@@ -1,0 +1,47 @@
+.header {
+  align-items: center;
+  color: var(--green);
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+  max-width: 1200px;
+  padding: 10px 30px;
+  width: 100%;
+}
+
+.total {
+  align-items: center;
+  display: flex;
+  font-size: 2rem;
+  gap: 10px;
+}
+
+.logo {
+  height: 50px;
+  width: 50px;
+}
+
+.titleContainer {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.title {
+  color: var(--green);
+  font-size: 4rem;
+  font-weight: 700;
+}
+
+.user {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.img {
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+}

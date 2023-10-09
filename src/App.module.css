@@ -1,0 +1,7 @@
+.page {
+  background-color: var(--white);
+  display: flex;
+  font-size: 1.6rem;
+  min-height: 100vh;
+  position: relative;
+}
