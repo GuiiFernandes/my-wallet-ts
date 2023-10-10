@@ -1,10 +1,10 @@
 export type User = {
   uid: string;
-  email: string;
-  displayName: string;
-  photoURL: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
   phoneNumber: string | null;
-  accessToken: string;
+  accessToken: string | undefined;
 };
 
 export type Currency = {

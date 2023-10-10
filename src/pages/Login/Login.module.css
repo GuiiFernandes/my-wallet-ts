@@ -1,0 +1,154 @@
+.login {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.titleContainer {
+  align-items: center;
+  background: url('../../images/background.png') var(--light-green);
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: auto 100vh;
+  border-bottom-right-radius: 40%;
+  border-top-right-radius: 40%;
+  box-shadow: 1px 1px 10px var(--dark-gray);
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  padding: 30px;
+  width: 55%;
+}
+
+.goWallet {
+  animation: openWallet 1s ease-in;
+  position: relative;
+}
+
+.goWalletForm {
+  animation: openWalletForm 1s ease-in;
+  position: relative;
+}
+
+.logo {
+  height: 110px;
+  width: 110px;
+}
+
+.title {
+  color: var(--green);
+  font-size: 7rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+  padding: 0 30px;
+  width: 45%;
+}
+
+.labelInput {
+  align-items: center;
+  color: var(--green);
+  display: flex;
+  font-size: 1.6rem;
+  font-weight: 700;
+  gap: 10px;
+  justify-content: center;
+  text-align: left;
+  width: 100%;
+}
+
+.inputLogin {
+  background-color: transparent;
+  border: 2px solid var(--green);
+  border-radius: 45px;
+  color: var(--green);
+  font-size: 1.6rem;
+  max-width: 340px;
+  outline: none;
+  padding: 10px;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.inputLogin::placeholder {
+  color: var(--gray);
+}
+
+.inputLogin:focus {
+  border: 2px solid var(--light-green);
+  box-shadow: 0 3px 15px rgba(171, 219, 37, 0.8);
+}
+
+.btnLogin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--green);
+  border: none;
+  border-radius: 45px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  color: var(--light-green);
+  cursor: pointer;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  margin-top: 10px;
+  outline: none;
+  padding: 20px 50px;
+  text-transform: uppercase;
+  transition: all 0.3s ease 0s;
+}
+
+.btnLogin:active {
+  transform: translateY(-1px);
+}
+
+.btnLogin:disabled {
+  background-color: var(--dark-gray);
+  cursor: not-allowed;
+}
+
+.btnLogin:enabled:hover {
+  background-color: var(--light-green);
+  box-shadow: 0 15px 20px rgba(0, 37, 0, 0.2);
+  color: var(--green);
+  transform: translateY(-7px);
+}
+
+.logoG {
+  height: 35px;
+}
+
+@keyframes openWallet {
+
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+
+  100% {
+    left: -800px;
+    opacity: 0;
+  }
+}
+
+@keyframes openWalletForm {
+
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+
+  100% {
+    opacity: 1;
+    right: -800px;
+  }
+}
