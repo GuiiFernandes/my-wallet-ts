@@ -1,5 +1,5 @@
-export default function Wallet() {
+export default function Home() {
   return (
-    <div>Wallet</div>
+    <div>Home</div>
   );
 }
