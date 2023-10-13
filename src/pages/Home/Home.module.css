@@ -1,0 +1,23 @@
+.form {
+  background-color: var(--light-gray);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, auto);
+  justify-content: center;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.inputForm {
+  background-color: transparent;
+  border: 2px solid var(--green);
+  border-radius: 45px;
+  color: var(--green);
+  font-size: 1.6rem;
+  margin-top: 5px;
+  max-width: 340px;
+  outline: none;
+  padding: 5px;
+  transition: all 0.3s ease;
+  width: 100%;
+}

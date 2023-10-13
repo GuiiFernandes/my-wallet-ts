@@ -1,47 +1,47 @@
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { GoogleAuthProvider, getAuth,
+import { browserLocalPersistence, getAuth,
+  setPersistence,
   signInWithPopup } from 'firebase/auth';
 
+import useLogin from '../../hooks/useLogin';
+import Loading from '../../components/Loading';
+import { saveUser } from '../../redux/reducers/user';
 import { provider } from '../../services/firebase';
 import logo from '../../images/logo.svg';
 import logoG from '../../images/google-icon.svg';
 import styles from './Login.module.css';
-import { saveUser } from '../../redux/reducers/user';
 
 export default function Login() {
+  const [acceptCookies, setAcceptCookies] = useState(true);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { validateLogin, loading } = useLogin();
+
+  useEffect(() => {
+    (async () => {
+      await validateLogin();
+    })();
+  }, []);
 
   const handleSubmit = async () => {
     const auth = getAuth();
+    await setPersistence(auth, browserLocalPersistence);
     const result = await signInWithPopup(auth, provider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
     const { uid, displayName, email, photoURL, phoneNumber } = result.user;
-    const accessToken = credential?.accessToken;
-    const TIME_OUT = 700;
-    dispatch(saveUser({ uid, displayName, email, photoURL, phoneNumber, accessToken }));
-    const title = document.getElementById('title');
-    const imgTitle = document.getElementById('imgTitle');
-    const form = document.querySelector('form');
-    if (title && imgTitle && form) {
-      form.classList.add(styles.goWalletForm);
-      title.classList.add(styles.goWallet);
-      imgTitle.classList.add(styles.goWallet);
-    }
-    setTimeout(() => {
-      navigate('/carteira');
-    }, TIME_OUT);
+    dispatch(saveUser({ uid, displayName, email, photoURL, phoneNumber }));
   };
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <section className={ styles.login }>
-      <div className={ styles.titleContainer }>
-        <img className={ styles.logo } id="title" src={ logo } alt="Logo" />
-        <h1 className={ styles.title } id="imgTitle">My Wallet</h1>
+      <div id="title-container" className={ styles.titleContainer }>
+        <img className={ styles.logo } src={ logo } alt="Logo" />
+        <h1 className={ styles.title }>My Wallet</h1>
       </div>
       <form
         className={ styles.form }
+        id="form"
         onSubmit={ (e) => {
           e.preventDefault();
           handleSubmit();
@@ -53,6 +53,19 @@ export default function Login() {
           <img src={ logoG } alt="Google" className={ styles.logoG } />
           Entrar
         </button>
+        <label>
+          <input
+            type="checkbox"
+            name="acceptCookies"
+            id="acceptCookies"
+            checked={ acceptCookies }
+            onChange={ () => setAcceptCookies(!acceptCookies) }
+          />
+          Desmarque essa opção para rejeitar os Cookies de login
+        </label>
+        <p className={ styles.legend }>
+          Manter essa opção marcado te mantém logado na aplicação.
+        </p>
       </form>
     </section>
   );

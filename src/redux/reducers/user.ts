@@ -5,7 +5,6 @@ import { User } from '../../types';
 const initialState: User = {
   uid: '',
   email: '',
-  accessToken: '',
   displayName: '',
   phoneNumber: null,
   photoURL: '',
@@ -15,9 +14,7 @@ const UserSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    saveUser: (state, { payload }: PayloadAction<User>) => {
-      state = payload;
-    },
+    saveUser: (_state, { payload }: PayloadAction<User>) => payload,
     deleteUser: () => initialState,
   },
 });

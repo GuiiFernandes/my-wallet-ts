@@ -53,13 +53,12 @@
 .form {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  font-size: 4rem;
   justify-content: center;
   padding: 0 30px;
   width: 45%;
   position: relative;
-  animation: closeWalletForm 1s ease-in;
+  right: 0;
 }
 
 .labelInput {
@@ -85,6 +84,10 @@
   padding: 10px;
   transition: all 0.3s ease;
   width: 100%;
+}
+
+.loadingCoin {
+  height: 60px;
 }
 
 .inputLogin::placeholder {
@@ -160,30 +163,5 @@
   100% {
     opacity: 1;
     right: -800px;
-  }
-}
-
-
-@keyframes closeWallet {
-
-  0% {
-    left: -800px;
-    opacity: 0;
-  }
-
-  100% {
-    left: 0;
-    opacity: 1;
-  }
-}
-
-@keyframes closeWalletForm {
-  
-    0% {
-      right: -800px;
-    }
-
-  100% {
-    right: 0;
   }
 }

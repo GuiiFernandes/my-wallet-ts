@@ -4,7 +4,6 @@ export type User = {
   displayName: string | null;
   photoURL: string | null;
   phoneNumber: string | null;
-  accessToken: string | undefined;
 };
 
 export type Currency = {
@@ -23,4 +22,9 @@ export type Currency = {
 
 export type Currencies = {
   [key: string]: Currency;
+};
+
+export type StateRedux = {
+  user: User;
+  currencies: Currencies;
 };

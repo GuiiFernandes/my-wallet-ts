@@ -1,0 +1,32 @@
+.goWallet {
+  animation: openWallet 1s ease-in;
+}
+
+.goWalletForm {
+  animation: openWalletForm 1s ease-in;
+}
+
+@keyframes openWallet {
+
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+
+  100% {
+    left: -800px;
+    opacity: 0;
+  }
+}
+
+@keyframes openWalletForm {
+
+  0% {
+    right: 0;
+  }
+
+  100% {
+    right: -800px;
+  }
+}
+
