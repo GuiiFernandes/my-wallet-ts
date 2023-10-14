@@ -1,32 +1,20 @@
-export const transactions = {
+export const transactionsModel = {
   revenue: [],
   fixedExpense: [],
   variableExpense: [],
 };
 
-export const investments = {
-  national: {
-    fixedIncome: [],
-    variableIncome: [],
-    fiis: [],
-    pension: [],
-    commodities: [],
-  },
-  international: {
-    fixedIncome: [],
-    variableIncome: [],
-    fiis: [],
-    pension: [],
-    commodities: [],
-  },
+export const investmentsModel = {
+  national: [],
+  international: [],
 };
 
-export const banks = {
+export const banksModel = {
   accounts: [],
   creditCards: [],
 };
 
-export const budgets = {
+export const budgetsModel = {
   revenue: [],
   fixedExpense: [],
   variableExpense: [],

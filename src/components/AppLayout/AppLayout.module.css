@@ -30,6 +30,9 @@
 }
 
 .containerMain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   animation: openContainer 2s ease-in;
   backdrop-filter: blur(16px) saturate(180%);
   background-color: rgba(0, 37, 0, 0.7);

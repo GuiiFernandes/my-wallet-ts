@@ -4,8 +4,8 @@ import styles from './Layout.module.css';
 
 export default function Layout() {
   return (
-    <main className={ styles.page }>
+    <div className={ styles.page }>
       <Outlet />
-    </main>
+    </div>
   );
 }

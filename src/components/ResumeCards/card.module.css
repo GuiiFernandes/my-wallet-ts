@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--white);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.title {
+  margin-bottom: 5px;
+}
+
+.manage {
+  background-color: var(--green);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 16px;
+  color: var(--blue);
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}

@@ -5,13 +5,13 @@ import Header from '../Header';
 
 export default function AppLayout() {
   return (
-    <section className={ styles.background }>
+    <main className={ styles.background }>
       <div className={ styles.header }>
         <Header />
       </div>
       <div className={ styles.containerMain }>
         <Outlet />
       </div>
-    </section>
+    </main>
   );
 }
