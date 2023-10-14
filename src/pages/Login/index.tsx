@@ -1,21 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 import { browserLocalPersistence, getAuth,
-  setPersistence,
-  signInWithPopup } from 'firebase/auth';
+  setPersistence, signInWithPopup } from 'firebase/auth';
 
 import useLogin from '../../hooks/useLogin';
 import Loading from '../../components/Loading';
-import { saveUser } from '../../redux/reducers/user';
 import { provider } from '../../services/firebase';
 import logo from '../../images/logo.svg';
 import logoG from '../../images/google-icon.svg';
 import styles from './Login.module.css';
 
 export default function Login() {
-  const [acceptCookies, setAcceptCookies] = useState(true);
-  const dispatch = useDispatch();
-  const { validateLogin, loading } = useLogin();
+  const { validateLogin, userLoading } = useLogin();
 
   useEffect(() => {
     (async () => {
@@ -26,12 +21,10 @@ export default function Login() {
   const handleSubmit = async () => {
     const auth = getAuth();
     await setPersistence(auth, browserLocalPersistence);
-    const result = await signInWithPopup(auth, provider);
-    const { uid, displayName, email, photoURL, phoneNumber } = result.user;
-    dispatch(saveUser({ uid, displayName, email, photoURL, phoneNumber }));
+    await signInWithPopup(auth, provider);
   };
 
-  return loading ? (
+  return userLoading ? (
     <Loading />
   ) : (
     <section className={ styles.login }>
@@ -53,19 +46,6 @@ export default function Login() {
           <img src={ logoG } alt="Google" className={ styles.logoG } />
           Entrar
         </button>
-        <label>
-          <input
-            type="checkbox"
-            name="acceptCookies"
-            id="acceptCookies"
-            checked={ acceptCookies }
-            onChange={ () => setAcceptCookies(!acceptCookies) }
-          />
-          Desmarque essa opção para rejeitar os Cookies de login
-        </label>
-        <p className={ styles.legend }>
-          Manter essa opção marcado te mantém logado na aplicação.
-        </p>
       </form>
     </section>
   );

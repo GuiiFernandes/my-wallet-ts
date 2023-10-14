@@ -1,6 +1,6 @@
 .background {
   align-items: center;
-  animation: openWallet 1.2s ease-in;
+  animation: openBackground 1.2s ease-in;
   background: url('../../images/background.png') var(--light-green);
   background-position: right;
   background-repeat: no-repeat;
@@ -29,6 +29,20 @@
   z-index: 1;
 }
 
+.containerMain {
+  animation: openContainer 2s ease-in;
+  backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(0, 37, 0, 0.7);
+  border: 1px solid rgba(0, 37, 0, 0.125);
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  color: var(--white);
+  padding: 90px 20px 20px;
+  position: relative;
+  top: -70px;
+  width: 95%;
+}
+
 @keyframes openHeader {
 
   0% {
@@ -47,8 +61,7 @@
   }
 }
 
-
-@keyframes openWallet {
+@keyframes openBackground {
 
   0% {
     border-bottom-right-radius: 40%;
@@ -69,5 +82,18 @@
     border-top-right-radius: 0;
     left: 0;
     width: 100%;
+  }
+}
+
+@keyframes openContainer {
+
+  0% {
+    opacity: 0;
+    top: calc(100vh + 166px);
+  }
+
+  100% {
+    opacity: 1;
+    top: -166px;
   }
 }

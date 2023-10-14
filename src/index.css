@@ -8,6 +8,10 @@
 
   --green: #002500;
 
+  --dark-red: #6d0000;
+
+  --red: #da2a2a;
+
   --gray: #999;
 
   --white: #fbf9ff;
@@ -36,4 +40,10 @@ a {
 .active {
   background-color: var(--green);
   color: var(--light-green);
+}
+
+.active:hover {
+  background-color: var(--light-green);
+  color: var(--green);
+  transition: all 0.2s ease-in-out;
 }

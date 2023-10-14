@@ -38,28 +38,27 @@ export default function Header() {
           </p>
         </div>
         <div className={ styles.user }>
-          <button className={ styles.resetBtn } onClick={ logout }>
-            { photoURL ? (
-              <img src={ photoURL } alt="user" className={ styles.img } />
-            ) : (
-              <CgProfile size="40px" />
-            )}
-          </button>
+          { photoURL ? (
+            <img src={ photoURL } alt="user" className={ styles.img } />
+          ) : (
+            <CgProfile size="40px" />
+          )}
           <p data-testid="email-field">{displayName}</p>
         </div>
       </header>
-      <aside>
-        <nav>
-          <NavLink to="/home" className={ styles.a }>Home</NavLink>
-          <NavLink to="/contas" className={ styles.a }>Contas</NavLink>
-          <NavLink to="/carteira" className={ styles.a }>Carteira</NavLink>
-          <NavLink to="/cartões" className={ styles.a }>Cartões</NavLink>
-          <NavLink to="/investimentos" className={ styles.a }>Investimentos</NavLink>
-          <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink>
-          <NavLink to="/perfil" className={ styles.a }>Perfil</NavLink>
-          <NavLink to="configuracoes" className={ styles.a }>Configurações</NavLink>
-        </nav>
-      </aside>
+      <nav className={ styles.nav }>
+        <NavLink to="/home" className={ styles.a }>Home</NavLink>
+        <NavLink to="/contas" className={ styles.a }>Contas</NavLink>
+        <NavLink to="/carteira" className={ styles.a }>Carteira</NavLink>
+        <NavLink to="/cartões" className={ styles.a }>Cartões</NavLink>
+        <NavLink to="/investimentos" className={ styles.a }>Investimentos</NavLink>
+        <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink>
+        <NavLink to="/perfil" className={ styles.a }>Perfil</NavLink>
+        <NavLink to="configuracoes" className={ styles.a }>Configurações</NavLink>
+        <button className={ styles.logoutBtn } onClick={ logout }>
+          Sair
+        </button>
+      </nav>
     </>
   );
 }
