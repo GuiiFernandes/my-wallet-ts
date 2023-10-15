@@ -1,24 +1,9 @@
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-
 import { useSelector } from 'react-redux';
-import { db } from '../../../services/firebase';
+
 import styles from '../card.module.css';
 
 export default function Cards() {
-  const [data, setData] = useState([]);
   const { uid } = useSelector(({ user }) => user);
-
-  useEffect(() => {
-    (async () => {
-      const docRef = doc(db, uid, 'banks');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const { accounts } = docSnap.data();
-        setData(accounts);
-      }
-    })();
-  }, []);
 
   return (
     <section className={ styles.container }>

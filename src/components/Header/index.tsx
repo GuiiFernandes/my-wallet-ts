@@ -6,7 +6,7 @@ import { CgProfile } from 'react-icons/cg';
 
 import logo from '../../images/logo.svg';
 import styles from './Header.module.css';
-import { StateRedux } from '../../types';
+import { StateRedux } from '../../types/State';
 
 export default function Header() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-import { Currencies } from '../../types';
+import { Currencies } from '../../types/State';
 import { fetchAPI } from '../../services/fetchAPI';
 
 const initialState: string[] = [];

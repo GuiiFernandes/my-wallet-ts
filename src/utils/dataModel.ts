@@ -1,6 +1,6 @@
-import { InvestimentsType } from '../types';
+import { Banks, Budgets, InvestimentsType, TransactionsType } from '../types/Data';
 
-export const transactionsModel = {
+export const transactionsModel: TransactionsType = {
   revenue: [],
   fixedExpense: [],
   variableExpense: [],
@@ -11,12 +11,12 @@ export const investmentsModel: InvestimentsType = {
   international: [],
 };
 
-export const banksModel = {
+export const banksModel: Banks = {
   accounts: [],
   creditCards: [],
 };
 
-export const budgetsModel = {
+export const budgetsModel: Budgets = {
   revenue: [],
   fixedExpense: [],
   variableExpense: [],

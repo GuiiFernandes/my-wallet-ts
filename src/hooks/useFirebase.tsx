@@ -1,26 +1,31 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import styles from './useLogin.module.css';
-import { banksModel, budgetsModel, investmentsModel,
-  transactionsModel } from '../utils/dataModel';
 import { db } from '../services/firebase';
 import { saveUser } from '../redux/reducers/user';
+import { initialState, updateData } from '../redux/reducers/data';
+import { banksModel, budgetsModel, investmentsModel,
+  transactionsModel } from '../utils/dataModel';
+import { StateRedux } from '../types/State';
+import styles from './useLogin.module.css';
+import { Data } from '../types/Data';
 
 const TIME_OUT = 700;
 
-export default function useLogin() {
+export default function useFirebase() {
   const [userLoading, setUserLoading] = useState(false);
+  const userLogged = useSelector(({ user }: StateRedux) => user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   const pathsIsLogin = ['/'];
 
-  const validateLogin = async () => {
+  const validateLogin = async (): Promise<boolean | undefined> => {
+    if (userLogged.uid) return;
     const auth = getAuth();
     onAuthStateChanged(auth, async (user) => {
       setUserLoading(true);
@@ -53,6 +58,17 @@ export default function useLogin() {
     });
   };
 
+  const listenerData = () => {
+    if (!userLogged.uid) return;
+    onSnapshot(collection(db, userLogged.uid), (data) => {
+      let newData: Data = initialState;
+      data.forEach((docData) => {
+        newData = { ...newData, [docData.id]: docData.data() };
+      });
+      dispatch(updateData(newData));
+    });
+  };
+
   const goHome = async () => {
     const title = document.getElementById('title-container');
     const form = document.getElementById('form');
@@ -67,5 +83,5 @@ export default function useLogin() {
     navigate('/');
   };
 
-  return { validateLogin, userLoading, goHome };
+  return { validateLogin, userLoading, goHome, listenerData };
 }

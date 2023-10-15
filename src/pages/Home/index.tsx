@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 
-import useLogin from '../../hooks/useLogin';
+import useFirebase from '../../hooks/useFirebase';
 import AccountsCard from '../../components/ResumeCards/AccountsCard';
 import Investiments from '../../components/ResumeCards/Investiments';
 import styles from './Home.module.css';
 
 export default function Home() {
-  const { validateLogin } = useLogin();
+  const { validateLogin, listenerData } = useFirebase();
   useEffect(() => {
     (async () => {
       await validateLogin();

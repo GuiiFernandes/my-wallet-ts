@@ -3,31 +3,19 @@ import { doc, getDoc } from 'firebase/firestore';
 
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { db } from '../../../services/firebase';
 import styles from '../card.module.css';
+import { StateRedux } from '../../../types/State';
 
 export default function AccountsCard() {
-  const [data, setData] = useState([]);
-  const { uid } = useSelector(({ user }) => user);
-
-  useEffect(() => {
-    (async () => {
-      const docRef = doc(db, uid, 'banks');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const { accounts } = docSnap.data();
-        setData(accounts);
-      }
-    })();
-  }, []);
+  const { accounts } = useSelector(({ data: { banks } }: StateRedux) => banks);
 
   return (
     <section className={ styles.container }>
       <h2 className={ styles.title }>Contas</h2>
       <div className={ styles.cards }>
-        { !data.length ? (
+        { !accounts.length ? (
           <p>Não há contas cadastradas.</p>
-        ) : data.map(({ name, balance }) => (
+        ) : accounts.map(({ name, balance }) => (
           <div className={ styles.card } key={ name }>
             <h3 className={ styles.cardTitle }>{ name }</h3>
             <p className={ styles.cardValue }>{ balance }</p>
@@ -35,7 +23,7 @@ export default function AccountsCard() {
         ))}
       </div>
       <Link to="/contas" className={ styles.manage }>
-        {data.length ? 'Gerenciar' : 'Cadastrar'}
+        {accounts.length ? 'Gerenciar' : 'Cadastrar'}
       </Link>
     </section>
   );

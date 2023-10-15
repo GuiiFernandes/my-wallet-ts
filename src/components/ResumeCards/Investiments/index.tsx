@@ -6,7 +6,7 @@ import { NumericFormat } from 'react-number-format';
 import { db } from '../../../services/firebase';
 import { typesInvestModel, investmentsModel } from '../../../utils/dataModel';
 import styles from '../card.module.css';
-import { InvestimentsType } from '../../../types';
+import { InvestimentsType } from '../../../types/State';
 
 const locale = ['nacional', 'internacional'];
 

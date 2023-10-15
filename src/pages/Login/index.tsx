@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { browserLocalPersistence, getAuth,
   setPersistence, signInWithPopup } from 'firebase/auth';
 
-import useLogin from '../../hooks/useLogin';
+import useFirebase from '../../hooks/useFirebase';
 import Loading from '../../components/Loading';
 import { provider } from '../../services/firebase';
 import logo from '../../images/logo.svg';
@@ -10,7 +10,7 @@ import logoG from '../../images/google-icon.svg';
 import styles from './Login.module.css';
 
 export default function Login() {
-  const { validateLogin, userLoading } = useLogin();
+  const { validateLogin, userLoading } = useFirebase();
 
   useEffect(() => {
     (async () => {
