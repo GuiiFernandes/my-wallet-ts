@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { db } from '../../../services/firebase';
 import styles from '../card.module.css';
 
-export default function Accounts() {
+export default function AccountsCard() {
   const [data, setData] = useState([]);
   const { uid } = useSelector(({ user }) => user);
 
@@ -33,9 +34,9 @@ export default function Accounts() {
           </div>
         ))}
       </div>
-      <button className={ styles.manage }>
+      <Link to="/contas" className={ styles.manage }>
         {data.length ? 'Gerenciar' : 'Cadastrar'}
-      </button>
+      </Link>
     </section>
   );
 }

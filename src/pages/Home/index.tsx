@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import useLogin from '../../hooks/useLogin';
-import Accounts from '../../components/ResumeCards/Accounts';
+import AccountsCard from '../../components/ResumeCards/AccountsCard';
 import Investiments from '../../components/ResumeCards/Investiments';
 import styles from './Home.module.css';
 
@@ -15,8 +15,8 @@ export default function Home() {
 
   return (
     <>
-      <Accounts />
-      <Investiments />
+      <AccountsCard />
+      {/* <Investiments /> */}
     </>
   );
 }
