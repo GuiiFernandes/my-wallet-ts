@@ -47,3 +47,35 @@ a {
   color: var(--green);
   transition: all 0.2s ease-in-out;
 }
+
+.logoutBtn {
+  background-color: var(--red);
+  color: var(--dark-red);
+  border: none;
+  cursor: pointer;
+  font-size: 1.6rem;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+.createBtn {
+  background-color: var(--light-green);
+  padding: 5px 10px;
+  border: none;
+  border-radius: 10px;
+  color: var(--green);
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background-color: var(--dark-red);
+  color: var(--red);
+  transition: all 0.2s ease-in-out;
+}
+
+.createBtn:hover {
+  background-color: var(--blue);
+  transition: all 0.2s ease-in-out;
+}

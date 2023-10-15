@@ -26,8 +26,16 @@ export type Currencies = {
   [key: string]: Currency;
 };
 
+export type NewAccountType = {
+  newAccount: boolean;
+  [key: string]: boolean;
+};
+
+export type Operationals = NewAccountType;
+
 export type StateRedux = {
   user: User;
   currencies: Currencies;
   data: Data;
+  operationals: Operationals;
 };

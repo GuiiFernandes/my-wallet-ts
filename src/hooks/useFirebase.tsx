@@ -16,7 +16,7 @@ import { Data } from '../types/Data';
 const TIME_OUT = 700;
 
 export default function useFirebase() {
-  const [userLoading, setUserLoading] = useState(false);
+  const [userLoading, setUserLoading] = useState(true);
   const userLogged = useSelector(({ user }: StateRedux) => user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,7 +28,6 @@ export default function useFirebase() {
     if (userLogged.uid) return;
     const auth = getAuth();
     onAuthStateChanged(auth, async (user) => {
-      setUserLoading(true);
       if (user) {
         const { displayName, email, photoURL, uid, phoneNumber } = user;
         dispatch(saveUser({ displayName, email, photoURL, uid, phoneNumber }));

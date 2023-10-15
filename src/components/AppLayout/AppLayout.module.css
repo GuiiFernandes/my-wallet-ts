@@ -41,8 +41,8 @@
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   color: var(--white);
   padding: 90px 20px 20px;
-  position: relative;
-  top: -70px;
+  position: absolute;
+  top: 70px;
   width: 95%;
 }
 

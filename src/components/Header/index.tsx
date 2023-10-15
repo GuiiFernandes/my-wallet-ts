@@ -55,7 +55,7 @@ export default function Header() {
         <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink>
         {/* <NavLink to="/perfil" className={ styles.a }>Perfil</NavLink> */}
         <NavLink to="configuracoes" className={ styles.a }>Configurações</NavLink>
-        <button className={ styles.logoutBtn } onClick={ logout }>
+        <button className="logoutBtn" onClick={ logout }>
           Sair
         </button>
       </nav>
