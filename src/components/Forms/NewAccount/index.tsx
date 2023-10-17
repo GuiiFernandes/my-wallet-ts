@@ -11,7 +11,7 @@ import { db } from '../../../services/firebase';
 
 const INITIAL_STATE = {
   name: '',
-  balance: 0,
+  balance: '0',
   type: 'conta-corrente',
 };
 
@@ -20,6 +20,7 @@ export default function NewAccount() {
   const { banks } = useSelector(({ data }: StateRedux) => data);
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const dispatch = useDispatch();
+  const { accounts } = banks;
 
   const handleChange = (
     { target: { id, value } }: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -28,9 +29,19 @@ export default function NewAccount() {
   };
 
   const createAccount = async () => {
+    const balanceNumber = Number(
+      form.balance.substring(2).replace('.', '').replace(',', '.'),
+    );
+    const newAccount = {
+      id: accounts.length ? accounts[accounts.length - 1].id + 1 : 0,
+      name: `${form.name[0].toLocaleUpperCase()}${form.name.substring(1)}`,
+      balance: balanceNumber,
+      real: balanceNumber,
+      type: form.type,
+    };
     await setDoc(doc(db, uid, 'banks'), {
       ...banks,
-      accounts: [...banks.accounts, form],
+      accounts: [...accounts, newAccount],
     });
     dispatch(changeOperationls<NewAccountType>({ newAccount: false }));
   };
@@ -81,12 +92,14 @@ export default function NewAccount() {
             <option className={ styles.option } value="conta-corrente">
               Conta Corrente
             </option>
-            <option className={ styles.option } value="conta-poupanca">
-              Conta Poupança
-            </option>
             <option className={ styles.option } value="conta-investimento">
               Conta Investimento
             </option>
+            { !accounts.map(({ type }) => type).includes('carteira') && (
+              <option className={ styles.option } value="carteira">
+                Carteira
+              </option>
+            )}
           </select>
         </label>
         <div className={ styles.containerBtns }>

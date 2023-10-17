@@ -21,9 +21,11 @@ export type Banks = {
 };
 
 export type AccountType = {
+  id: number,
   name: string,
   balance: number,
-  type: 'conta-corrente' | 'conta-poupanca' | 'conta-investimento',
+  real: number,
+  type: 'carteira' | 'conta-corrente' | 'conta-investimento',
 };
 
 export type InvestimentsType = {

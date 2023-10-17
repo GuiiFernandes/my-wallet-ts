@@ -5,6 +5,7 @@
   align-items: center;
   height: 100%;
   width: 100%;
+  max-width: 500px;
 }
 
 .manage {
@@ -17,4 +18,56 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.tHead {
+  width: 100%;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.td {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tdName {
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  border-bottom: 1px solid var(--light-green);
+  width: 100%;
+  padding: 5px;
+}
+
+.realInput {
+  background-color: transparent;
+  color: var(--white);
+  border: 1px solid var(--light-green);
+  width: 100%;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 1.6rem;
+  padding: 3px 0;
+  margin: 5px 0;
+  font-weight: 400;
+  outline: none;
+}
+
+.confirmReal {
+  background-color: transparent;
+  color: var(--light-green);
+  border: none;
+  padding: 3px;
+  font-size: 2rem;
+}
+
+.confirmReal:hover {
+  color: var(--blue);
 }
