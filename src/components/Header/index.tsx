@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth';
 import { BsCashCoin } from 'react-icons/bs';
@@ -7,14 +7,17 @@ import { CgProfile } from 'react-icons/cg';
 import logo from '../../images/logo.svg';
 import styles from './Header.module.css';
 import { StateRedux } from '../../types/State';
+import { deleteUser } from '../../redux/reducers/user';
 
 export default function Header() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { displayName, photoURL } = useSelector(({ user }: StateRedux) => user);
 
   const logout = async () => {
     const auth = getAuth();
     await signOut(auth);
+    dispatch(deleteUser());
     navigate('/');
   };
 

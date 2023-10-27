@@ -21,3 +21,8 @@
   text-decoration: none;
   font-weight: bold;
 }
+
+.a:hover {
+  color: var(--blue);
+  transition: all 0.2s ease-in-out;
+}

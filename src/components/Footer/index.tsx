@@ -1,4 +1,5 @@
 import { FaGithub, FaLinkedinIn } from 'react-icons/fa';
+import { HiHome } from 'react-icons/hi';
 
 import styles from './footer.module.css';
 
@@ -24,6 +25,14 @@ export default function Footer() {
           className={ styles.a }
         >
           <FaLinkedinIn size="20px" />
+        </a>
+        <a
+          href="https://guiifernandes.github.io/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={ styles.a }
+        >
+          <HiHome size="20px" />
         </a>
       </p>
     </footer>

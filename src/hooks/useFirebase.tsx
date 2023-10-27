@@ -24,6 +24,12 @@ export default function useFirebase() {
 
   const pathsIsLogin = ['/'];
 
+  const loadingFalse = () => {
+    setTimeout(() => {
+      setUserLoading(false);
+    }, TIME_OUT);
+  };
+
   const validateLogin = async (): Promise<boolean | undefined> => {
     if (userLogged.uid) return;
     const auth = getAuth();
@@ -51,10 +57,13 @@ export default function useFirebase() {
         setUserLoading(true);
         backLogin();
         setUserLoading(false);
-      } else {
-        setUserLoading(false);
       }
     });
+    if (!userLogged.uid) {
+      setTimeout(() => {
+        setUserLoading(false);
+      }, TIME_OUT);
+    }
   };
 
   const listenerData = () => {

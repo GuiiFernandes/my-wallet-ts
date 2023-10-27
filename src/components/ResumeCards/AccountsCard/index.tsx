@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { NumericFormat } from 'react-number-format';
+
 import styles from '../card.module.css';
 import { StateRedux } from '../../../types/State';
 
@@ -15,10 +14,27 @@ export default function AccountsCard() {
       <div className={ styles.cards }>
         { !accounts.length ? (
           <p>Não há contas cadastradas.</p>
-        ) : accounts.map(({ name, balance }) => (
+        ) : accounts.map(({ name, balance, real }) => (
           <div className={ styles.card } key={ name }>
-            <h3 className={ styles.cardTitle }>{ name }</h3>
-            <p className={ styles.cardValue }>{ balance }</p>
+            <h3
+              style={ balance - real !== 0
+                ? { color: 'var(--light-red)' }
+                : { color: 'var(--white)' } }
+            >
+              { name }
+            </h3>
+            <NumericFormat
+              value={ balance }
+              allowNegative
+              displayType="text"
+              decimalScale={ 2 }
+              fixedDecimalScale
+              decimalSeparator=","
+              prefix="R$"
+              thousandSeparator="."
+              style={ balance < 0
+                ? { color: 'var(--red)' } : { color: 'var(--light-green)' } }
+            />
           </div>
         ))}
       </div>

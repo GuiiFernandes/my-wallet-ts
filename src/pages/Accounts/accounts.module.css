@@ -5,7 +5,7 @@
   align-items: center;
   height: 100%;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
 }
 
 .manage {
@@ -42,30 +42,43 @@
   grid-template-columns: repeat(4, 1fr);
   width: 100%;
   border-bottom: 1px solid var(--white);
-  width: 100%;
   padding: 5px;
 }
 
 .realInput {
+  display: flex;
   background-color: transparent;
-  color: var(--white);
   border: 1px solid var(--light-green);
-  width: 100%;
   text-align: center;
   border-radius: 5px;
   font-size: 1.6rem;
   padding: 3px 0;
-  margin: 5px 0;
+  height: 31px;
   font-weight: 400;
+}
+
+.inputNumeric {
+  border: none;
   outline: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 1.6rem;
+  width: calc(100% - 26px);
+  margin: 0 8px;
+  color: var(--white);
 }
 
 .confirmReal {
   background-color: transparent;
   color: var(--light-green);
   border: none;
-  padding: 3px;
   font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
 }
 
 .confirmReal:hover {
