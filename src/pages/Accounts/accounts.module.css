@@ -39,7 +39,7 @@
 
 .card {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr) 30px;
   width: 100%;
   border-bottom: 1px solid var(--white);
   padding: 5px;
@@ -79,8 +79,30 @@
   align-items: center;
   justify-content: center;
   margin-right: 8px;
+  cursor: pointer;
 }
 
 .confirmReal:hover {
   color: var(--blue);
+}
+
+.tdDelete {
+  align-self: center;
+  justify-self: center;
+}
+
+.btnEdit {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+  font-size: 3rem;
+}
+
+.btnEdit:hover {
+  color: var(--blue);
+  transition: all 0.2s ease-in-out;
 }

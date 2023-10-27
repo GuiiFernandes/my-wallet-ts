@@ -33,7 +33,7 @@ export default function AccountsCard() {
               prefix="R$"
               thousandSeparator="."
               style={ balance < 0
-                ? { color: 'var(--red)' } : { color: 'var(--light-green)' } }
+                ? { color: 'var(--light-red)' } : { color: 'var(--light-green)' } }
             />
           </div>
         ))}

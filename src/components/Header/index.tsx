@@ -55,9 +55,10 @@ export default function Header() {
         <NavLink to="/carteira" className={ styles.a }>Carteira</NavLink>
         <NavLink to="/cartoes" className={ styles.a }>Cartões</NavLink>
         {/* <NavLink to="/investimentos" className={ styles.a }>Investimentos</NavLink> */}
+        <NavLink to="/contabil" className={ styles.a }>Contabil</NavLink>
         <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink>
         {/* <NavLink to="/perfil" className={ styles.a }>Perfil</NavLink> */}
-        <NavLink to="configuracoes" className={ styles.a }>Configurações</NavLink>
+        <NavLink to="/configuracoes" className={ styles.a }>Configurações</NavLink>
         <button className="logoutBtn" onClick={ logout }>
           Sair
         </button>

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { doc, setDoc } from 'firebase/firestore';
-import { GiConfirmed } from 'react-icons/gi';
+import { FiSave } from 'react-icons/fi';
+import { MdDeleteForever } from 'react-icons/md';
 
 import { NumericFormat } from 'react-number-format';
 import useFirebase from '../../hooks/useFirebase';
+import useData from '../../hooks/useData';
 import { NewAccountType, StateRedux } from '../../types/State';
 import styles from './accounts.module.css';
 import { changeOperationls } from '../../redux/reducers/operationals';
@@ -12,12 +14,13 @@ import { db } from '../../services/firebase';
 
 type RealForm = { [key: string]: string };
 
-const red = 'var(--light-red)';
+const lightRed = 'var(--light-red)';
 const lightGreen = 'var(--light-green)';
 
 export default function Accounts() {
   const [realForm, setRealForm] = useState<RealForm>({});
   const { validateLogin } = useFirebase();
+  const { deleteAccount } = useData();
   const dispatch = useDispatch();
   const { banks } = useSelector(({ data }: StateRedux) => data);
   const { newAccount } = useSelector(({ operationals }: StateRedux) => operationals);
@@ -59,6 +62,7 @@ export default function Accounts() {
             <td className={ styles.td }>Saldo</td>
             <td className={ styles.td }>Real</td>
             <td className={ styles.td }>Diferença</td>
+            <td className={ styles.td }>{' '}</td>
           </tr>
         </thead>
         <tbody>
@@ -80,7 +84,7 @@ export default function Accounts() {
                   prefix="R$"
                   thousandSeparator="."
                   style={ balance < 0
-                    ? { color: red } : { color: lightGreen } }
+                    ? { color: lightRed } : { color: lightGreen } }
                 />
               </td>
               <td className={ styles.td }>
@@ -114,7 +118,7 @@ export default function Accounts() {
                       className={ styles.confirmReal }
                       onClick={ () => saveReal(id, name) }
                     >
-                      <GiConfirmed />
+                      <FiSave />
                     </button>
                   )}
                 </div>
@@ -125,7 +129,7 @@ export default function Accounts() {
                   displayType="text"
                   decimalScale={ 2 }
                   style={ {
-                    color: Number(realForm[name]) - balance !== 0 ? red : lightGreen,
+                    color: Number(realForm[name]) - balance !== 0 ? lightRed : lightGreen,
                     fontWeight: 700,
                   } }
                   fixedDecimalScale
@@ -133,6 +137,15 @@ export default function Accounts() {
                   prefix="R$"
                   thousandSeparator="."
                 />
+              </td>
+              <td className={ styles.tdDelete }>
+                <button
+                  type="button"
+                  className={ styles.btnEdit }
+                  onClick={ () => deleteAccount({ id, name }) }
+                >
+                  <MdDeleteForever />
+                </button>
               </td>
             </tr>
           ))}

@@ -11,6 +11,7 @@ import Accounts from './pages/Accounts';
 import Cards from './pages/Cards';
 import Budget from './pages/Budget';
 import Settings from './pages/Settings';
+import Contabil from './pages/Contabil';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/configuracoes" element={ <Settings /> } />
             <Route path="/orcamento" element={ <Budget /> } />
             <Route path="/carteira" element={ <Wallet /> } />
+            <Route path="/contabil" element={ <Contabil /> } />
           </Route>
         </Route>
       </Routes>

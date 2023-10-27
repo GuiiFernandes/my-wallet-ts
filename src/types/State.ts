@@ -31,6 +31,11 @@ export type NewAccountType = {
   [key: string]: boolean;
 };
 
+export type DeleteAccountType = {
+  changeAccount: boolean;
+  [key: string]: boolean;
+};
+
 export type Operationals = NewAccountType;
 
 export type StateRedux = {

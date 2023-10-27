@@ -10,7 +10,7 @@ import { initialState, updateData } from '../redux/reducers/data';
 import { banksModel, budgetsModel, investmentsModel,
   transactionsModel } from '../utils/dataModel';
 import { StateRedux } from '../types/State';
-import styles from './useLogin.module.css';
+import styles from './useFirebase.module.css';
 import { Data } from '../types/Data';
 
 const TIME_OUT = 700;
@@ -23,12 +23,6 @@ export default function useFirebase() {
   const { pathname } = useLocation();
 
   const pathsIsLogin = ['/'];
-
-  const loadingFalse = () => {
-    setTimeout(() => {
-      setUserLoading(false);
-    }, TIME_OUT);
-  };
 
   const validateLogin = async (): Promise<boolean | undefined> => {
     if (userLogged.uid) return;

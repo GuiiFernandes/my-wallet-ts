@@ -3,6 +3,7 @@ import { Operationals } from '../../types/State';
 
 export const initialState = {
   newAccount: false,
+  changeAccount: false,
 };
 
 const OperationalsSlice = createSlice({
