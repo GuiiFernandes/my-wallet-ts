@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { GiPayMoney, GiReceiveMoney } from 'react-icons/gi';
-import { BiSolidDislike, BiSolidLike } from 'react-icons/bi';
 
 import { NumericFormat } from 'react-number-format';
 import FormLayout from '../FormLayout';
