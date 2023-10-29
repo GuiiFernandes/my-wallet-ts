@@ -23,6 +23,12 @@ export const budgetsModel: Budgets = {
   peoplesBudgets: {},
 };
 
+export const configurationsModel = {
+  categories: [],
+  subCategories: [],
+  currency: 'BRL',
+};
+
 export const typesInvestModel = [
   {
     name: 'fixa',

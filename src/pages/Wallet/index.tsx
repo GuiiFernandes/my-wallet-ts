@@ -1,20 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { StateRedux } from '../../types/State';
 import useFirebase from '../../hooks/useFirebase';
-import { mouths } from '../../utils/datas';
+import MonthSelector from '../../components/MonthSelector';
 
 export default function Wallet() {
-  const [mounth, setMounth] = useState<string>('');
   const { validateLogin } = useFirebase();
   const { transactions } = useSelector(({ data }: StateRedux) => data);
+  const { month, monthString } = useSelector(
+    ({ operationals }: StateRedux) => operationals.monthSelected,
+  );
   useEffect(() => {
     (async () => {
       await validateLogin();
     })();
   }, []);
   return (
-    <div>Wallet</div>
+    <>
+      <MonthSelector />
+      <div>Wallet</div>
+    </>
   );
 }

@@ -10,7 +10,7 @@
 
   --dark-red: #6d0000;
 
-  --red: #da2a2a;
+  --red: #ee4545;
 
   --light-red: #ff7474;
 
@@ -50,34 +50,35 @@ a {
   transition: all 0.2s ease-in-out;
 }
 
-.logoutBtn {
+.cancelBtn {
   background-color: var(--red);
-  color: var(--dark-red);
+  color: var(--green);
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
-  padding: 5px 10px;
-  border-radius: 10px;
+  font-weight: 600;
+  padding: 15px 10px;
+  border-radius: 6px;
 }
 
-.createBtn {
+.confirmBtn {
   background-color: var(--light-green);
-  padding: 5px 10px;
+  padding: 15px 10px;
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   color: var(--green);
   font-size: 1.6rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.logoutBtn:hover {
+.cancelBtn:hover {
   background-color: var(--dark-red);
   color: var(--red);
   transition: all 0.2s ease-in-out;
 }
 
-.createBtn:hover {
+.confirmBtn:hover {
   background-color: var(--blue);
   transition: all 0.2s ease-in-out;
 }

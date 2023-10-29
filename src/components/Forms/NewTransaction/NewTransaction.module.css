@@ -1,0 +1,44 @@
+.containerTypes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 10px;
+  gap: 20px;
+}
+
+.labelType {
+  background-color: var(--white);
+  color: var(--green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.containerDates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 10px;
+  gap: 5px;
+}
+
+.labelDates {
+  background-color: transparent;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+  line-height: 30px;
+}
+
+.button {
+  background-color: transparent;
+  border: none;
+  color: var(--white);
+}

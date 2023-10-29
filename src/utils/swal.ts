@@ -24,13 +24,6 @@ const swalRemove = <P extends any[], R>(
   }).then((result) => {
     if (result.isConfirmed) {
       fn(...params);
-      Swal.fire({
-        title: 'Deletado!',
-        text: 'O registro foi deletado com sucesso.',
-        icon: 'success',
-        confirmButtonColor: 'var(--light-green)',
-        confirmButtonText: 'Ok',
-      });
     }
   });
 

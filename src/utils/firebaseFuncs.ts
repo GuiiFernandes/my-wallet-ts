@@ -2,6 +2,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { User } from '../types/State';
 import { db } from '../services/firebase';
 import { banksModel, budgetsModel,
+  configurationsModel,
   investmentsModel, transactionsModel } from './dataModel';
 import { AccountType, Banks } from '../types/Data';
 
@@ -14,6 +15,7 @@ const addNewUser = async (user: User): Promise<void> => {
       setDoc(doc(db, user.uid, 'investments'), investmentsModel),
       setDoc(doc(db, user.uid, 'banks'), banksModel),
       setDoc(doc(db, user.uid, 'budgets'), budgetsModel),
+      setDoc(doc(db, user.uid, 'configurations'), configurationsModel),
     ]);
   }
 };

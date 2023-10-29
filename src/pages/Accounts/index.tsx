@@ -16,8 +16,8 @@ const lightGreen = 'var(--light-green)';
 
 export default function Accounts() {
   const [realForm, setRealForm] = useState<RealForm>({});
-  const { validateLogin, saveReal } = useFirebase();
-  const { deleteAccount } = useData();
+  const { validateLogin } = useFirebase();
+  const { deleteAccount, saveReal } = useData();
   const dispatch = useDispatch();
   const { banks } = useSelector(({ data }: StateRedux) => data);
   const { newAccount } = useSelector(({ operationals }: StateRedux) => operationals);

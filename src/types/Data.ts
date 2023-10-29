@@ -3,6 +3,7 @@ export type Data = {
   budgets: Budgets,
   investments: InvestimentsType,
   transactions: TransactionsType,
+  configurations: ConfigurationsType,
 };
 
 export type Budgets = TransactionsType & {
@@ -57,3 +58,14 @@ export type InvestInternational = {
 };
 
 type InvestimentType = 'fixa' | 'variável' | 'FII' | 'previdência' | 'outros';
+
+export type SubCategory = {
+  name: string,
+  category: string,
+};
+
+export type ConfigurationsType = {
+  categories: string[],
+  subCategories: SubCategory[],
+  currency: string,
+};

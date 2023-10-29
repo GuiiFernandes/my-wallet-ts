@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  max-width: 800px;
+  gap: 20px;
+}
+
+.select {
+  color: var(--white);
+  background-color: transparent;
+  border: 1px solid var(--light-green);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 1.6rem;
+}
+
+.option {
+  background-color: var(--green);
+}

@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { Data } from '../../types/Data';
-import { banksModel, budgetsModel, investmentsModel,
+import { banksModel, budgetsModel, configurationsModel, investmentsModel,
   transactionsModel } from '../../utils/dataModel';
 
 export const initialState: Data = {
@@ -9,6 +9,7 @@ export const initialState: Data = {
   budgets: budgetsModel,
   investments: investmentsModel,
   transactions: transactionsModel,
+  configurations: configurationsModel,
 };
 
 const DataSlice = createSlice({

@@ -28,15 +28,30 @@ export type Currencies = {
 
 export type NewAccountType = {
   newAccount: boolean;
-  [key: string]: boolean;
 };
 
 export type DeleteAccountType = {
   changeAccount: boolean;
-  [key: string]: boolean;
 };
 
-export type Operationals = NewAccountType;
+export type DateSelected = {
+  month: number;
+  monthString: string;
+};
+
+export type MonthSelected = {
+  monthSelected: DateSelected;
+};
+
+export type NewTransactionType = {
+  newTransaction: boolean;
+};
+
+export type Operationals = NewAccountType
+& DeleteAccountType
+& MonthSelected
+& NewTransactionType
+& { [key: string]: boolean | DateSelected };
 
 export type StateRedux = {
   user: User;

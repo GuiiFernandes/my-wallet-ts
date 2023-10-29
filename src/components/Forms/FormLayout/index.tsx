@@ -4,7 +4,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function FromLayout({ children }: Props) {
+export default function FormLayout({ children }: Props) {
   return (
     <div className={ styles.container }>
       { children }
