@@ -81,3 +81,19 @@ a {
   background-color: var(--blue);
   transition: all 0.2s ease-in-out;
 }
+
+.swal2-popup {
+  font-size: 1.6rem !important;
+  border-radius: 16px !important;
+  background-color: var(--green) !important;
+  color: var(--white) !important;
+}
+
+.swal2-popup .swal2-styled:focus {
+  box-shadow: none !important;
+}
+
+.swal2-popup .swal2-styled {
+	color: var(--green) !important;
+  font-weight: 600 !important;
+}

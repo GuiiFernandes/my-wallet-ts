@@ -43,7 +43,7 @@ export default function Login() {
         <button
           className={ styles.btnLogin }
         >
-          <img src={ logoG } alt="Google" className={ styles.logoG } />
+          <img src={ logoG } alt="Google Login" className={ styles.logoG } />
           Entrar
         </button>
       </form>

@@ -2,26 +2,28 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 import { db } from '../services/firebase';
 import { saveUser } from '../redux/reducers/user';
 import { initialState, updateData } from '../redux/reducers/data';
-import { banksModel, budgetsModel, investmentsModel,
-  transactionsModel } from '../utils/dataModel';
 import { StateRedux } from '../types/State';
 import styles from './useFirebase.module.css';
 import { Data } from '../types/Data';
+import { addNewUser } from '../utils/firebaseFuncs';
+import { RealForm } from '../types/LocalStates';
 
 const TIME_OUT = 700;
 
 export default function useFirebase() {
   const [userLoading, setUserLoading] = useState(true);
   const userLogged = useSelector(({ user }: StateRedux) => user);
+  const { banks } = useSelector(({ data }: StateRedux) => data);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const { accounts } = banks;
   const pathsIsLogin = ['/'];
 
   const validateLogin = async (): Promise<boolean | undefined> => {
@@ -31,16 +33,7 @@ export default function useFirebase() {
       if (user) {
         const { displayName, email, photoURL, uid, phoneNumber } = user;
         dispatch(saveUser({ displayName, email, photoURL, uid, phoneNumber }));
-        const docRef = doc(db, user.uid, 'transactions');
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-          await Promise.all([
-            setDoc(doc(db, user.uid, 'transactions'), transactionsModel),
-            setDoc(doc(db, user.uid, 'investments'), investmentsModel),
-            setDoc(doc(db, user.uid, 'banks'), banksModel),
-            setDoc(doc(db, user.uid, 'budgets'), budgetsModel),
-          ]);
-        }
+        await addNewUser(user);
         if (pathsIsLogin.includes(pathname)) {
           setTimeout(() => {
             goHome();
@@ -85,5 +78,23 @@ export default function useFirebase() {
     navigate('/');
   };
 
-  return { validateLogin, userLoading, goHome, listenerData };
+  const saveReal = async (id: number, name: string, realForm: RealForm) => {
+    const accountsChanged = [...accounts];
+    const indexAccount = accountsChanged.findIndex((account) => account.id === id);
+    if (indexAccount !== -1) {
+      accountsChanged[indexAccount].real = Number(realForm[name]);
+    }
+    await setDoc(doc(db, userLogged.uid, 'banks'), {
+      ...banks,
+      accounts: accountsChanged,
+    });
+  };
+
+  return {
+    validateLogin,
+    userLoading,
+    goHome,
+    listenerData,
+    saveReal,
+  };
 }

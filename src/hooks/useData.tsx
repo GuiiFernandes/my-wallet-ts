@@ -4,6 +4,9 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, StateRedux } from '../types/State';
+import { Options, swalRemove } from '../utils/swal';
+import { removeAccount } from '../utils/firebaseFuncs';
+import { RemoveAccountParams } from '../types/Functions';
 
 type Account = {
   id: number;
@@ -28,11 +31,19 @@ export default function useData() {
     if (haveTransaction) {
       dispatch(changeOperationls<DeleteAccountType>({ changeAccount: !changeAccount }));
     } else {
-      const accountIndex = accounts.findIndex((account) => account.id === id);
-      setDoc(doc(db, uid, 'banks'), {
-        ...banks,
-        accounts: [...accounts].splice(accountIndex, 1),
-      });
+      const options: Options = {
+        title: 'Deletar',
+        text: `Deseja deletar a conta ${name}? Essa ação não tem retorno`,
+        icon: 'warning',
+      };
+      swalRemove<RemoveAccountParams, void>(
+        removeAccount,
+        options,
+        accounts,
+        banks,
+        uid,
+        id,
+      );
     }
   };
 

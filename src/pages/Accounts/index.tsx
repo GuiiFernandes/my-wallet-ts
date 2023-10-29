@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { doc, setDoc } from 'firebase/firestore';
 import { FiSave } from 'react-icons/fi';
 import { MdDeleteForever } from 'react-icons/md';
 
@@ -10,21 +9,18 @@ import useData from '../../hooks/useData';
 import { NewAccountType, StateRedux } from '../../types/State';
 import styles from './accounts.module.css';
 import { changeOperationls } from '../../redux/reducers/operationals';
-import { db } from '../../services/firebase';
-
-type RealForm = { [key: string]: string };
+import { RealForm } from '../../types/LocalStates';
 
 const lightRed = 'var(--light-red)';
 const lightGreen = 'var(--light-green)';
 
 export default function Accounts() {
   const [realForm, setRealForm] = useState<RealForm>({});
-  const { validateLogin } = useFirebase();
+  const { validateLogin, saveReal } = useFirebase();
   const { deleteAccount } = useData();
   const dispatch = useDispatch();
   const { banks } = useSelector(({ data }: StateRedux) => data);
   const { newAccount } = useSelector(({ operationals }: StateRedux) => operationals);
-  const { uid } = useSelector(({ user }: StateRedux) => user);
   const { accounts } = banks;
 
   useEffect(() => {
@@ -39,19 +35,6 @@ export default function Accounts() {
     ), {});
     setRealForm(accountsKeys);
   }, [accounts]);
-
-  const saveReal = async (id: number, name: string) => {
-    const accountsChanged = accounts.map((account) => {
-      if (account.id === id) {
-        return { ...account, real: Number(realForm[name]) };
-      }
-      return account;
-    });
-    await setDoc(doc(db, uid, 'banks'), {
-      ...banks,
-      accounts: accountsChanged,
-    });
-  };
 
   return (
     <>
@@ -116,7 +99,7 @@ export default function Accounts() {
                     <button
                       type="button"
                       className={ styles.confirmReal }
-                      onClick={ () => saveReal(id, name) }
+                      onClick={ () => saveReal(id, name, realForm) }
                     >
                       <FiSave />
                     </button>
