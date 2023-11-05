@@ -8,13 +8,13 @@ import { db } from '../services/firebase';
 import { saveUser } from '../redux/reducers/user';
 import { initialState, updateData } from '../redux/reducers/data';
 import { StateRedux } from '../types/State';
-import styles from './useFirebase.module.css';
 import { Data } from '../types/Data';
 import { addNewUser } from '../utils/firebaseFuncs';
+import styles from './useLogin.module.css';
 
 const TIME_OUT = 700;
 
-export default function useFirebase() {
+export default function useLogin() {
   const [userLoading, setUserLoading] = useState(true);
   const userLogged = useSelector(({ user }: StateRedux) => user);
   const dispatch = useDispatch();

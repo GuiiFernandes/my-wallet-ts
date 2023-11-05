@@ -6,6 +6,20 @@ import { banksModel, budgetsModel,
   investmentsModel, transactionsModel } from './dataModel';
 import { AccountType, Banks } from '../types/Data';
 
+type PrevData<T> = {
+  [key: string]: T[];
+};
+
+type NewData<T> = {
+  [key: string]: T;
+};
+
+type MetaInfos = {
+  uid: string;
+  docName: string;
+  key: string;
+};
+
 const addNewUser = async (user: User): Promise<void> => {
   const docRef = doc(db, user.uid, 'transactions');
   const docSnap = await getDoc(docRef);
@@ -20,7 +34,35 @@ const addNewUser = async (user: User): Promise<void> => {
   }
 };
 
-const removeAccount = async (
+const create = async <T, R>(
+  { uid, docName, key }: MetaInfos,
+  prevData: PrevData<T>,
+  newData: NewData<R>,
+) => {
+  await setDoc(doc(db, uid, docName), {
+    ...prevData,
+    [key]: [...prevData[key], newData],
+  });
+};
+
+const update = async <T, R>(
+  { uid, docName, key }: MetaInfos,
+  prevData: PrevData<T>,
+  newData: NewData<R>,
+) => {
+  const index = prevData[key].findIndex((item) => {
+    const itemData = item as unknown as any;
+    return itemData.id === newData.id;
+  });
+  const prevDataCopy = [...prevData[key]];
+  prevDataCopy[index] = newData as unknown as T;
+  await setDoc(doc(db, uid, docName), {
+    ...prevData,
+    [key]: prevDataCopy,
+  });
+};
+
+const remove = async (
   accounts: AccountType[],
   banks: Banks,
   uid: string,
@@ -35,4 +77,4 @@ const removeAccount = async (
   });
 };
 
-export { addNewUser, removeAccount };
+export { addNewUser, remove, create, update };

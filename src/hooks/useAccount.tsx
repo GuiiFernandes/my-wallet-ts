@@ -5,7 +5,7 @@ import { db } from '../services/firebase';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
 import { Options, swalRemove } from '../utils/swal';
-import { removeAccount } from '../utils/firebaseFuncs';
+import { create, remove } from '../utils/firebaseFuncs';
 import { RemoveAccountParams } from '../types/Functions';
 import { FormAccount, RealForm } from '../types/LocalStates';
 
@@ -14,18 +14,14 @@ type Account = {
   name: string;
 };
 
-export default function useData() {
+export default function useLogin() {
   const dispatch = useDispatch();
   const { banks, transactions } = useSelector(({ data }: StateRedux) => data);
   const { changeAccount } = useSelector(({ operationals }: StateRedux) => operationals);
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { accounts } = banks;
   const { revenue, fixedExpense, variableExpense } = transactions;
-  const allTransactions = [
-    ...Object.values(revenue),
-    ...Object.values(fixedExpense),
-    ...Object.values(variableExpense),
-  ];
+  const allTransactions = [...revenue, ...fixedExpense, ...variableExpense];
 
   const createAccount = async (form: FormAccount) => {
     const balanceNumber = Number(
@@ -38,10 +34,7 @@ export default function useData() {
       real: balanceNumber,
       type: form.type,
     };
-    await setDoc(doc(db, uid, 'banks'), {
-      ...banks,
-      accounts: [...accounts, newAccount],
-    });
+    await create({ uid, docName: 'banks', key: 'accounts' }, banks, newAccount);
     dispatch(changeOperationls<NewAccountType>({ newAccount: false }));
   };
 
@@ -56,7 +49,7 @@ export default function useData() {
         icon: 'warning',
       };
       swalRemove<RemoveAccountParams, void>(
-        removeAccount,
+        remove,
         options,
         accounts,
         banks,
@@ -69,8 +62,11 @@ export default function useData() {
   const saveReal = async (id: number, name: string, realForm: RealForm) => {
     const accountsChanged = [...accounts];
     const indexAccount = accountsChanged.findIndex((account) => account.id === id);
+    console.log(accountsChanged, indexAccount);
     if (indexAccount !== -1) {
-      accountsChanged[indexAccount].real = Number(realForm[name]);
+      const account = { ...accountsChanged[indexAccount] };
+      account.real = Number(realForm[name]);
+      accountsChanged[indexAccount] = account;
     }
     await setDoc(doc(db, uid, 'banks'), {
       ...banks,

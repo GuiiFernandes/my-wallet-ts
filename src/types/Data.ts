@@ -29,6 +29,22 @@ export type AccountType = {
   type: 'carteira' | 'conta-corrente' | 'conta-investimento',
 };
 
+export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
+
+export type TransactionType = {
+  id: number,
+  date: string,
+  dueDate: string,
+  payday: string | null,
+  description: string,
+  value: number,
+  account: string,
+  type: TypesTransaction,
+  category: string | null,
+  subCategory: string | null,
+  installments: number | null,
+};
+
 export type InvestimentsType = {
   national: InvestNational[];
   international: InvestInternational[];

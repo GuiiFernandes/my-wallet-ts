@@ -1,3 +1,5 @@
+import { TransactionType } from './Data';
+
 export type RealForm = { [key: string]: string };
 
 export type FormAccount = {
@@ -7,19 +9,10 @@ export type FormAccount = {
 };
 
 export type FormTransaction = {
-  date: string,
-  dueDate: string,
-  payday: string | null,
-  description: string,
-  value: number,
-  account: string,
-  type: 'Receita' | 'Despesa',
-  category: string,
-  subCategory: string,
-  installments: number | null,
   period: string,
   isFixed: boolean,
-};
+  accountDestiny: string,
+} & Omit<TransactionType, 'id'>;
 
 export type PropsNewTrans = {
   form: FormTransaction;

@@ -24,7 +24,7 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
 
   return (
     <div
-      className={ styles.containerTypes }
+      className={ styles.containerMethod }
       style={ { marginBottom: form.installments !== null ? '10px' : '51px' } }
     >
       <label

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 
-import useFirebase from '../../hooks/useFirebase';
+import useLogin from '../../hooks/useLogin';
 import styles from './AppLayout.module.css';
 import Header from '../Header';
 import { StateRedux } from '../../types/State';
@@ -10,7 +10,7 @@ import NewAccount from '../Forms/NewAccount';
 import NewTransaction from '../Forms/NewTransaction';
 
 export default function AppLayout() {
-  const { listenerData } = useFirebase();
+  const { listenerData } = useLogin();
   const userLogged = useSelector(({ user }: StateRedux) => user);
   const {
     newAccount,

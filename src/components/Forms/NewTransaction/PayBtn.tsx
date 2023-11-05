@@ -3,6 +3,13 @@ import { BiSolidLike, BiSolidDislike } from 'react-icons/bi';
 import styles from './NewTransaction.module.css';
 import { PropsNewTrans } from '../../../types/LocalStates';
 
+const typeTexts = {
+  Despesa: 'Pagamento:',
+  Receita: 'Recebimento:',
+  Investimento: 'Investido:',
+  Transferência: 'Transferido:',
+};
+
 export default function PayBtn({ form, setForm }: PropsNewTrans) {
   const changePayment = () => {
     setForm({ ...form,
@@ -12,7 +19,7 @@ export default function PayBtn({ form, setForm }: PropsNewTrans) {
 
   return (
     <p>
-      {form.type === 'Despesa' ? 'Pagamento:' : 'Recebimento:'}
+      {typeTexts[form.type]}
       {' '}
       <button
         type="button"

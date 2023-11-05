@@ -12,6 +12,7 @@ import Cards from './pages/Cards';
 import Budget from './pages/Budget';
 import Settings from './pages/Settings';
 import Contabil from './pages/Contabil';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -20,7 +21,7 @@ export default function App() {
         <Route path="/" element={ <Layout /> }>
           <Route path="/" element={ <Login /> } />
           <Route path="/about" element={ <About /> } />
-          <Route path="*" element={ <div>Not Found</div> } />
+          <Route path="*" element={ <NotFound /> } />
           <Route path="/" element={ <AppLayout /> }>
             <Route path="/home" element={ <Home /> } />
             <Route path="/contas" element={ <Accounts /> } />
