@@ -38,17 +38,18 @@ export default function useTransaction() {
     const transactions = [];
     if (installments) {
       const periodNumber = installmentsTransform[period];
-
       for (let i = 0; i <= installments; i += 1) {
-        const dueDate = new Date(form.dueDate).getTime() + (periodNumber * i);
+        const dueDate = new Date(form.date).getTime() + (periodNumber * i);
         transactions.push({
-          ...form,
+          ...newForm,
           dueDate: new Date(dueDate).toISOString().slice(0, 10),
         });
       }
     } else {
       transactions.push(form);
     }
+
+    console.log(transactions);
 
     // const newTransactions = {
     //   ...form,
