@@ -12,14 +12,14 @@ type Props = {
 
 const infos = [
   {
+    title: 'Despesa',
+    color: 'var(--red)',
+    icon: (<GiPayMoney size="30px" />),
+  },
+  {
     title: 'Receita',
     color: 'var(--light-green)',
     icon: (<GiReceiveMoney size="30px" />),
-  },
-  {
-    title: 'Despesa',
-    color: 'var(--red)',
-    icon: (<TbPigMoney size="30px" />),
   },
   {
     title: 'Transferência',
@@ -29,7 +29,7 @@ const infos = [
   {
     title: 'Investimento',
     color: 'var(--blue)',
-    icon: (<GiPayMoney size="30px" />),
+    icon: (<TbPigMoney size="30px" />),
   },
 ];
 
