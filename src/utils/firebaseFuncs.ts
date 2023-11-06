@@ -45,6 +45,17 @@ const create = async <T, R>(
   });
 };
 
+const bulkCreate = async <T, R>(
+  { uid, docName, key }: MetaInfos,
+  prevData: PrevData<T>,
+  newData: NewData<R>[],
+) => {
+  await setDoc(doc(db, uid, docName), {
+    ...prevData,
+    [key]: [...prevData[key], ...newData],
+  });
+};
+
 const update = async <T, R>(
   { uid, docName, key }: MetaInfos,
   prevData: PrevData<T>,
@@ -77,4 +88,4 @@ const remove = async (
   });
 };
 
-export { addNewUser, remove, create, update };
+export { addNewUser, remove, create, update, bulkCreate };

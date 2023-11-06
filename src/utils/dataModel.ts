@@ -1,9 +1,10 @@
 import { Banks, Budgets, InvestimentsType, TransactionsType } from '../types/Data';
 
 export const transactionsModel: TransactionsType = {
-  revenue: [],
-  fixedExpense: [],
-  variableExpense: [],
+  variableRevenues: [],
+  fixedRevenues: [],
+  fixedExpenses: [],
+  variableExpenses: [],
 };
 
 export const investmentsModel: InvestimentsType = {
@@ -17,9 +18,7 @@ export const banksModel: Banks = {
 };
 
 export const budgetsModel: Budgets = {
-  revenue: [],
-  fixedExpense: [],
-  variableExpense: [],
+  ...transactionsModel,
   peoplesBudgets: {},
 };
 

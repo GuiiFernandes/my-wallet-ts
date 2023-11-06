@@ -4,7 +4,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
-import { Options, swalRemove } from '../utils/swal';
+import { Options, swalRemove, toast } from '../utils/swal';
 import { create, remove } from '../utils/firebaseFuncs';
 import { RemoveAccountParams } from '../types/Functions';
 import { FormAccount, RealForm } from '../types/LocalStates';
@@ -20,10 +20,20 @@ export default function useLogin() {
   const { changeAccount } = useSelector(({ operationals }: StateRedux) => operationals);
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { accounts } = banks;
-  const { revenue, fixedExpense, variableExpense } = transactions;
-  const allTransactions = [...revenue, ...fixedExpense, ...variableExpense];
+  const { variableRevenues, fixedRevenues,
+    fixedExpenses, variableExpenses } = transactions;
+  const allTransactions = [...variableRevenues, ...fixedRevenues,
+    ...fixedExpenses, ...variableExpenses];
 
   const createAccount = async (form: FormAccount) => {
+    const haveAccount = accounts.some(({ name }) => name === form.name);
+    if (haveAccount) {
+      toast.fire({
+        icon: 'error',
+        title: 'Já existe uma conta com esse nome',
+      });
+      return;
+    }
     const balanceNumber = Number(
       form.balance.substring(2).replace('.', '').replace(',', '.'),
     );

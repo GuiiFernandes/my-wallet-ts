@@ -6,14 +6,20 @@ import { TransactionType } from '../../types/Data';
 export default function WalletTable() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
   const operationals = useSelector((state : StateRedux) => state.operationals);
-  const { revenue, fixedExpense, variableExpense } = transactions;
+  const { variableRevenues, fixedRevenues,
+    fixedExpenses, variableExpenses } = transactions;
 
   const allTransactions: TransactionType[] = [
-    ...revenue,
-    ...fixedExpense,
-    ...variableExpense
-      .filter(({ date }) => {
-        return new Date(date).getMonth() + 1 === operationals.monthSelected.month;
+    ...variableRevenues.filter(({ dueDate }) => {
+      return new Date(dueDate).getMonth() + 1 === operationals.monthSelected.month;
+    }),
+    ...fixedRevenues,
+    ...fixedExpenses,
+    ...variableExpenses
+      .filter(({ dueDate }) => {
+        console.log(new Date(dueDate).getMonth() + 1);
+
+        return new Date(dueDate).getMonth() + 1 === operationals.monthSelected.month;
       }),
   ].sort((a: TransactionType, b: TransactionType) => {
     return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
@@ -29,7 +35,6 @@ export default function WalletTable() {
     <table>
       <thead>
         <tr>
-          <td>Data</td>
           <td>Vencimento</td>
           <td>Pagamento</td>
           <td>Descrição</td>
@@ -44,9 +49,14 @@ export default function WalletTable() {
       <tbody>
         {allTransactions.map((transaction) => (
           <tr key={ transaction.id }>
-            <td>{ transaction.date }</td>
-            <td>{ transaction.dueDate }</td>
-            <td>{ transaction.payday }</td>
+            <td>{ new Date(transaction.dueDate).getDate() }</td>
+            <td>
+              {
+                transaction.payday
+                  ? new Date(transaction.payday).toLocaleDateString()
+                  : 'Não Pago'
+              }
+            </td>
             <td>{ transaction.description }</td>
             <td>{ transaction.value }</td>
             <td>{ transaction.account }</td>

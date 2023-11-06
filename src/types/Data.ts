@@ -11,9 +11,10 @@ export type Budgets = TransactionsType & {
 };
 
 export type TransactionsType = {
-  revenue: [],
-  fixedExpense: [],
-  variableExpense: [],
+  variableRevenues: TransactionType[],
+  fixedRevenues: TransactionType[],
+  fixedExpenses: TransactionType[],
+  variableExpenses: TransactionType[],
 };
 
 export type Banks = {
@@ -32,7 +33,7 @@ export type AccountType = {
 export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
 
 export type TransactionType = {
-  id: number,
+  id: string,
   date: string,
   dueDate: string,
   payday: string | null,

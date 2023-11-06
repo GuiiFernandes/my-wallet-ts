@@ -21,10 +21,25 @@ const swalRemove = <P extends any[], R>(
     cancelButtonColor: 'var(--red)',
     confirmButtonText: 'Sim',
     cancelButtonText: 'Não',
+    customClass: {
+      popup: 'background-swal',
+    },
   }).then((result) => {
     if (result.isConfirmed) {
       fn(...params);
     }
   });
 
-export { swalRemove };
+const toast = Swal.mixin({
+  toast: true,
+  position: 'center',
+  iconColor: 'white',
+  customClass: {
+    popup: 'colored-toast',
+  },
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+});
+
+export { swalRemove, toast };
