@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import useLogin from '../../hooks/useLogin';
 import MonthSelector from '../../components/MonthSelector';
-import WalletTable from '../../components/WalletTable';
+import WalletTable from '../../components/Tables/WalletTable';
 
 export default function Wallet() {
   const { validateLogin } = useLogin();

@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 50px 120px 1fr 150px 90px repeat(2, 1fr) 100px 90px 30px;
+  width: 100%;
+  border-bottom: 1px solid var(--white);
+  padding: 5px;
+}
+
+.btnEdit {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue);
+  font-size: 3rem;
+}
+
+.btnEdit:hover {
+  color: var(--light-green);
+  transition: all 0.2s ease-in-out;
+}

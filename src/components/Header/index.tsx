@@ -13,6 +13,16 @@ export default function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { displayName, photoURL } = useSelector(({ user }: StateRedux) => user);
+  const { transactions } = useSelector(({ data }: StateRedux) => data);
+  const { variableRevenues, fixedRevenues,
+    fixedExpenses, variableExpenses } = transactions;
+
+  const allTransactions = [
+    ...variableRevenues,
+    ...fixedRevenues,
+    ...fixedExpenses,
+    ...variableExpenses,
+  ];
 
   const logout = async () => {
     const auth = getAuth();
@@ -34,7 +44,11 @@ export default function Header() {
             <strong>Saldo Total:</strong>
             {' '}
             <span data-testid="total-field">
-              { 0 }
+              {/* { allTransactions.reduce((sum, {type, payday, value}) => {
+                if(type === 'Receita' && payday) {
+                  return sum + value;
+                } else if(type === 'Transferência')
+              }, 0) } */}
             </span>
             {' '}
             <span data-testid="header-currency-field">BRL</span>

@@ -1,13 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { doc, setDoc } from 'firebase/firestore';
 
-import { db } from '../services/firebase';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
 import { Options, swalRemove, toast } from '../utils/swal';
-import { create, remove } from '../utils/firebaseFuncs';
+import { bulkUpdate, create, remove } from '../utils/firebaseFuncs';
 import { RemoveAccountParams } from '../types/Functions';
 import { FormAccount, RealForm } from '../types/LocalStates';
+import { AccountType } from '../types/Data';
 
 type Account = {
   id: number;
@@ -70,18 +69,14 @@ export default function useLogin() {
   };
 
   const saveReal = async (id: number, name: string, realForm: RealForm) => {
-    const accountsChanged = [...accounts];
+    const accountsChanged: AccountType[] = [...accounts];
     const indexAccount = accountsChanged.findIndex((account) => account.id === id);
-    console.log(accountsChanged, indexAccount);
     if (indexAccount !== -1) {
       const account = { ...accountsChanged[indexAccount] };
       account.real = Number(realForm[name]);
       accountsChanged[indexAccount] = account;
     }
-    await setDoc(doc(db, uid, 'banks'), {
-      ...banks,
-      accounts: accountsChanged,
-    });
+    await bulkUpdate({ uid, docName: 'banks', key: 'accounts' }, banks, accountsChanged);
   };
 
   return { deleteAccount, saveReal, createAccount };

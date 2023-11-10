@@ -1,0 +1,62 @@
+.tHead {
+  width: 100%;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.td {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tdName {
+  display: flex;
+  align-items: center;
+}
+
+.realInput {
+  display: flex;
+  background-color: transparent;
+  border: 1px solid var(--light-green);
+  text-align: center;
+  border-radius: 5px;
+  font-size: 1.6rem;
+  padding: 3px 0;
+  height: 31px;
+  font-weight: 400;
+}
+
+.inputNumeric {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 1.6rem;
+  width: calc(100% - 26px);
+  margin: 0 8px;
+  color: var(--white);
+}
+
+.confirmReal {
+  background-color: transparent;
+  color: var(--light-green);
+  border: none;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.confirmReal:hover {
+  color: var(--blue);
+}
+
+.tdBtn {
+  align-self: center;
+  justify-self: center;
+}

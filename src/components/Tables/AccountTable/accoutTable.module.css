@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-width: 600px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 30px;
+  width: 100%;
+  border-bottom: 1px solid var(--white);
+  padding: 5px;
+}
+
+.btnDel {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red);
+  font-size: 3rem;
+}
+
+.btnDel:hover {
+  color: var(--blue);
+  transition: all 0.2s ease-in-out;
+}
