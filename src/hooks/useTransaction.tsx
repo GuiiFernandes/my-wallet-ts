@@ -1,10 +1,11 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { TransactionType } from '../types/Data';
+import { FixedTransactionType, InfosTransVar, TransactionType } from '../types/Data';
 import { FormTransaction } from '../types/LocalStates';
 import { bulkCreate } from '../utils/firebaseFuncs';
 import { StateRedux } from '../types/State';
+import { changeOperationls } from '../redux/reducers/operationals';
 
 type InstallmentsTransType = {
   Diariamente: number;
@@ -42,8 +43,12 @@ const keyByType = (isFixed: boolean, isTransfer?: boolean) => {
 };
 
 export default function useTransaction() {
+  const dispatch = useDispatch();
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { transactions } = useSelector(({ data }: StateRedux) => data);
+  const { monthSelected,
+    newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const { month } = monthSelected;
 
   const formatedTransactions = (form: Omit<FormTransaction, 'id'>) => {
     const { installments, period, type, isFixed } = form;
@@ -60,11 +65,11 @@ export default function useTransaction() {
     if (installments) {
       const periodNumber = installmentsTransform[period];
       for (let i = 0; i < installments; i += 1) {
-        const dueDate = new Date(form.date).getTime() + (periodNumber * i);
+        const date = new Date(form.date[0]).getTime() + (periodNumber * i);
         newTransactions.push({
           id: uuidv4(),
           ...newForm,
-          dueDate: new Date(dueDate).toISOString().slice(0, 10),
+          date: new Date(date).toISOString().slice(0, 10),
           installments: `${i + 1}/${installments}`,
         });
       }
@@ -79,10 +84,12 @@ export default function useTransaction() {
         againstTransactions.push(...destinyTransactions);
       }
     } else {
-      newTransactions.push({
+      const formatedTrans = {
         id: uuidv4(),
         ...newForm,
-        installments: isFixed ? 'F' : 'U' });
+        installments: isFixed ? 'F' : 'U' };
+      if (isFixed) formatedTrans.variations = [];
+      newTransactions.push(formatedTrans);
     }
 
     return [newTransactions, againstTransactions];
@@ -111,7 +118,44 @@ export default function useTransaction() {
         againstTransactions,
       ) : null,
     ]);
+    dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
-  return { createTransaction };
+  const getVariations = (trans: FixedTransactionType[]) => {
+    const transByDate = trans.filter(({ date }) => new Date(date)
+      .getMonth() + 1 < month);
+    const transByVariations = transByDate.reduce((
+      array: Partial<FixedTransactionType>[],
+      transaction: FixedTransactionType,
+    ) => {
+      const { variations } = transaction;
+      if (!variations.length) return [...array, transaction];
+      const formatedVariations = variations.map((variation: InfosTransVar) => {
+        const transWithVariations = { ...transaction } as Partial<FixedTransactionType>;
+        delete transWithVariations.variations;
+        const { date, value, payday, account } = variation;
+        return { ...transWithVariations, date, value, payday, account };
+      }, []);
+      return [...array, ...formatedVariations];
+    }, []);
+    return transByVariations as TransactionType[];
+  };
+
+  const getAllTransactions = () => {
+    const { fixedExpenses, variableExpenses,
+      fixedRevenues, variableRevenues } = transactions;
+    const formatedFixesRev = getVariations(fixedRevenues);
+    const formatedFixesExp = getVariations(fixedExpenses);
+    const allTransactions: TransactionType[] = [
+      ...variableRevenues,
+      ...formatedFixesRev,
+      ...formatedFixesExp,
+      ...variableExpenses,
+    ].sort((a: TransactionType, b: TransactionType) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+    return allTransactions;
+  };
+
+  return { createTransaction, getAllTransactions };
 }

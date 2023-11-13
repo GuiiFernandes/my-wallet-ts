@@ -12,8 +12,8 @@ export type Budgets = TransactionsType & {
 
 export type TransactionsType = {
   variableRevenues: TransactionType[],
-  fixedRevenues: TransactionType[],
-  fixedExpenses: TransactionType[],
+  fixedRevenues: FixedTransactionType[],
+  fixedExpenses: FixedTransactionType[],
   variableExpenses: TransactionType[],
 };
 
@@ -32,18 +32,24 @@ export type AccountType = {
 
 export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
 
+export type InfosTransVar = {
+  date: string,
+  value: number,
+  payday: string | null,
+  account: string,
+};
+
 export type TransactionType = {
   id: string,
-  date: string,
-  dueDate: string,
-  payday: string | null,
   description: string,
-  value: number,
-  account: string,
   type: TypesTransaction,
   category: string | null,
   subCategory: string | null,
   installments: number | null,
+} & InfosTransVar;
+
+export type FixedTransactionType = TransactionType & {
+  variations: InfosTransVar[],
 };
 
 export type InvestimentsType = {

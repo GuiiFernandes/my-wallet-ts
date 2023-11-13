@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { FormTransaction } from '../types/LocalStates';
 import { TypesTransaction } from '../types/Data';
+import { StateRedux } from '../types/State';
 
 const selectedAccountText = 'Selecione uma conta';
 const selectOriginText = 'Selecione origem';
 const INITIAL_STATE: FormTransaction = {
   date: new Date().toISOString().slice(0, 10),
-  dueDate: new Date().toISOString().slice(0, 10),
   payday: null,
   description: '',
   value: 0,
@@ -22,18 +23,6 @@ const INITIAL_STATE: FormTransaction = {
 
 export default function useChangeFormTrans() {
   const [form, setForm] = useState(INITIAL_STATE);
-
-  const handleChangeDate = (
-    { target: { value } }: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const valueDate = new Date(value).getTime();
-    const dueDateDate = new Date(form.dueDate).getTime();
-    const paydayDate = form.payday
-      ? new Date(form.payday).getTime() : valueDate;
-    const dueDate = dueDateDate < valueDate ? value : form.dueDate;
-    const payday = paydayDate < valueDate ? value : form.payday;
-    setForm({ ...form, date: value, dueDate, payday });
-  };
 
   const handleChangeValue = (
     { target: { value } }: React.ChangeEvent<HTMLInputElement>,
@@ -82,7 +71,6 @@ export default function useChangeFormTrans() {
   return {
     form,
     setForm,
-    handleChangeDate,
     handleChangeValue,
     handleChangeType,
     handleChange,

@@ -15,6 +15,7 @@ export default function AppLayout() {
   const {
     newAccount,
     newTransaction,
+    editTransaction,
   } = useSelector(({ operationals }: StateRedux) => operationals);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function AppLayout() {
       { newAccount && (
         <NewAccount />
       )}
-      { newTransaction && (
+      { (newTransaction || editTransaction) && (
         <NewTransaction />
       )}
     </main>

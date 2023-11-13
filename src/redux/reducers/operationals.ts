@@ -13,6 +13,7 @@ export const initialState = {
     monthString,
     month: date.getMonth() + 1,
   },
+  editTransaction: null,
 };
 
 const OperationalsSlice = createSlice({

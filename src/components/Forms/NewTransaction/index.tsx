@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
+import { useEffect } from 'react';
 import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
@@ -12,6 +13,7 @@ import { NewTransactionType, StateRedux } from '../../../types/State';
 import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
+import { TransactionType } from '../../../types/Data';
 
 const styles = { ...style1, ...styles2 };
 
@@ -19,20 +21,34 @@ const transferText = 'Transferência';
 const indexes = [0, 1, 2, 3];
 
 export default function NewTransaction() {
-  const { createTransaction } = useTransaction();
+  const { createTransaction, getAllTransactions } = useTransaction();
   const {
     form,
     setForm,
     handleChange,
     handleChangeValue,
     handleChangeType,
-    handleChangeDate,
   } = useChangeFormTrans();
-  const { banks, configurations } = useSelector(({ data }: StateRedux) => data);
+  const { editTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const { banks,
+    configurations } = useSelector(({ data }: StateRedux) => data);
   const { accounts } = banks;
   const { categories, subCategories } = configurations;
 
   const destinyAccounts = accounts.filter((account) => account.name !== form.account);
+
+  const allTransactions: TransactionType[] = getAllTransactions();
+
+  useEffect(() => {
+    // const index = allTransactions.findIndex(({ id }) => id === editTransaction);
+    // if (index !== -1) {
+    //   const { id, ...formTrans } = allTransactions[index];
+    //   setForm({
+    //     ...formTrans,
+
+    //   });
+    // }
+  }, [editTransaction]);
 
   return (
     <FormLayout>
@@ -58,27 +74,17 @@ export default function NewTransaction() {
         </div>
         <div className={ styles.containerDates }>
           <label htmlFor="date" className={ styles.labelDates }>
-            Data:
-            <input
-              type="date"
-              id="date"
-              className={ styles.input }
-              value={ form.date }
-              onChange={ handleChangeDate }
-            />
-          </label>
-          <label htmlFor="dueDate" className={ styles.labelDates }>
             Vencimento:
             <input
               type="date"
-              id="dueDate"
-              disabled={ !!form.installments }
+              id="date"
+              disabled={ !!form.installments || form.isFixed }
               className={ styles.input }
-              value={ !form.installments ? form.dueDate : '' }
+              value={ !(form.installments || form.isFixed) ? form.date : '' }
               onChange={ handleChange }
             />
           </label>
-          <label htmlFor="dueDate" className={ styles.labelDates }>
+          <label htmlFor="date" className={ styles.labelDates }>
             <PayBtn form={ form } setForm={ setForm } />
             <input
               type="date"

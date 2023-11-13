@@ -47,11 +47,16 @@ export type NewTransactionType = {
   newTransaction: boolean;
 };
 
-export type Operationals = NewAccountType
+export type EditTransactionType = {
+  editTransaction: string | null;
+};
+
+export type Operationals = EditTransactionType
+& NewAccountType
 & DeleteAccountType
 & MonthSelected
 & NewTransactionType
-& { [key: string]: boolean | DateSelected };
+& { [key: string]: boolean | DateSelected | string | null };
 
 export type StateRedux = {
   user: User;

@@ -1,6 +1,8 @@
 .containerTypes {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 10px;
   gap: 20px;
 }
@@ -20,13 +22,14 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  width: 110px;
   padding: 5px;
   border-radius: 8px;
 }
 
 .containerDates {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   margin-bottom: 10px;
   gap: 5px;
   align-items: end;
