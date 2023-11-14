@@ -25,7 +25,8 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
   return (
     <div
       className={ styles.containerMethod }
-      style={ { marginBottom: form.installments !== null ? '10px' : '51px' } }
+      style={ { marginBottom: form.installments !== null || form.isFixed
+        ? '10px' : '51px' } }
     >
       <label
         className={ styles.labelType }

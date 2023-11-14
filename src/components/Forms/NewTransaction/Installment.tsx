@@ -15,18 +15,20 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
   };
   return (
     <div className={ styles.containerInstallments }>
-      <label htmlFor="installments" className={ styles.labelInstallments }>
-        Parcelas:
-        <input
-          className={ styles.inputInstallments }
-          type="number"
-          min="2"
-          step="1"
-          id="installments"
-          value={ form.installments?.toString() || '' }
-          onChange={ handleChange }
-        />
-      </label>
+      { !form.isFixed && (
+        <label htmlFor="installments" className={ styles.labelInstallments }>
+          Parcelas:
+          <input
+            className={ styles.inputInstallments }
+            type="number"
+            min="2"
+            step="1"
+            id="installments"
+            value={ form.installments?.toString() || '' }
+            onChange={ handleChange }
+          />
+        </label>
+      )}
       <label htmlFor="period" className={ styles.labelRepeat }>
         Repetir:
         <select

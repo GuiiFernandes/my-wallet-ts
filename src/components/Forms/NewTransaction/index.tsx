@@ -60,7 +60,8 @@ export default function NewTransaction() {
         } }
       >
         <h2 className={ styles.h2 }>
-          {`Nov${form.type === 'Investimento' ? 'o' : 'a'} ${form.type}`}
+          { editTransaction ? 'Editar' : `Nov${form.type === 'Investimento' ? 'o' : 'a'}`}
+          {` ${form.type}`}
         </h2>
         <div className={ styles.containerTypes }>
           { indexes.map((index) => (
@@ -78,9 +79,8 @@ export default function NewTransaction() {
             <input
               type="date"
               id="date"
-              disabled={ !!form.installments || form.isFixed }
               className={ styles.input }
-              value={ !(form.installments || form.isFixed) ? form.date : '' }
+              value={ form.date }
               onChange={ handleChange }
             />
           </label>
@@ -201,7 +201,7 @@ export default function NewTransaction() {
           </>
         )}
         <PaymentMethod form={ form } setForm={ setForm } />
-        { form.installments !== null && (
+        { (form.installments !== null || form.isFixed) && (
           <Installment form={ form } setForm={ setForm } />
         )}
         <BtnsForm<NewTransactionType> value={ { newTransaction: false } } />

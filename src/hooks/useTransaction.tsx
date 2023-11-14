@@ -48,10 +48,10 @@ export default function useTransaction() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
   const { monthSelected,
     newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
-  const { month } = monthSelected;
+  const { monthString } = monthSelected;
 
   const formatedTransactions = (form: Omit<FormTransaction, 'id'>) => {
-    const { installments, period, type, isFixed } = form;
+    const { installments, period, type, isFixed, value } = form;
 
     const newForm: any = { ...form };
 
@@ -65,10 +65,14 @@ export default function useTransaction() {
     if (installments) {
       const periodNumber = installmentsTransform[period];
       for (let i = 0; i < installments; i += 1) {
-        const date = new Date(form.date[0]).getTime() + (periodNumber * i);
+        const date = new Date(form.date).getTime() + (periodNumber * i);
+        const baseValue = Math.floor((value / installments) * 100) / 100;
+        const totalBase = baseValue * installments;
+        const restValue = (form.value - totalBase) * 100;
         newTransactions.push({
           id: uuidv4(),
           ...newForm,
+          value: i < restValue - 1 ? baseValue + 0.01 : baseValue,
           date: new Date(date).toISOString().slice(0, 10),
           installments: `${i + 1}/${installments}`,
         });
@@ -121,9 +125,11 @@ export default function useTransaction() {
     dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
+  const ByDateCallback = ({ date }: { date: string }) => new Date(date)
+    .getTime() <= new Date(monthString).getTime();
+
   const getVariations = (trans: FixedTransactionType[]) => {
-    const transByDate = trans.filter(({ date }) => new Date(date)
-      .getMonth() + 1 < month);
+    const transByDate = trans.filter(ByDateCallback);
     const transByVariations = transByDate.reduce((
       array: Partial<FixedTransactionType>[],
       transaction: FixedTransactionType,
@@ -141,16 +147,17 @@ export default function useTransaction() {
     return transByVariations as TransactionType[];
   };
 
+  const getByDate = (trans: TransactionType[]) => trans
+    .filter(ByDateCallback);
+
   const getAllTransactions = () => {
     const { fixedExpenses, variableExpenses,
       fixedRevenues, variableRevenues } = transactions;
-    const formatedFixesRev = getVariations(fixedRevenues);
-    const formatedFixesExp = getVariations(fixedExpenses);
     const allTransactions: TransactionType[] = [
-      ...variableRevenues,
-      ...formatedFixesRev,
-      ...formatedFixesExp,
-      ...variableExpenses,
+      ...getByDate(variableRevenues),
+      ...getVariations(fixedRevenues),
+      ...getVariations(fixedExpenses),
+      ...getByDate(variableExpenses),
     ].sort((a: TransactionType, b: TransactionType) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });

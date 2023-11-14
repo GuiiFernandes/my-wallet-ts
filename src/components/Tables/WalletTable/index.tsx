@@ -1,10 +1,9 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 import { AiFillEdit } from 'react-icons/ai';
 
 import { changeOperationls } from '../../../redux/reducers/operationals';
 import useTransaction from '../../../hooks/useTransaction';
-import { StateRedux } from '../../../types/State';
 import { TransactionType } from '../../../types/Data';
 import styleGlobal from '../table.module.css';
 import styleTable from './walleTable.module.css';
@@ -54,7 +53,7 @@ export default function WalletTable() {
                 className={ styles.td }
                 style={ { fontWeight: 'bold' } }
               >
-                { new Date(transaction.date[0]).getDate() }
+                { new Date(transaction.date).getDate() }
               </td>
               <td
                 className={ styles.td }

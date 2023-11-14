@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { FormTransaction } from '../types/LocalStates';
 import { TypesTransaction } from '../types/Data';
-import { StateRedux } from '../types/State';
 
 const selectedAccountText = 'Selecione uma conta';
 const selectOriginText = 'Selecione origem';
