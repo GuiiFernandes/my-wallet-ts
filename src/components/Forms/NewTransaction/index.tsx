@@ -28,6 +28,7 @@ export default function NewTransaction() {
     handleChange,
     handleChangeValue,
     handleChangeType,
+    handleChangeAccount,
   } = useChangeFormTrans();
   const { editTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
   const { banks,
@@ -60,23 +61,29 @@ export default function NewTransaction() {
         className={ styles.containerForm }
         onSubmit={ async (e) => {
           e.preventDefault();
+          // if (editTransaction) {
+          //   editTransaction(form);
+          // } else {
           createTransaction(form);
+          // }
         } }
       >
         <h2 className={ styles.h2 }>
           { editTransaction ? 'Editar' : `Nov${form.type === 'Investimento' ? 'o' : 'a'}`}
           {` ${form.type}`}
         </h2>
-        <div className={ styles.containerTypes }>
-          { indexes.map((index) => (
-            <TypeBtn
-              key={ index }
-              index={ index }
-              type={ form.type }
-              handleChange={ handleChangeType }
-            />
-          ))}
-        </div>
+        { !editTransaction && (
+          <div className={ styles.containerTypes }>
+            { indexes.map((index) => (
+              <TypeBtn
+                key={ index }
+                index={ index }
+                type={ form.type }
+                handleChange={ handleChangeType }
+              />
+            ))}
+          </div>
+        )}
         <div className={ styles.containerDates }>
           <label htmlFor="date" className={ styles.labelDates }>
             Vencimento:
@@ -132,11 +139,8 @@ export default function NewTransaction() {
             id="account"
             className={ styles.input }
             value={ form.account }
-            onChange={ handleChange }
+            onChange={ handleChangeAccount }
           >
-            <option className={ styles.option }>
-              { form.type !== transferText ? 'Selecione uma conta' : 'Selecione origem' }
-            </option>
             { accounts.map(({ name }) => (
               <option key={ name } className={ styles.option } value={ name }>
                 { name }
@@ -157,9 +161,6 @@ export default function NewTransaction() {
               value={ form.accountDestiny }
               onChange={ handleChange }
             >
-              <option className={ styles.option }>
-                Selecione um destino
-              </option>
               { destinyAccounts.map(({ name }) => (
                 <option key={ name } className={ styles.option } value={ name }>
                   { name }
@@ -204,8 +205,10 @@ export default function NewTransaction() {
             </label>
           </>
         )}
-        <PaymentMethod form={ form } setForm={ setForm } />
-        { (form.installments !== null || form.isFixed) && (
+        { !editTransaction && (
+          <PaymentMethod form={ form } setForm={ setForm } />
+        ) }
+        { (form.installments !== null || form.isFixed) && !editTransaction && (
           <Installment form={ form } setForm={ setForm } />
         )}
         <BtnsForm<NewTransactionType>

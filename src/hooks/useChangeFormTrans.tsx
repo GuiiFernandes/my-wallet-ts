@@ -1,25 +1,27 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+
 import { FormTransaction } from '../types/LocalStates';
 import { TypesTransaction } from '../types/Data';
-
-const selectedAccountText = 'Selecione uma conta';
-const selectOriginText = 'Selecione origem';
-const INITIAL_STATE: FormTransaction = {
-  date: new Date().toISOString().slice(0, 10),
-  payday: null,
-  description: '',
-  value: 0,
-  account: selectedAccountText,
-  accountDestiny: 'Selecione destino',
-  type: 'Despesa',
-  category: '',
-  subCategory: '',
-  installments: null,
-  period: 'Mensalmente',
-  isFixed: false,
-};
+import { StateRedux } from '../types/State';
 
 export default function useChangeFormTrans() {
+  const { accounts } = useSelector(({ data }: StateRedux) => data.banks);
+  const selectedAccountText = accounts[0].name;
+  const INITIAL_STATE: FormTransaction = {
+    date: new Date().toISOString().slice(0, 10),
+    payday: null,
+    description: '',
+    value: 0,
+    account: selectedAccountText,
+    accountDestiny: accounts.filter(({ name }) => name !== selectedAccountText)[0].name,
+    type: 'Despesa',
+    category: '',
+    subCategory: '',
+    installments: null,
+    period: 'Mensalmente',
+    isFixed: false,
+  };
   const [form, setForm] = useState(INITIAL_STATE);
 
   const handleChangeValue = (
@@ -38,24 +40,14 @@ export default function useChangeFormTrans() {
   const handleChangeType = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const type = value as TypesTransaction;
-    let valueAccount = '';
     let categoriesValue: string | null = '';
     let subCategoriesValue: string | null = '';
-    let accountDestinyValue = form.accountDestiny;
     if (value === 'Transferência') {
-      valueAccount = valueAccount === selectedAccountText
-        ? selectOriginText : form.account;
       categoriesValue = null;
       subCategoriesValue = null;
-    } else {
-      accountDestinyValue = 'Selecione destino';
-      valueAccount = valueAccount === selectedAccountText
-        ? selectOriginText : form.account;
     }
     setForm({
       ...form,
-      account: valueAccount,
-      accountDestiny: accountDestinyValue,
       category: categoriesValue,
       subCategory: subCategoriesValue,
       type,
@@ -66,11 +58,25 @@ export default function useChangeFormTrans() {
     { target: { id, value } }: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => { setForm({ ...form, [id]: value }); };
 
+  const handleChangeAccount = (
+    { target: { value } }: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const { accountDestiny } = form;
+    const destinyAccounts = accounts.filter((account) => account.name !== value);
+    const newDestinyAccount = destinyAccounts[0].name;
+    setForm({
+      ...form,
+      account: value,
+      accountDestiny: accountDestiny === value ? newDestinyAccount : accountDestiny,
+    });
+  };
+
   return {
     form,
     setForm,
     handleChangeValue,
     handleChangeType,
     handleChange,
+    handleChangeAccount,
   };
 }
