@@ -1,11 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { FixedTransactionType, InfosTransVar, TransactionType } from '../types/Data';
+import { FixedTransactionType, InfosTransVar, KeyByType, TransactionType } from '../types/Data';
 import { FormTransaction } from '../types/LocalStates';
-import { bulkCreate } from '../utils/firebaseFuncs';
+import { bulkCreate, update } from '../utils/firebaseFuncs';
 import { StateRedux } from '../types/State';
 import { changeOperationls } from '../redux/reducers/operationals';
+import { swalUpTrans } from '../utils/swal';
 
 type InstallmentsTransType = {
   Diariamente: number;
@@ -32,7 +33,7 @@ const installmentsTransform: InstallmentsTransType = {
   Anualmente: oneDay * 365,
 };
 
-const keyByType = (isFixed: boolean, isTransfer?: boolean) => {
+const keyByType = (isFixed: boolean, isTransfer?: boolean): KeyByType => {
   const key = isTransfer ? 'Revenues' : 'Expenses';
   return {
     Despesa: isFixed ? 'fixedExpenses' : 'variableExpenses',
@@ -46,8 +47,11 @@ export default function useTransaction() {
   const dispatch = useDispatch();
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { transactions } = useSelector(({ data }: StateRedux) => data);
-  const { monthSelected,
-    newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const {
+    monthSelected,
+    newTransaction,
+    editTransaction,
+  } = useSelector(({ operationals }: StateRedux) => operationals);
   const { month } = monthSelected;
 
   const formatedTransactions = (form: Omit<FormTransaction, 'id'>) => {
@@ -125,6 +129,51 @@ export default function useTransaction() {
     dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
+  const updateTransaction = async (form: Omit<FormTransaction, 'id'>) => {
+    const { type, isFixed } = form;
+    const key = keyByType(isFixed)[type];
+    if (form.installments) {
+      const { value } = await swalUpTrans({
+        title: 'Atualizar Lançamento',
+        text: 'Quais lançamentos deseja alterar?',
+        icon: 'question',
+      });
+      const [newTransactions, againstTransactions] = formatedTransactions(form);
+      if (value && key.includes('fixed')) {
+        const newTrans = transactions[key];
+        const transIndex = newTrans
+          .findIndex(({ id }) => id === editTransaction);
+
+        // const newVariations = variations.map((variation: InfosTransVar) => {
+        //   const { date, value, payday, account } = variation;
+        //   return { date, value, payday, account };
+        // });
+        // newTransactions[0].variations = newVariations;
+      }
+    }
+    await Promise.all([
+      bulkCreate(
+        {
+          uid,
+          docName: 'transactions',
+          key: keyByType(isFixed)[type],
+        },
+        transactions,
+        newTransactions,
+      ),
+      againstTransactions.length ? bulkCreate(
+        {
+          uid,
+          docName: 'transactions',
+          key: keyByType(isFixed, true)[type],
+        },
+        transactions,
+        againstTransactions,
+      ) : null,
+    ]);
+    dispatch(changeOperationls({ newTransaction: !newTransaction }));
+  };
+
   const createInMonthCallback = ({ date }: { date: string }) => new Date(date)
     .getMonth() + 1 === month;
 
@@ -167,5 +216,5 @@ export default function useTransaction() {
     return allTransactions;
   };
 
-  return { createTransaction, getAllTransactions };
+  return { createTransaction, getAllTransactions, updateTransaction };
 }

@@ -92,3 +92,10 @@ export type ConfigurationsType = {
   subCategories: SubCategory[],
   currency: string,
 };
+
+export type KeyTrans = 'variableRevenues' | 'fixedRevenues'
+| 'fixedExpenses' | 'variableExpenses';
+
+export type KeyByType = {
+  [key in TypesTransaction]: KeyTrans;
+};

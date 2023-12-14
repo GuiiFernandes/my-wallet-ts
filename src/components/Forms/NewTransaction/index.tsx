@@ -14,6 +14,7 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { TransactionType } from '../../../types/Data';
+import { swalUpTrans } from '../../../utils/swal';
 
 const styles = { ...style1, ...styles2 };
 
@@ -21,7 +22,7 @@ const transferText = 'Transferência';
 const indexes = [0, 1, 2, 3];
 
 export default function NewTransaction() {
-  const { createTransaction, getAllTransactions } = useTransaction();
+  const { createTransaction, getAllTransactions, updateTransaction } = useTransaction();
   const {
     form,
     setForm,
@@ -61,11 +62,16 @@ export default function NewTransaction() {
         className={ styles.containerForm }
         onSubmit={ async (e) => {
           e.preventDefault();
-          // if (editTransaction) {
-          //   editTransaction(form);
-          // } else {
-          createTransaction(form);
-          // }
+          if (editTransaction) {
+            const { value } = await swalUpTrans({
+              title: 'Atualizar Lançamento',
+              text: 'Quais lançamentos deseja alterar?',
+              icon: 'question',
+            });
+            updateTransaction(form, value);
+          } else {
+            createTransaction(form);
+          }
         } }
       >
         <h2 className={ styles.h2 }>

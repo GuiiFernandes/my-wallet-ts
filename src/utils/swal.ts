@@ -5,7 +5,7 @@ type Fn<P extends any[], R> = (...params: P) => R;
 export type Options = {
   title: string;
   text: string;
-  icon: 'warning' | 'success';
+  icon: 'warning' | 'success' | 'question';
 };
 
 const swalRemove = <P extends any[], R>(
@@ -30,6 +30,31 @@ const swalRemove = <P extends any[], R>(
     }
   });
 
+const swalUpTrans = (
+  { title, text, icon }: Options,
+) => Swal.fire({
+  title,
+  text,
+  icon,
+  input: 'radio',
+  showCancelButton: true,
+  confirmButtonColor: 'var(--light-green)',
+  cancelButtonColor: 'var(--red)',
+  confirmButtonText: 'Confirmar',
+  cancelButtonText: 'Não',
+  inputOptions: {
+    false: 'Somente este',
+    true: 'Este e os próximos',
+  },
+  inputValue: 'false',
+  inputValidator: (value) => {
+    if (!value) return 'Você precisa escolher uma opção';
+  },
+  customClass: {
+    popup: 'background-swal',
+  },
+});
+
 const toast = Swal.mixin({
   toast: true,
   position: 'center',
@@ -42,4 +67,4 @@ const toast = Swal.mixin({
   timerProgressBar: true,
 });
 
-export { swalRemove, toast };
+export { swalRemove, toast, swalUpTrans };
