@@ -48,7 +48,7 @@ export default function useTransaction() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
   const { monthSelected,
     newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
-  const { monthString } = monthSelected;
+  const { month } = monthSelected;
 
   const formatedTransactions = (form: Omit<FormTransaction, 'id'>) => {
     const { installments, period, type, isFixed, value } = form;
@@ -100,7 +100,7 @@ export default function useTransaction() {
   };
 
   const createTransaction = async (form: Omit<FormTransaction, 'id'>) => {
-    const { type } = form;
+    const { type, isFixed } = form;
     const [newTransactions, againstTransactions] = formatedTransactions(form);
     await Promise.all([
       bulkCreate(
@@ -116,7 +116,7 @@ export default function useTransaction() {
         {
           uid,
           docName: 'transactions',
-          key: keyByType(form.isFixed, true)[type],
+          key: keyByType(isFixed, true)[type],
         },
         transactions,
         againstTransactions,
@@ -125,11 +125,14 @@ export default function useTransaction() {
     dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
-  const ByDateCallback = ({ date }: { date: string }) => new Date(date)
-    .getTime() <= new Date(monthString).getTime();
+  const createInMonthCallback = ({ date }: { date: string }) => new Date(date)
+    .getMonth() + 1 === month;
+
+  const createBeforeMonthCallback = ({ date }: { date: string }) => new Date(date)
+    .getMonth() + 1 <= month;
 
   const getVariations = (trans: FixedTransactionType[]) => {
-    const transByDate = trans.filter(ByDateCallback);
+    const transByDate = trans.filter(createBeforeMonthCallback);
     const transByVariations = transByDate.reduce((
       array: Partial<FixedTransactionType>[],
       transaction: FixedTransactionType,
@@ -148,7 +151,7 @@ export default function useTransaction() {
   };
 
   const getByDate = (trans: TransactionType[]) => trans
-    .filter(ByDateCallback);
+    .filter(createInMonthCallback);
 
   const getAllTransactions = () => {
     const { fixedExpenses, variableExpenses,
@@ -161,6 +164,7 @@ export default function useTransaction() {
     ].sort((a: TransactionType, b: TransactionType) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
+    console.log(allTransactions);
     return allTransactions;
   };
 

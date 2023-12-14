@@ -34,7 +34,7 @@ export default function WalletTable() {
       <thead className={ styles.tHead }>
         <tr className={ styles.card }>
           <td className={ styles.td }>Venc</td>
-          <td className={ styles.td }>Pagamento</td>
+          <td className={ styles.td }>PG Data</td>
           <td className={ styles.td }>Descrição</td>
           <td className={ styles.td }>Valor</td>
           <td className={ styles.td }>Parcelas</td>
@@ -64,7 +64,7 @@ export default function WalletTable() {
               >
                 { payday
                   ? new Date(payday).toLocaleDateString()
-                  : 'Não Pago'}
+                  : '-'}
               </td>
               <td className={ styles.td }>
                 { transaction.description }
