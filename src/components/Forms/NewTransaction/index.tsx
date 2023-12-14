@@ -40,14 +40,18 @@ export default function NewTransaction() {
   const allTransactions: TransactionType[] = getAllTransactions();
 
   useEffect(() => {
-    // const index = allTransactions.findIndex(({ id }) => id === editTransaction);
-    // if (index !== -1) {
-    //   const { id, ...formTrans } = allTransactions[index];
-    //   setForm({
-    //     ...formTrans,
-
-    //   });
-    // }
+    const index = allTransactions.findIndex(({ id }) => id === editTransaction);
+    if (index !== -1) {
+      const { id, ...formTrans } = allTransactions[index];
+      const { installments } = formTrans;
+      setForm({
+        ...formTrans,
+        installments: installments !== 'F' ? installments?.split('/')[0] || '2' : null,
+        period: installments?.split('/')[1] || '2',
+        isFixed: installments === 'F',
+        accountDestiny: '',
+      });
+    }
   }, [editTransaction]);
 
   return (
@@ -204,7 +208,11 @@ export default function NewTransaction() {
         { (form.installments !== null || form.isFixed) && (
           <Installment form={ form } setForm={ setForm } />
         )}
-        <BtnsForm<NewTransactionType> value={ { newTransaction: false } } />
+        <BtnsForm<NewTransactionType>
+          value={ editTransaction
+            ? { editTransaction: null }
+            : { newTransaction: false } }
+        />
       </form>
     </FormLayout>
   );

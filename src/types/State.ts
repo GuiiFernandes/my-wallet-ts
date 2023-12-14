@@ -44,7 +44,8 @@ export type MonthSelected = {
 };
 
 export type NewTransactionType = {
-  newTransaction: boolean;
+  newTransaction?: boolean;
+  editTransaction?: string | null;
 };
 
 export type EditTransactionType = {

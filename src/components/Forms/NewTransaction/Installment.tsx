@@ -6,13 +6,9 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
   const handleChange = (
     { target: { id, value } }: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    const numberValue = Number(value);
-    if (id === 'installments') {
-      setForm({ ...form, [id]: numberValue });
-    } else if (id === 'period') {
-      setForm({ ...form, [id]: value });
-    }
+    setForm({ ...form, [id]: value });
   };
+
   return (
     <div className={ styles.containerInstallments }>
       { !form.isFixed && (
@@ -24,7 +20,7 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
             min="2"
             step="1"
             id="installments"
-            value={ form.installments?.toString() || '' }
+            value={ form.installments || '' }
             onChange={ handleChange }
           />
         </label>
@@ -44,6 +40,10 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
           )) }
         </select>
       </label>
+      <p className={ styles.parcelas }>
+        {`${form.installments} parcelas
+        de R$${(form.value / Number(form.installments)).toFixed(2)}`}
+      </p>
     </div>
   );
 }

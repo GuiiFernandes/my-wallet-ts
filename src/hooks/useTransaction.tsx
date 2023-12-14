@@ -56,18 +56,18 @@ export default function useTransaction() {
     const newForm: any = { ...form };
 
     delete newForm.installments;
-    delete newForm.period;
     delete newForm.accountDestiny;
     delete newForm.isFixed;
 
     const newTransactions: Omit<TransactionType, 'id'>[] = [];
     const againstTransactions: Omit<TransactionType, 'id'>[] = [];
     if (installments) {
+      const numInstallments = Number(installments);
       const periodNumber = installmentsTransform[period];
-      for (let i = 0; i < installments; i += 1) {
+      for (let i = 0; i < numInstallments; i += 1) {
         const date = new Date(form.date).getTime() + (periodNumber * i);
-        const baseValue = Math.floor((value / installments) * 100) / 100;
-        const totalBase = baseValue * installments;
+        const baseValue = Math.floor((value / numInstallments) * 100) / 100;
+        const totalBase = baseValue * numInstallments;
         const restValue = (form.value - totalBase) * 100;
         newTransactions.push({
           id: uuidv4(),
@@ -164,7 +164,6 @@ export default function useTransaction() {
     ].sort((a: TransactionType, b: TransactionType) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
-    console.log(allTransactions);
     return allTransactions;
   };
 

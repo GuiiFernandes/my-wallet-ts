@@ -58,7 +58,6 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .labelRepeat {
@@ -66,7 +65,6 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .inputInstallments {
@@ -94,6 +92,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 10px;
   width: 90%;
 }
@@ -114,4 +113,11 @@
 
 .option {
   background-color: var(--green);
+}
+
+.parcelas {
+  text-align: center;
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+  color: var(--light-gray);
 }

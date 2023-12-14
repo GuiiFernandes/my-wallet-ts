@@ -10,7 +10,7 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
     if (id === 'installments') {
       setForm({
         ...form,
-        [id]: form[id] ? null : 2,
+        [id]: form[id] ? null : '2',
         isFixed: false,
       });
     } else if (id === 'isFixed') {

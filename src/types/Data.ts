@@ -45,7 +45,7 @@ export type TransactionType = {
   type: TypesTransaction,
   category: string | null,
   subCategory: string | null,
-  installments: number | null,
+  installments: string | null,
 } & InfosTransVar;
 
 export type FixedTransactionType = TransactionType & {
