@@ -14,7 +14,6 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { TransactionType } from '../../../types/Data';
-import { swalUpTrans } from '../../../utils/swal';
 
 const styles = { ...style1, ...styles2 };
 
@@ -48,7 +47,7 @@ export default function NewTransaction() {
       const { installments } = formTrans;
       setForm({
         ...formTrans,
-        installments: installments !== 'F' ? installments?.split('/')[0] || '2' : null,
+        installments: installments !== 'F' ? installments?.split('/')[0] || 'U' : 'F',
         period: installments?.split('/')[1] || '2',
         isFixed: installments === 'F',
         accountDestiny: '',
@@ -63,12 +62,7 @@ export default function NewTransaction() {
         onSubmit={ async (e) => {
           e.preventDefault();
           if (editTransaction) {
-            const { value } = await swalUpTrans({
-              title: 'Atualizar Lançamento',
-              text: 'Quais lançamentos deseja alterar?',
-              icon: 'question',
-            });
-            updateTransaction(form, value);
+            updateTransaction(form);
           } else {
             createTransaction(form);
           }

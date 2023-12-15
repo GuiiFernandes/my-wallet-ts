@@ -151,3 +151,24 @@ input[type="radio"]:checked::before {
   align-items: center;
   justify-content: center;
 }
+
+/* ===== Scrollbar CSS ===== */
+  /* Firefox */
+  * {
+    scrollbar-width: 6px;
+    scrollbar-color: var(--blue) transparent;
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--blue);
+    border-radius: 10px;
+  }

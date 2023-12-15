@@ -12,6 +12,7 @@ export const initialState = {
   monthSelected: {
     monthString,
     month: date.getMonth() + 1,
+    year: date.getFullYear(),
   },
   editTransaction: null,
 };

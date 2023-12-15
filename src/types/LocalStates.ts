@@ -9,7 +9,6 @@ export type FormAccount = {
 };
 
 export type FormTransaction = {
-  period: string,
   isFixed: boolean,
   accountDestiny: string,
 } & Omit<TransactionType, 'id'>;

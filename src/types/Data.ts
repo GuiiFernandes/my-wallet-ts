@@ -12,8 +12,8 @@ export type Budgets = TransactionsType & {
 
 export type TransactionsType = {
   variableRevenues: TransactionType[],
-  fixedRevenues: FixedTransactionType[],
-  fixedExpenses: FixedTransactionType[],
+  fixedRevenues: TransactionType[],
+  fixedExpenses: TransactionType[],
   variableExpenses: TransactionType[],
 };
 
@@ -32,12 +32,17 @@ export type AccountType = {
 
 export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
 
-export type InfosTransVar = {
-  date: string,
-  value: number,
-  payday: string | null,
-  account: string,
-};
+// export type InfosTransVar = {
+//   date: string,
+//   value: number,
+//   payday: string | null,
+//   account: string,
+// };
+
+export type Period = 'Diariamente' | 'Semanalmente'
+| 'Quinzenalmente' | 'Mensalmente'
+| 'Bimestralmente' | 'Trimestralmente'
+| 'Semestralmente' | 'Anualmente';
 
 export type TransactionType = {
   id: string,
@@ -45,12 +50,18 @@ export type TransactionType = {
   type: TypesTransaction,
   category: string | null,
   subCategory: string | null,
-  installments: string | null,
-} & InfosTransVar;
-
-export type FixedTransactionType = TransactionType & {
-  variations: InfosTransVar[],
+  period: Period,
+  installments: string,
+  transactionId: string,
+  date: string,
+  value: number,
+  payday: string | null,
+  account: string,
 };
+
+// export type FixedTransactionType = TransactionType & {
+//   variations: InfosTransVar[],
+// };
 
 export type InvestimentsType = {
   national: InvestNational[];

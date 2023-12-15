@@ -37,6 +37,7 @@ export type DeleteAccountType = {
 export type DateSelected = {
   month: number;
   monthString: string;
+  year: number;
 };
 
 export type MonthSelected = {

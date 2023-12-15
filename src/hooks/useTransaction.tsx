@@ -1,37 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { FixedTransactionType, InfosTransVar, KeyByType, TransactionType } from '../types/Data';
+import { KeyByType, TransactionType } from '../types/Data';
 import { FormTransaction } from '../types/LocalStates';
 import { bulkCreate, update } from '../utils/firebaseFuncs';
 import { StateRedux } from '../types/State';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { swalUpTrans } from '../utils/swal';
-
-type InstallmentsTransType = {
-  Diariamente: number;
-  Semanalmente: number;
-  Quinzenalmente: number;
-  Mensalmente: number;
-  Bimestralmente: number;
-  Trimestralmente: number;
-  Semestralmente: number;
-  Anualmente: number;
-  [key: string]: number;
-};
-
-const oneDay = 1000 * 60 * 60 * 24;
-
-const installmentsTransform: InstallmentsTransType = {
-  Diariamente: oneDay,
-  Semanalmente: oneDay * 7,
-  Quinzenalmente: oneDay * 14,
-  Mensalmente: oneDay * 30,
-  Bimestralmente: oneDay * 60,
-  Trimestralmente: oneDay * 90,
-  Semestralmente: oneDay * 180,
-  Anualmente: oneDay * 365,
-};
+import { calculateNextDate, calculateValue } from '../utils/calculates';
 
 const keyByType = (isFixed: boolean, isTransfer?: boolean): KeyByType => {
   const key = isTransfer ? 'Revenues' : 'Expenses';
@@ -52,7 +28,7 @@ export default function useTransaction() {
     newTransaction,
     editTransaction,
   } = useSelector(({ operationals }: StateRedux) => operationals);
-  const { month } = monthSelected;
+  const { month, year } = monthSelected;
 
   const formatedTransactions = (form: Omit<FormTransaction, 'id'>) => {
     const { installments, period, type, isFixed, value } = form;
@@ -65,19 +41,16 @@ export default function useTransaction() {
 
     const newTransactions: Omit<TransactionType, 'id'>[] = [];
     const againstTransactions: Omit<TransactionType, 'id'>[] = [];
+    const transactionId = uuidv4();
     if (installments) {
       const numInstallments = Number(installments);
-      const periodNumber = installmentsTransform[period];
       for (let i = 0; i < numInstallments; i += 1) {
-        const date = new Date(form.date).getTime() + (periodNumber * i);
-        const baseValue = Math.floor((value / numInstallments) * 100) / 100;
-        const totalBase = baseValue * numInstallments;
-        const restValue = (form.value - totalBase) * 100;
         newTransactions.push({
           id: uuidv4(),
           ...newForm,
-          value: i < restValue - 1 ? baseValue + 0.01 : baseValue,
-          date: new Date(date).toISOString().slice(0, 10),
+          transactionId,
+          value: calculateValue(numInstallments, value, i),
+          date: calculateNextDate(form.date, period, i),
           installments: `${i + 1}/${installments}`,
         });
       }
@@ -86,6 +59,7 @@ export default function useTransaction() {
         const destinyTransactions = newTransactions.map((transaction) => ({
           id: uuidv4(),
           ...transaction,
+          transactionId,
           value: transaction.value,
           account: accountDestiny,
         }));
@@ -95,6 +69,7 @@ export default function useTransaction() {
       const formatedTrans = {
         id: uuidv4(),
         ...newForm,
+        transactionId,
         installments: isFixed ? 'F' : 'U' };
       if (isFixed) formatedTrans.variations = [];
       newTransactions.push(formatedTrans);
@@ -129,10 +104,10 @@ export default function useTransaction() {
     dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
-  const updateTransaction = async (form: Omit<FormTransaction, 'id'>) => {
+  const verifyTransactionUp = async (form: Omit<FormTransaction, 'id'>) => {
     const { type, isFixed } = form;
     const key = keyByType(isFixed)[type];
-    if (form.installments) {
+    if (form.installments !== 'U') {
       const { value } = await swalUpTrans({
         title: 'Atualizar Lançamento',
         text: 'Quais lançamentos deseja alterar?',
@@ -140,17 +115,31 @@ export default function useTransaction() {
       });
       const [newTransactions, againstTransactions] = formatedTransactions(form);
       if (value && key.includes('fixed')) {
-        const newTrans = transactions[key];
-        const transIndex = newTrans
-          .findIndex(({ id }) => id === editTransaction);
-
-        // const newVariations = variations.map((variation: InfosTransVar) => {
-        //   const { date, value, payday, account } = variation;
-        //   return { date, value, payday, account };
-        // });
-        // newTransactions[0].variations = newVariations;
+        const transactionFixed = transactions[key]
+          .find(({ id }) => id === editTransaction);
+        if (transactionFixed) {
+          const { transactionId } = transactionFixed;
+          const variableKey = keyByType(!isFixed)[type];
+          const variableTransactions = transactions[variableKey]
+            .filter((transaction) => transaction.transactionId === transactionId)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          let initialDate = transactionFixed.date;
+          if (variableTransactions.length) {
+            initialDate = variableTransactions[0].date;
+          }
+        }
       }
     }
+  };
+
+  const updateTransaction = async (form: Omit<FormTransaction, 'id'>) => {
+    const transArray = verifyTransactionUp(form);
+
+    // const newVariations = variations.map((variation: InfosTransVar) => {
+    //   const { date, value, payday, account } = variation;
+    //   return { date, value, payday, account };
+    // });
+    // newTransactions[0].variations = newVariations;
     await Promise.all([
       bulkCreate(
         {
@@ -174,42 +163,57 @@ export default function useTransaction() {
     dispatch(changeOperationls({ newTransaction: !newTransaction }));
   };
 
-  const createInMonthCallback = ({ date }: { date: string }) => new Date(date)
-    .getMonth() + 1 === month;
+  // const createInMonthCallback = (
+  //   { date }: { date: string },
+  //   createInMonth: boolean = false,
+  // ) => {
+  //   const transDate = new Date(date).getTime();
+  //   const initialMonth = new Date(`${year}-${month}-01`).getTime();
+  //   const monthCompare = (month % 12) + 1;
+  //   const yearCompare = monthCompare < month ? year + 1 : year;
+  //   const finalMonth = new Date(`${yearCompare}-${monthCompare}-01`).getTime();
+  //   if (createInMonth) return transDate >= initialMonth && transDate <= finalMonth;
+  //   return transDate <= finalMonth;
+  // };
 
-  const createBeforeMonthCallback = ({ date }: { date: string }) => new Date(date)
-    .getMonth() + 1 <= month;
+  // const getVariations = (trans: TransactionType[]) => {
+  //   const transByDate = trans.filter((elem) => createInMonthCallback(elem));
+  //   const transByVariations = transByDate.reduce((
+  //     array: Partial<FixedTransactionType>[],
+  //     transaction: TransactionType,
+  //   ) => {
+  //     const { variations } = transaction;
+  //     if (!variations.length) return [...array, transaction];
+  //     const formatedVariations = variations.map((variation: InfosTransVar) => {
+  //       const transWithVariations = { ...transaction } as Partial<FixedTransactionType>;
+  //       delete transWithVariations.variations;
+  //       const { date, value, payday, account } = variation;
+  //       return { ...transWithVariations, date, value, payday, account };
+  //     }, []);
+  //     return [...array, ...formatedVariations];
+  //   }, []);
+  //   return transByVariations as TransactionType[];
+  // };
 
-  const getVariations = (trans: FixedTransactionType[]) => {
-    const transByDate = trans.filter(createBeforeMonthCallback);
-    const transByVariations = transByDate.reduce((
-      array: Partial<FixedTransactionType>[],
-      transaction: FixedTransactionType,
-    ) => {
-      const { variations } = transaction;
-      if (!variations.length) return [...array, transaction];
-      const formatedVariations = variations.map((variation: InfosTransVar) => {
-        const transWithVariations = { ...transaction } as Partial<FixedTransactionType>;
-        delete transWithVariations.variations;
-        const { date, value, payday, account } = variation;
-        return { ...transWithVariations, date, value, payday, account };
-      }, []);
-      return [...array, ...formatedVariations];
-    }, []);
-    return transByVariations as TransactionType[];
-  };
-
-  const getByDate = (trans: TransactionType[]) => trans
-    .filter(createInMonthCallback);
+  const getByDate = (trans: TransactionType[], createInMonth: boolean = false) => trans
+    .filter(({ date }) => {
+      const transDate = new Date(date).getTime();
+      const initialMonth = new Date(`${year}-${month}-01`).getTime();
+      const monthCompare = (month % 12) + 1;
+      const yearCompare = monthCompare < month ? year + 1 : year;
+      const finalMonth = new Date(`${yearCompare}-${monthCompare}-01`).getTime();
+      if (createInMonth) return transDate >= initialMonth && transDate <= finalMonth;
+      return transDate <= finalMonth;
+    });
 
   const getAllTransactions = () => {
     const { fixedExpenses, variableExpenses,
       fixedRevenues, variableRevenues } = transactions;
     const allTransactions: TransactionType[] = [
-      ...getByDate(variableRevenues),
-      ...getVariations(fixedRevenues),
-      ...getVariations(fixedExpenses),
-      ...getByDate(variableExpenses),
+      ...getByDate(variableRevenues, true),
+      ...getByDate(fixedRevenues),
+      ...getByDate(fixedExpenses),
+      ...getByDate(variableExpenses, true),
     ].sort((a: TransactionType, b: TransactionType) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });

@@ -40,10 +40,12 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
           )) }
         </select>
       </label>
-      <p className={ styles.parcelas }>
-        {`${form.installments} parcelas
+      { !form.isFixed && (
+        <p className={ styles.parcelas }>
+          {`${form.installments} parcelas
         de R$${(form.value / Number(form.installments)).toFixed(2)}`}
-      </p>
+        </p>
+      )}
     </div>
   );
 }
