@@ -8,10 +8,12 @@ export type FormAccount = {
   type: 'conta-corrente' | 'conta-investimento' | 'carteira',
 };
 
+type FormWithoutId = Omit<TransactionType, 'id'>;
+
 export type FormTransaction = {
   isFixed: boolean,
   accountDestiny: string,
-} & Omit<TransactionType, 'id'>;
+} & Omit<FormWithoutId, 'transactionId'>;
 
 export type PropsNewTrans = {
   form: FormTransaction;

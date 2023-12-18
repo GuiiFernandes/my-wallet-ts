@@ -1,3 +1,5 @@
+import { Interval } from '../types/Others';
+
 type InstallmentsTransType = {
   Diariamente: number;
   Semanalmente: number;
@@ -21,6 +23,14 @@ const installmentsTransform: InstallmentsTransType = {
   Trimestralmente: oneDay * 90,
   Semestralmente: oneDay * 180,
   Anualmente: oneDay * 365,
+};
+
+export const calculateInstallments = (interval: Interval, period: string) => {
+  if (!interval) return 0;
+  const { initialDate, endDate } = interval;
+  const diff = new Date(endDate).getTime() - new Date(initialDate).getTime();
+  const numInstallments = Math.floor(diff / installmentsTransform[period]);
+  return numInstallments;
 };
 
 export const calculateNextDate = (

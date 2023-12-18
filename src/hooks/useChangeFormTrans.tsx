@@ -18,7 +18,7 @@ export default function useChangeFormTrans() {
     type: 'Despesa',
     category: '',
     subCategory: '',
-    installments: null,
+    installments: '',
     period: 'Mensalmente',
     isFixed: false,
   };

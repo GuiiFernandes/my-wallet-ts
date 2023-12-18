@@ -1,10 +1,11 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { User } from '../types/State';
 import { db } from '../services/firebase';
-import { banksModel, budgetsModel,
-  configurationsModel,
-  investmentsModel, transactionsModel } from './dataModel';
-import { AccountType, Banks } from '../types/Data';
+import { banksModel, budgetsModel, configurationsModel,
+  investmentsModel, keyByType, transactionsModel } from './dataModel';
+import { AccountType, Banks, KeyTrans,
+  TransactionType, TransactionsType } from '../types/Data';
+import { FormTransaction } from '../types/LocalStates';
 
 type PrevData<T> = {
   [key: string]: T[];
@@ -17,7 +18,13 @@ type NewData<T> = {
 type MetaInfos = {
   uid: string;
   docName: string;
-  key: string;
+  key: KeyTrans;
+};
+
+type TransactionsObj = {
+  newTransactions: TransactionType[],
+  againstTransactions: TransactionType[],
+  transactions: TransactionsType,
 };
 
 const addNewUser = async (user: User): Promise<void> => {
@@ -99,4 +106,34 @@ const remove = async (
   });
 };
 
-export { addNewUser, remove, create, update, bulkCreate, bulkUpdate };
+const manyCreate = async (
+  form: FormTransaction,
+  { uid, docName }: Omit<MetaInfos, 'key'>,
+  { newTransactions,
+    againstTransactions,
+    transactions } : TransactionsObj,
+) => {
+  const { type, isFixed } = form;
+  await Promise.all([
+    bulkCreate(
+      {
+        uid,
+        docName,
+        key: keyByType(isFixed)[type],
+      },
+      transactions,
+      newTransactions,
+    ),
+    againstTransactions.length ? bulkCreate(
+      {
+        uid,
+        docName,
+        key: keyByType(isFixed, true)[type],
+      },
+      transactions,
+      againstTransactions,
+    ) : null,
+  ]);
+};
+
+export { addNewUser, remove, create, update, bulkCreate, bulkUpdate, manyCreate };

@@ -44,11 +44,11 @@ export default function NewTransaction() {
     const index = allTransactions.findIndex(({ id }) => id === editTransaction);
     if (index !== -1) {
       const { id, ...formTrans } = allTransactions[index];
-      const { installments } = formTrans;
+      const { installments, period } = formTrans;
       setForm({
         ...formTrans,
-        installments: installments !== 'F' ? installments?.split('/')[0] || 'U' : 'F',
-        period: installments?.split('/')[1] || '2',
+        installments: installments !== 'F' ? installments.split('/')[0] || 'U' : 'F',
+        period,
         isFixed: installments === 'F',
         accountDestiny: '',
       });
