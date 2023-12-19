@@ -15,6 +15,7 @@ export type TransactionsType = {
   fixedRevenues: TransactionType[],
   fixedExpenses: TransactionType[],
   variableExpenses: TransactionType[],
+  transfers: TransactionType[],
 };
 
 export type Banks = {
@@ -31,13 +32,6 @@ export type AccountType = {
 };
 
 export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
-
-// export type InfosTransVar = {
-//   date: string,
-//   value: number,
-//   payday: string | null,
-//   account: string,
-// };
 
 export type Period = 'Diariamente' | 'Semanalmente'
 | 'Quinzenalmente' | 'Mensalmente'
@@ -58,10 +52,6 @@ export type TransactionType = {
   payday: string | null,
   account: string,
 };
-
-// export type FixedTransactionType = TransactionType & {
-//   variations: InfosTransVar[],
-// };
 
 export type InvestimentsType = {
   national: InvestNational[];
@@ -105,7 +95,7 @@ export type ConfigurationsType = {
 };
 
 export type KeyTrans = 'variableRevenues' | 'fixedRevenues'
-| 'fixedExpenses' | 'variableExpenses';
+| 'fixedExpenses' | 'variableExpenses' | 'transfers';
 
 export type KeyByType = {
   [key in TypesTransaction]: KeyTrans;

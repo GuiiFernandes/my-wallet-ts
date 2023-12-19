@@ -16,6 +16,7 @@ export const transactionsModel: TransactionsType = {
   fixedRevenues: [],
   fixedExpenses: [],
   variableExpenses: [],
+  transfers: [],
 };
 
 export const investmentsModel: InvestimentsType = {

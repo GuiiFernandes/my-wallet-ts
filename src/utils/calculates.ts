@@ -38,7 +38,7 @@ export const calculateInstallments = (
   }
   const parcel = installments.split('/');
   if (parcel && parcel[1]) return [Number(parcel[0]), Number(parcel[1])];
-  return [1, Number(installments)];
+  return [1, Number(installments) || 1];
 };
 
 export const calculateNextDate = (
@@ -46,7 +46,8 @@ export const calculateNextDate = (
   period: keyof InstallmentsTransType,
   i: number = 1,
 ) => {
-  const periodNumber = installmentsTransform[period];
+  const periodValid = period || 'Mensalmente';
+  const periodNumber = installmentsTransform[periodValid];
   const nextDate = new Date(date).getTime() + (periodNumber * i);
   return new Date(nextDate).toISOString().slice(0, 10);
 };
@@ -62,4 +63,14 @@ export const calculateValue = (
   const totalBase = baseValue * installments;
   const restValue = (value - totalBase) * 100;
   return i < restValue - 1 ? baseValue + 0.01 : baseValue;
+};
+
+export const generateInstallments = (
+  isFixed: boolean,
+  parcel: number,
+  i: number,
+  totalParcel: number,
+) => {
+  const letter = isFixed ? 'F' : 'U';
+  return totalParcel > 1 ? `${i + parcel}/${totalParcel}` : letter;
 };

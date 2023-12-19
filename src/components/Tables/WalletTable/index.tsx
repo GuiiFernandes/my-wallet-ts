@@ -13,7 +13,7 @@ const styles = { ...styleGlobal, ...styleTable };
 const colors = {
   Receita: 'var(--light-green)',
   Despesa: 'var(--light-red)',
-  Transferência: 'var(--light-blue)',
+  Transferência: 'var(--blue)',
   Investimento: 'var(--light-yellow)',
 };
 
@@ -93,7 +93,7 @@ export default function WalletTable() {
                 className={ styles.td }
                 style={ { color: colors[transaction.type] } }
               >
-                { transaction.type }
+                { transaction.type === 'Transferência' ? 'Transf' : transaction.type }
               </td>
               <td className={ styles.tdBtn }>
                 <button

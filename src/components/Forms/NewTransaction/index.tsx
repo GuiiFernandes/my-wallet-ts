@@ -45,13 +45,15 @@ export default function NewTransaction() {
   useEffect(() => {
     const index = allTransactions.findIndex(({ id }) => id === editTransaction);
     if (index !== -1) {
-      const { id, ...formTrans } = allTransactions[index];
+      const { id, account, ...formTrans } = allTransactions[index];
       const { installments, period } = formTrans;
+      const [originAcc, destinyAcc] = account.split('>');
       setForm({
         ...formTrans,
         period,
+        account: originAcc,
         isFixed: installments === 'F',
-        accountDestiny: '',
+        accountDestiny: destinyAcc || '',
       });
     }
   }, [editTransaction]);

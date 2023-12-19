@@ -8,9 +8,12 @@ import { StateRedux } from '../types/State';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { swalUpTrans } from '../utils/swal';
 import { calculateInstallments, calculateNextDate,
-  calculateValue } from '../utils/calculates';
+  calculateValue,
+  generateInstallments } from '../utils/calculates';
 import { Interval } from '../types/Others';
 import { keyByType } from '../utils/dataModel';
+
+const TRANSFER_TYPE = 'Transferência';
 
 export default function useTransaction() {
   const dispatch = useDispatch();
@@ -22,6 +25,8 @@ export default function useTransaction() {
     editTransaction,
   } = useSelector(({ operationals }: StateRedux) => operationals);
   const { month, year } = monthSelected;
+  const { fixedExpenses, variableExpenses, transfers,
+    fixedRevenues, variableRevenues } = transactions;
 
   const generateId = (id: string | undefined) => id || uuidv4();
 
@@ -42,28 +47,17 @@ export default function useTransaction() {
     const transactionId = generateId(transId);
     if (installments) {
       const [parcel, totalParcel] = calculateInstallments(period, installments, interval);
-      console.log(parcel, totalParcel, interval);
       for (let i = 0; i <= (totalParcel - parcel); i += 1) {
+        const newInstallments = generateInstallments(isFixed, parcel, i, totalParcel);
         newTransactions.push({
           ...newForm,
           id: generateId(newForm.id),
           transactionId,
           value: calculateValue(totalParcel, value, i, newTransaction),
           date: calculateNextDate(form.date, period, i),
-          installments: isFixed
-            ? 'F' : `${i + parcel}/${totalParcel}`,
+          installments: newInstallments,
+          period: installments === 'U' ? '' : period,
         });
-      }
-      if (type === 'Transferência') {
-        const { accountDestiny } = form;
-        const destinyTransactions = newTransactions.map((transaction) => ({
-          ...transaction,
-          id: generateId(newForm.id),
-          transactionId,
-          value: transaction.value,
-          account: accountDestiny,
-        }));
-        againstTransactions.push(...destinyTransactions);
       }
     } else {
       const formatedTrans = {
@@ -73,7 +67,17 @@ export default function useTransaction() {
         installments: isFixed ? 'F' : 'U' };
       newTransactions.push(formatedTrans);
     }
-
+    if (type === TRANSFER_TYPE) {
+      const { accountDestiny } = form;
+      const destinyTransactions = newTransactions.map((transaction) => ({
+        ...transaction,
+        id: generateId(newForm.id),
+        transactionId,
+        value: transaction.value,
+        account: accountDestiny,
+      }));
+      againstTransactions.push(...destinyTransactions);
+    }
     return [newTransactions, againstTransactions];
   };
 
@@ -90,44 +94,40 @@ export default function useTransaction() {
   const searchAndFormatedTrans = (
     transactionUp: TransactionType | undefined,
     form: FormTransaction,
-    key: KeyTrans | null,
+    key: KeyTrans,
   ) => {
-    const { type, isFixed } = form;
-    if (transactionUp) {
-      const { transactionId } = transactionUp;
-      const validKey = key || keyByType(!isFixed)[type];
-      const transactionsByType = transactions[validKey]
-        .filter((transaction) => transaction.transactionId === transactionId)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      const initialDate = transactionUp.date;
-      const endDate = transactionsByType[0].date;
-      const dateObj = transactionUp.installments === 'F'
-        ? { initialDate, endDate } : undefined;
-      return formatedTransactions(
-        form,
-        dateObj,
-        transactionId,
-      );
-    }
-    throw new Error('Não foi possível encontrar a transação variável');
+    const { transactionId } = transactionUp || { transactionId: '' };
+    const transactionsByType = transactions[key]
+      .filter((transaction) => transaction.transactionId === transactionId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const initialDate = transactionUp ? transactionUp.date : form.date;
+    const endDate = transactionsByType.length
+      ? transactionsByType[0].date : `${year}-${month}-${form.date.split('-')[2]}`;
+    const dateObj = !transactionUp || transactionUp.installments === 'F'
+      ? { initialDate, endDate } : undefined;
+    return formatedTransactions(
+      form,
+      dateObj,
+      transactionId,
+    );
   };
 
   const updateOneFixedTrans = async (
     form: FormTransaction,
     key: KeyTrans,
   ) => {
-    const { type, isFixed } = form;
-    const variableKey = keyByType(!isFixed)[type];
-    let transactionFixed = transactions[variableKey]
+    const { isFixed } = form;
+    let transactionInVariables = transactions[key]
       .find(({ id }) => id === editTransaction);
     const newForm: any = { ...form };
 
     delete newForm.accountDestiny;
     delete newForm.isFixed;
 
-    if (transactionFixed) {
+    if (transactionInVariables) {
       const formatedTrans: TransactionType = {
-        ...transactionFixed,
+        ...transactionInVariables,
         ...newForm,
       };
       await update(
@@ -136,10 +136,10 @@ export default function useTransaction() {
         formatedTrans,
       );
     } else {
-      transactionFixed = transactions[key]
+      transactionInVariables = transactions[key]
         .find(({ id }) => id === editTransaction);
       const formatedTrans: TransactionType = {
-        ...transactionFixed,
+        ...transactionInVariables,
         ...newForm,
         installments: isFixed ? 'F' : 'U',
       };
@@ -173,34 +173,35 @@ export default function useTransaction() {
     form: FormTransaction,
   ) => {
     const { type, isFixed } = form;
-    const key = keyByType(isFixed)[type];
-    if (form.installments !== 'U') {
-      const { value } = await swalUpTrans({
-        title: 'Atualizar Lançamento',
-        text: 'Quais lançamentos deseja alterar?',
-        icon: 'question',
-      });
+    const key = keyByType(false)[type];
+    if (form.installments !== 'U' || form.type === TRANSFER_TYPE) {
+      const { value } = form.installments === 'U' && form.type === TRANSFER_TYPE
+        ? { value: 'true' }
+        : await swalUpTrans({ title: 'Atualizar Lançamento',
+          text: 'Quais lançamentos deseja alterar?',
+          icon: 'question' });
       const transactionUp = transactions[key]
         .find(({ id }) => id === editTransaction);
+
       if (value === 'true') {
-        const paramKey = key.includes('fixed') ? null : key;
         const [newTransactions, againstTransactions] = searchAndFormatedTrans(
           transactionUp,
           form,
-          paramKey,
+          key,
         );
-        console.log(newTransactions, againstTransactions);
+
         return manyUpdate(
+          { uid,
+            docName: 'transactions',
+            transactionId: transactionUp?.transactionId || '' },
           form,
-          { uid, docName: 'transactions', transactionId: transactionUp?.transactionId },
-          {
-            transactions,
+          { transactions,
             newTransactions,
             againstTransactions,
-          },
+            key },
         );
       }
-      if (key.includes('fixed')) {
+      if (isFixed) {
         return updateOneFixedTrans(form, key);
       }
       await updateOneTrans(form, key);
@@ -221,17 +222,24 @@ export default function useTransaction() {
     });
 
   const getAllTransactions = () => {
-    const { fixedExpenses, variableExpenses,
-      fixedRevenues, variableRevenues } = transactions;
-    const allTransactions: TransactionType[] = [
+    const variableTransactions: TransactionType[] = [
       ...getByDate(variableRevenues, true),
+      ...getByDate(variableExpenses, true),
+    ];
+    const fixedTransactions: TransactionType[] = [
       ...getByDate(fixedRevenues),
       ...getByDate(fixedExpenses),
-      ...getByDate(variableExpenses, true),
-    ].sort((a: TransactionType, b: TransactionType) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-    return allTransactions;
+    ];
+    const setVariableExpenses = new Set(variableTransactions
+      .map(({ transactionId }) => transactionId));
+    const fixedFilterTransactions = fixedTransactions
+      .filter(({ transactionId }) => !setVariableExpenses.has(transactionId));
+    const expensesWithoutTransfers = [...variableTransactions, ...fixedFilterTransactions]
+      .filter(({ type }) => type !== TRANSFER_TYPE);
+    return [...expensesWithoutTransfers, ...getByDate(transfers)]
+      .sort((a: TransactionType, b: TransactionType) => {
+        return new Date(b.date).getDate() - new Date(a.date).getDate();
+      });
   };
 
   return { createTransaction, getAllTransactions, updateTransaction };
