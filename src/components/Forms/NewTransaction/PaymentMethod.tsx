@@ -10,14 +10,14 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
     if (id === 'installments') {
       setForm({
         ...form,
-        [id]: form[id] ? null : '2',
+        [id]: form[id] ? '' : '2',
         isFixed: false,
       });
     } else if (id === 'isFixed') {
       setForm({
         ...form,
         [id]: !form[id],
-        installments: null,
+        installments: '',
       });
     }
   };
@@ -25,8 +25,8 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
   return (
     <div
       className={ styles.containerMethod }
-      style={ { marginBottom: form.installments !== null || form.isFixed
-        ? '10px' : '51px' } }
+      style={ { marginBottom: form.installments !== '' || form.isFixed
+        ? '10px' : '42px' } }
     >
       <label
         className={ styles.labelType }
@@ -47,7 +47,7 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
       <label
         className={ styles.labelType }
         htmlFor="installments"
-        style={ { backgroundColor: form.installments !== null
+        style={ { backgroundColor: form.installments !== ''
           ? 'var(--blue)' : white } }
       >
         <input

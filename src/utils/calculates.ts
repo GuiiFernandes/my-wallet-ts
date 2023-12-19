@@ -25,12 +25,20 @@ const installmentsTransform: InstallmentsTransType = {
   Anualmente: oneDay * 365,
 };
 
-export const calculateInstallments = (interval: Interval, period: string) => {
-  if (!interval) return 0;
-  const { initialDate, endDate } = interval;
-  const diff = new Date(endDate).getTime() - new Date(initialDate).getTime();
-  const numInstallments = Math.floor(diff / installmentsTransform[period]);
-  return numInstallments;
+export const calculateInstallments = (
+  period: string,
+  installments: string,
+  interval?: Interval,
+) => {
+  if (interval) {
+    const { initialDate, endDate } = interval;
+    const diff = new Date(endDate).getTime() - new Date(initialDate).getTime();
+    const numInstallments = Math.floor(diff / installmentsTransform[period]);
+    return [1, numInstallments];
+  }
+  const parcel = installments.split('/');
+  if (parcel && parcel[1]) return [Number(parcel[0]), Number(parcel[1])];
+  return [1, Number(installments)];
 };
 
 export const calculateNextDate = (
@@ -47,7 +55,9 @@ export const calculateValue = (
   installments: number,
   value: number,
   i: number = 1,
+  newTransaction: boolean = true,
 ) => {
+  if (!newTransaction) return value;
   const baseValue = Math.floor((value / installments) * 100) / 100;
   const totalBase = baseValue * installments;
   const restValue = (value - totalBase) * 100;

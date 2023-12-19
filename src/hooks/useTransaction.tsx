@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { KeyTrans, TransactionType } from '../types/Data';
 import { FormTransaction } from '../types/LocalStates';
-import { create, manyCreate, update } from '../utils/firebaseFuncs';
+import { create, manyCreate, manyUpdate, update } from '../utils/firebaseFuncs';
 import { StateRedux } from '../types/State';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { swalUpTrans } from '../utils/swal';
@@ -27,10 +27,9 @@ export default function useTransaction() {
 
   const formatedTransactions = (
     form: FormTransaction,
-    interval: Interval = null,
+    interval?: Interval,
+    transId?: string,
   ) => {
-    console.log(form, interval);
-
     const { installments, period, type, isFixed, value } = form;
 
     const newForm: any = { ...form };
@@ -40,18 +39,19 @@ export default function useTransaction() {
 
     const newTransactions: TransactionType[] = [];
     const againstTransactions: TransactionType[] = [];
-    const transactionId = uuidv4();
+    const transactionId = generateId(transId);
     if (installments) {
-      const numInstallments = interval
-        ? calculateInstallments(interval, period) : Number(installments);
-      for (let i = 0; i < numInstallments; i += 1) {
+      const [parcel, totalParcel] = calculateInstallments(period, installments, interval);
+      console.log(parcel, totalParcel, interval);
+      for (let i = 0; i <= (totalParcel - parcel); i += 1) {
         newTransactions.push({
           ...newForm,
           id: generateId(newForm.id),
           transactionId,
-          value: calculateValue(numInstallments, value, i),
+          value: calculateValue(totalParcel, value, i, newTransaction),
           date: calculateNextDate(form.date, period, i),
-          installments: isFixed ? 'F' : `${i + 1}/${installments}`,
+          installments: isFixed
+            ? 'F' : `${i + parcel}/${totalParcel}`,
         });
       }
       if (type === 'Transferência') {
@@ -90,7 +90,7 @@ export default function useTransaction() {
   const searchAndFormatedTrans = (
     transactionUp: TransactionType | undefined,
     form: FormTransaction,
-    key: KeyTrans | null = null,
+    key: KeyTrans | null,
   ) => {
     const { type, isFixed } = form;
     if (transactionUp) {
@@ -101,9 +101,12 @@ export default function useTransaction() {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       const initialDate = transactionUp.date;
       const endDate = transactionsByType[0].date;
+      const dateObj = transactionUp.installments === 'F'
+        ? { initialDate, endDate } : undefined;
       return formatedTransactions(
         form,
-        { initialDate, endDate },
+        dateObj,
+        transactionId,
       );
     }
     throw new Error('Não foi possível encontrar a transação variável');
@@ -166,7 +169,7 @@ export default function useTransaction() {
     );
   };
 
-  const verifyTransactionTypeUp = async (
+  const updateTransaction = async (
     form: FormTransaction,
   ) => {
     const { type, isFixed } = form;
@@ -177,17 +180,25 @@ export default function useTransaction() {
         text: 'Quais lançamentos deseja alterar?',
         icon: 'question',
       });
-      if (value === 'true' && key.includes('fixed')) {
-        const transactionFixed = transactions[key]
-          .find(({ id }) => id === editTransaction);
-        return searchAndFormatedTrans(transactionFixed, form);
-      }
+      const transactionUp = transactions[key]
+        .find(({ id }) => id === editTransaction);
       if (value === 'true') {
-        const transactionUp = transactions[key]
-          .find(({ id }) => id === editTransaction);
-
-        const result = searchAndFormatedTrans(transactionUp, form, key);
-        return result;
+        const paramKey = key.includes('fixed') ? null : key;
+        const [newTransactions, againstTransactions] = searchAndFormatedTrans(
+          transactionUp,
+          form,
+          paramKey,
+        );
+        console.log(newTransactions, againstTransactions);
+        return manyUpdate(
+          form,
+          { uid, docName: 'transactions', transactionId: transactionUp?.transactionId },
+          {
+            transactions,
+            newTransactions,
+            againstTransactions,
+          },
+        );
       }
       if (key.includes('fixed')) {
         return updateOneFixedTrans(form, key);
@@ -196,19 +207,6 @@ export default function useTransaction() {
     } else {
       await updateOneTrans(form, key);
     }
-  };
-
-  const updateTransaction = async (form: FormTransaction) => {
-    const [newTransactions, againstTransactions] = await verifyTransactionTypeUp(form)
-      || [[], []];
-    if (newTransactions.length) {
-      await manyCreate(
-        form,
-        { uid, docName: 'transactions' },
-        { transactions, newTransactions, againstTransactions },
-      );
-    }
-    dispatch(changeOperationls({ editTransaction: null }));
   };
 
   const getByDate = (trans: TransactionType[], createInMonth: boolean = false) => trans

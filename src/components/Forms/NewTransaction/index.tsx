@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
 import { useEffect } from 'react';
@@ -14,6 +14,7 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { TransactionType } from '../../../types/Data';
+import { changeOperationls } from '../../../redux/reducers/operationals';
 
 const styles = { ...style1, ...styles2 };
 
@@ -21,6 +22,7 @@ const transferText = 'Transferência';
 const indexes = [0, 1, 2, 3];
 
 export default function NewTransaction() {
+  const dispatch = useDispatch();
   const { createTransaction, getAllTransactions, updateTransaction } = useTransaction();
   const {
     form,
@@ -47,7 +49,6 @@ export default function NewTransaction() {
       const { installments, period } = formTrans;
       setForm({
         ...formTrans,
-        installments: installments !== 'F' ? installments.split('/')[0] || 'U' : 'F',
         period,
         isFixed: installments === 'F',
         accountDestiny: '',
@@ -62,9 +63,10 @@ export default function NewTransaction() {
         onSubmit={ async (e) => {
           e.preventDefault();
           if (editTransaction) {
-            updateTransaction(form);
+            await updateTransaction(form);
+            dispatch(changeOperationls({ editTransaction: null }));
           } else {
-            createTransaction(form);
+            await createTransaction(form);
           }
         } }
       >
@@ -208,7 +210,7 @@ export default function NewTransaction() {
         { !editTransaction && (
           <PaymentMethod form={ form } setForm={ setForm } />
         ) }
-        { (form.installments !== null || form.isFixed) && !editTransaction && (
+        { (form.installments || form.isFixed) && !editTransaction && (
           <Installment form={ form } setForm={ setForm } />
         )}
         <BtnsForm<NewTransactionType>

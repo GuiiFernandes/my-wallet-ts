@@ -114,26 +114,44 @@ const manyCreate = async (
     transactions } : TransactionsObj,
 ) => {
   const { type, isFixed } = form;
+  const key = keyByType(isFixed)[type];
   await Promise.all([
     bulkCreate(
-      {
-        uid,
-        docName,
-        key: keyByType(isFixed)[type],
-      },
+      { uid, docName, key },
       transactions,
       newTransactions,
     ),
     againstTransactions.length ? bulkCreate(
-      {
-        uid,
-        docName,
-        key: keyByType(isFixed, true)[type],
-      },
+      { uid, docName, key },
       transactions,
       againstTransactions,
     ) : null,
   ]);
 };
 
-export { addNewUser, remove, create, update, bulkCreate, bulkUpdate, manyCreate };
+const manyUpdate = async (
+  form: FormTransaction,
+  { uid, docName, transactionId }: Omit<MetaInfos, 'key'> & { transactionId?: string },
+  { newTransactions,
+    againstTransactions,
+    transactions } : TransactionsObj,
+) => {
+  const { type, isFixed } = form;
+  const key = keyByType(isFixed)[type];
+  const newTransactionFiltered = transactions[key]
+    .filter((transaction) => {
+      const transParcel = Number(transaction.installments.split('/')[0]);
+      const newTransParcel = Number(newTransactions[0].installments.split('/')[0]);
+      const diffId = transaction.transactionId !== transactionId;
+      return diffId || transParcel < newTransParcel;
+    });
+  console.log(newTransactionFiltered, transactionId);
+  await bulkUpdate(
+    { uid, docName, key },
+    transactions,
+    [...newTransactionFiltered, ...newTransactions, ...againstTransactions],
+  );
+};
+
+export { addNewUser, remove, create, update,
+  bulkCreate, bulkUpdate, manyCreate, manyUpdate };
