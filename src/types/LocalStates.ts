@@ -11,7 +11,6 @@ export type FormAccount = {
 type FormWithoutId = Omit<TransactionType, 'id'>;
 
 export type FormTransaction = {
-  isFixed: boolean,
   accountDestiny: string,
 } & Omit<FormWithoutId, 'transactionId'>;
 

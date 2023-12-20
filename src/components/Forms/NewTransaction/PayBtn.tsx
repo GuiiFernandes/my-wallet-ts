@@ -12,9 +12,11 @@ const typeTexts = {
 
 export default function PayBtn({ form, setForm }: PropsNewTrans) {
   const changePayment = () => {
-    setForm({ ...form,
-      payday: form.payday
-        ? null : new Date().toISOString().slice(0, 10) });
+    const now = new Date().toLocaleDateString().split('/').reverse();
+    setForm({
+      ...form,
+      payday: form.payday ? null : now.join('-'),
+    });
   };
 
   return (

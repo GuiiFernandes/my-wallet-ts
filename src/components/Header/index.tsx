@@ -14,16 +14,13 @@ export default function Header() {
   const dispatch = useDispatch();
   const { displayName, photoURL } = useSelector(({ user }: StateRedux) => user);
   const { transactions } = useSelector(({ data }: StateRedux) => data);
-  const { variableRevenues, fixedRevenues,
-    fixedExpenses, variableExpenses } = transactions;
+  const { records } = transactions;
 
-  const allTransactions = [
-    ...variableRevenues,
-    ...fixedRevenues,
-    ...fixedExpenses,
-    ...variableExpenses,
-  ];
-
+  const total = records.reduce((sum, { payday, value, type }) => {
+    const mult = type === 'Despesa' ? -1 : 1;
+    const valueSum = payday ? value : 0;
+    return sum + (valueSum * mult);
+  }, 0);
   const logout = async () => {
     const auth = getAuth();
     await signOut(auth);
@@ -41,17 +38,11 @@ export default function Header() {
         <div className={ styles.total }>
           <BsCashCoin size="2.5rem" />
           <p>
-            <strong>Saldo Total:</strong>
+            <strong>Saldo:</strong>
             {' '}
-            <span data-testid="total-field">
-              {/* { allTransactions.reduce((sum, {type, payday, value}) => {
-                if(type === 'Receita' && payday) {
-                  return sum + value;
-                } else if(type === 'Transferência')
-              }, 0) } */}
+            <span style={ { color: total >= 0 ? 'var(--green)' : 'var(--red)' } }>
+              { total.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }
             </span>
-            {' '}
-            <span data-testid="header-currency-field">BRL</span>
           </p>
         </div>
         <div className={ styles.user }>
@@ -67,10 +58,10 @@ export default function Header() {
         <NavLink to="/home" className={ styles.a }>Home</NavLink>
         <NavLink to="/contas" className={ styles.a }>Contas</NavLink>
         <NavLink to="/carteira" className={ styles.a }>Carteira</NavLink>
-        <NavLink to="/cartoes" className={ styles.a }>Cartões</NavLink>
+        {/* <NavLink to="/cartoes" className={ styles.a }>Cartões</NavLink> */}
         {/* <NavLink to="/investimentos" className={ styles.a }>Investimentos</NavLink> */}
-        <NavLink to="/contabil" className={ styles.a }>Contabil</NavLink>
-        <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink>
+        {/* <NavLink to="/contabil" className={ styles.a }>Contabil</NavLink>
+        <NavLink to="/orcamento" className={ styles.a }>Orçamento</NavLink> */}
         {/* <NavLink to="/perfil" className={ styles.a }>Perfil</NavLink> */}
         <NavLink to="/configuracoes" className={ styles.a }>Configurações</NavLink>
         <button className={ styles.logoutBtn } onClick={ logout }>

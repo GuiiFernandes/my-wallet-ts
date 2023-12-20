@@ -8,8 +8,9 @@ import { StateRedux } from '../types/State';
 export default function useChangeFormTrans() {
   const { accounts } = useSelector(({ data }: StateRedux) => data.banks);
   const selectedAccountText = accounts[0].name;
+  const now = new Date().toLocaleDateString().split('/').reverse();
   const INITIAL_STATE: FormTransaction = {
-    date: new Date().toISOString().slice(0, 10),
+    date: now.join('-'),
     payday: null,
     description: '',
     value: 0,
@@ -18,9 +19,8 @@ export default function useChangeFormTrans() {
     type: 'Despesa',
     category: '',
     subCategory: '',
-    installments: '',
+    installments: 'U',
     period: 'Mensalmente',
-    isFixed: false,
   };
   const [form, setForm] = useState(INITIAL_STATE);
 
@@ -40,23 +40,17 @@ export default function useChangeFormTrans() {
   const handleChangeType = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const type = value as TypesTransaction;
-    let categoriesValue: string | null = '';
-    let subCategoriesValue: string | null = '';
-    if (value === 'Transferência') {
-      categoriesValue = null;
-      subCategoriesValue = null;
-    }
     setForm({
       ...form,
-      category: categoriesValue,
-      subCategory: subCategoriesValue,
       type,
     });
   };
 
   const handleChange = (
     { target: { id, value } }: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => { setForm({ ...form, [id]: value }); };
+  ) => {
+    setForm({ ...form, [id]: value });
+  };
 
   const handleChangeAccount = (
     { target: { value } }: React.ChangeEvent<HTMLSelectElement>,

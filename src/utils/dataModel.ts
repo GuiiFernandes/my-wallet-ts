@@ -1,21 +1,8 @@
-import { Banks, Budgets, InvestimentsType,
-  KeyByType, TransactionsType } from '../types/Data';
-
-export const keyByType = (isFixed: boolean, isTransfer?: boolean): KeyByType => {
-  const key = isTransfer ? 'Revenues' : 'Expenses';
-  return {
-    Despesa: isFixed ? 'fixedExpenses' : 'variableExpenses',
-    Receita: isFixed ? 'fixedRevenues' : 'variableRevenues',
-    Transferência: isFixed ? `fixed${key}` : `variable${key}`,
-    Investimento: isFixed ? 'fixedExpenses' : 'fixedExpenses',
-  };
-};
+import { Banks, Budgets, InvestimentsType, TransactionsType } from '../types/Data';
 
 export const transactionsModel: TransactionsType = {
-  variableRevenues: [],
-  fixedRevenues: [],
-  fixedExpenses: [],
-  variableExpenses: [],
+  fixeds: [],
+  records: [],
   transfers: [],
 };
 

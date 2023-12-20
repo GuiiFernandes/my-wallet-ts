@@ -11,10 +11,8 @@ export type Budgets = TransactionsType & {
 };
 
 export type TransactionsType = {
-  variableRevenues: TransactionType[],
-  fixedRevenues: TransactionType[],
-  fixedExpenses: TransactionType[],
-  variableExpenses: TransactionType[],
+  fixeds: TransactionType[],
+  records: TransactionType[],
   transfers: TransactionType[],
 };
 
@@ -42,11 +40,12 @@ export type TransactionType = {
   id: string,
   description: string,
   type: TypesTransaction,
-  category: string | null,
-  subCategory: string | null,
+  category: string,
+  subCategory: string,
   period: Period,
+  installment?: number,
   installments: string,
-  transactionId: string,
+  transactionId?: string,
   date: string,
   value: number,
   payday: string | null,
@@ -94,9 +93,8 @@ export type ConfigurationsType = {
   currency: string,
 };
 
-export type KeyTrans = 'variableRevenues' | 'fixedRevenues'
-| 'fixedExpenses' | 'variableExpenses' | 'transfers';
+export type TransactionsKeys = 'fixeds' | 'records' | 'transfers' | 'accounts';
 
 export type KeyByType = {
-  [key in TypesTransaction]: KeyTrans;
+  [key: string]: TransactionsKeys;
 };

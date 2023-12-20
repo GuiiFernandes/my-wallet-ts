@@ -10,14 +10,12 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
     if (id === 'installments') {
       setForm({
         ...form,
-        [id]: form[id] ? '' : '2',
-        isFixed: false,
+        [id]: form[id] === 'F' || form[id] === 'U' ? '2' : 'U',
       });
-    } else if (id === 'isFixed') {
+    } else if (id === 'fixed') {
       setForm({
         ...form,
-        [id]: !form[id],
-        installments: '',
+        installments: form.installments === 'F' ? 'U' : 'F',
       });
     }
   };
@@ -25,20 +23,20 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
   return (
     <div
       className={ styles.containerMethod }
-      style={ { marginBottom: form.installments !== '' || form.isFixed
+      style={ { marginBottom: form.installments !== 'U'
         ? '10px' : '42px' } }
     >
       <label
         className={ styles.labelType }
-        htmlFor="isFixed"
-        style={ { backgroundColor: form.isFixed
+        htmlFor="fixed"
+        style={ { backgroundColor: form.installments === 'F'
           ? 'var(--blue)' : white } }
       >
         <input
           type="checkbox"
-          id="isFixed"
+          id="fixed"
           value="Despesa"
-          checked={ form.isFixed }
+          checked={ form.installments === 'F' }
           onChange={ handleCheck }
           style={ { display: 'none' } }
         />
@@ -47,7 +45,7 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
       <label
         className={ styles.labelType }
         htmlFor="installments"
-        style={ { backgroundColor: form.installments !== ''
+        style={ { backgroundColor: form.installments !== 'U' && form.installments !== 'F'
           ? 'var(--blue)' : white } }
       >
         <input
@@ -55,7 +53,7 @@ export default function PaymentMethod({ form, setForm }: PropsNewTrans) {
           type="checkbox"
           id="installments"
           value="Receita"
-          checked={ !!form.installments }
+          checked={ Number.isNaN(form.installments) }
           onChange={ handleCheck }
         />
         Parcelada

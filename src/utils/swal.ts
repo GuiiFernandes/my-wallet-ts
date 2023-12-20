@@ -30,12 +30,10 @@ const swalRemove = <P extends any[], R>(
     }
   });
 
-const swalUpTrans = (
-  { title, text, icon }: Options,
-) => Swal.fire({
-  title,
-  text,
-  icon,
+const swalUpTrans = () => Swal.fire({
+  title: 'Atualizar Lançamento',
+  text: 'Quais lançamentos deseja alterar?',
+  icon: 'question',
   input: 'radio',
   showCancelButton: true,
   confirmButtonColor: 'var(--light-green)',

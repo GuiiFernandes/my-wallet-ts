@@ -3,10 +3,10 @@ import { NumericFormat } from 'react-number-format';
 import { AiFillEdit } from 'react-icons/ai';
 
 import { changeOperationls } from '../../../redux/reducers/operationals';
-import useTransaction from '../../../hooks/useTransaction';
 import { TransactionType } from '../../../types/Data';
 import styleGlobal from '../table.module.css';
 import styleTable from './walleTable.module.css';
+import useTransaction from '../../../hooks/useTransaction';
 
 const styles = { ...styleGlobal, ...styleTable };
 
@@ -53,7 +53,7 @@ export default function WalletTable() {
                 className={ styles.td }
                 style={ { fontWeight: 'bold' } }
               >
-                { new Date(transaction.date).getDate() }
+                { Number(transaction.date.split('-')[2]) }
               </td>
               <td
                 className={ styles.td }

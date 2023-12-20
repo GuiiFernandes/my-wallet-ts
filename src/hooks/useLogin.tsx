@@ -9,7 +9,7 @@ import { saveUser } from '../redux/reducers/user';
 import { initialState, updateData } from '../redux/reducers/data';
 import { StateRedux } from '../types/State';
 import { Data } from '../types/Data';
-import { addNewUser } from '../utils/firebaseFuncs';
+import firebase from '../utils/firebaseFuncs';
 import styles from './useLogin.module.css';
 
 const TIME_OUT = 700;
@@ -30,7 +30,7 @@ export default function useLogin() {
       if (user) {
         const { displayName, email, photoURL, uid, phoneNumber } = user;
         dispatch(saveUser({ displayName, email, photoURL, uid, phoneNumber }));
-        await addNewUser(user);
+        await firebase.addNewUser(user);
         if (pathsIsLogin.includes(pathname)) {
           setTimeout(() => {
             goHome();

@@ -1,76 +1,51 @@
-import { Interval } from '../types/Others';
+// export const formatedTransfer = (
+//   form: FormTransaction,
+//   newTransaction: boolean = true,
+//   interval?: Interval,
+//   transId?: string,
+// ) => {
+//   const { installments, period, type, value } = form;
 
-type InstallmentsTransType = {
-  Diariamente: number;
-  Semanalmente: number;
-  Quinzenalmente: number;
-  Mensalmente: number;
-  Bimestralmente: number;
-  Trimestralmente: number;
-  Semestralmente: number;
-  Anualmente: number;
-  [key: string]: number;
-};
+//   const newForm: any = { ...form };
 
-const oneDay = 1000 * 60 * 60 * 24;
+//   delete newForm.accountDestiny;
+//   delete newForm.isFixed;
 
-const installmentsTransform: InstallmentsTransType = {
-  Diariamente: oneDay,
-  Semanalmente: oneDay * 7,
-  Quinzenalmente: oneDay * 14,
-  Mensalmente: oneDay * 30,
-  Bimestralmente: oneDay * 60,
-  Trimestralmente: oneDay * 90,
-  Semestralmente: oneDay * 180,
-  Anualmente: oneDay * 365,
-};
-
-export const calculateInstallments = (
-  period: string,
-  installments: string,
-  interval?: Interval,
-) => {
-  if (interval) {
-    const { initialDate, endDate } = interval;
-    const diff = new Date(endDate).getTime() - new Date(initialDate).getTime();
-    const numInstallments = Math.floor(diff / installmentsTransform[period]);
-    return [1, numInstallments];
-  }
-  const parcel = installments.split('/');
-  if (parcel && parcel[1]) return [Number(parcel[0]), Number(parcel[1])];
-  return [1, Number(installments) || 1];
-};
-
-export const calculateNextDate = (
-  date: string,
-  period: keyof InstallmentsTransType,
-  i: number = 1,
-) => {
-  const periodValid = period || 'Mensalmente';
-  const periodNumber = installmentsTransform[periodValid];
-  const nextDate = new Date(date).getTime() + (periodNumber * i);
-  return new Date(nextDate).toISOString().slice(0, 10);
-};
-
-export const calculateValue = (
-  installments: number,
-  value: number,
-  i: number = 1,
-  newTransaction: boolean = true,
-) => {
-  if (!newTransaction) return value;
-  const baseValue = Math.floor((value / installments) * 100) / 100;
-  const totalBase = baseValue * installments;
-  const restValue = (value - totalBase) * 100;
-  return i < restValue - 1 ? baseValue + 0.01 : baseValue;
-};
-
-export const generateInstallments = (
-  isFixed: boolean,
-  parcel: number,
-  i: number,
-  totalParcel: number,
-) => {
-  const letter = isFixed ? 'F' : 'U';
-  return totalParcel > 1 ? `${i + parcel}/${totalParcel}` : letter;
-};
+//   const newTransactions: TransactionType[] = [];
+//   const againstTransactions: TransactionType[] = [];
+//   const transactionId = generateId(transId);
+//   if (installments) {
+//     const [parcel, totalParcel] = calculateInstallments(period, installments, interval);
+//     for (let i = 0; i <= (totalParcel - parcel); i += 1) {
+//       const newInstallments = generateInstallments(isFixed, parcel, i, totalParcel);
+//       newTransactions.push({
+//         ...newForm,
+//         id: generateId(newForm.id),
+//         transactionId,
+//         value: calculateValue(totalParcel, value, i, newTransaction),
+//         date: calculateNextDate(form.date, period, i),
+//         installments: newInstallments,
+//         period: installments === 'U' ? '' : period,
+//       });
+//     }
+//   } else {
+//     const formatedTrans = {
+//       ...newForm,
+//       id: generateId(newForm.id),
+//       transactionId,
+//       installments: isFixed ? 'F' : 'U' };
+//     newTransactions.push(formatedTrans);
+//   }
+//   if (type === 'Transferência') {
+//     const { accountDestiny } = form;
+//     const destinyTransactions = newTransactions.map((transaction) => ({
+//       ...transaction,
+//       id: generateId(newForm.id),
+//       transactionId,
+//       value: transaction.value,
+//       account: accountDestiny,
+//     }));
+//     againstTransactions.push(...destinyTransactions);
+//   }
+//   return [newTransactions, againstTransactions];
+// };

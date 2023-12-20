@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
 import { Options, swalRemove, toast } from '../utils/swal';
-import { bulkUpdate, create, remove } from '../utils/firebaseFuncs';
-import { RemoveAccountParams } from '../types/Functions';
+import firebase from '../utils/firebaseFuncs';
+import { RemoveAccountParams } from '../types/Others';
 import { FormAccount, RealForm } from '../types/LocalStates';
 import { AccountType } from '../types/Data';
 
@@ -19,10 +19,8 @@ export default function useLogin() {
   const { changeAccount } = useSelector(({ operationals }: StateRedux) => operationals);
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { accounts } = banks;
-  const { variableRevenues, fixedRevenues,
-    fixedExpenses, variableExpenses } = transactions;
-  const allTransactions = [...variableRevenues, ...fixedRevenues,
-    ...fixedExpenses, ...variableExpenses];
+  const { records, fixeds, transfers } = transactions;
+  const allTransactions = [...records, ...fixeds, ...transfers];
 
   const createAccount = async (form: FormAccount) => {
     const haveAccount = accounts.some(({ name }) => name === form.name);
@@ -43,7 +41,7 @@ export default function useLogin() {
       real: balanceNumber,
       type: form.type,
     };
-    await create({ uid, docName: 'banks', key: 'accounts' }, banks, newAccount);
+    await firebase.create({ uid, docName: 'banks', key: 'accounts' }, banks, newAccount);
     dispatch(changeOperationls<NewAccountType>({ newAccount: false }));
   };
 
@@ -58,7 +56,7 @@ export default function useLogin() {
         icon: 'warning',
       };
       swalRemove<RemoveAccountParams, void>(
-        remove,
+        firebase.remove,
         options,
         accounts,
         banks,
@@ -76,7 +74,9 @@ export default function useLogin() {
       account.real = Number(realForm[name]);
       accountsChanged[indexAccount] = account;
     }
-    await bulkUpdate({ uid, docName: 'banks', key: 'accounts' }, banks, accountsChanged);
+    await firebase.bulkUpdate({
+      uid, docName: 'banks', key: 'accounts',
+    }, banks, accountsChanged);
   };
 
   return { deleteAccount, saveReal, createAccount };

@@ -1,8 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
-import { useEffect } from 'react';
-import useTransaction from '../../../hooks/useTransaction';
+// import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
 import Installment from './Installment';
@@ -13,17 +12,19 @@ import { NewTransactionType, StateRedux } from '../../../types/State';
 import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
-import { TransactionType } from '../../../types/Data';
 import { changeOperationls } from '../../../redux/reducers/operationals';
+import { Transaction } from '../../../classes/Transactions';
+// import { TransactionType } from '../../../types/Data';
+// import useTransaction from '../../../hooks/useTransaction';
 
 const styles = { ...style1, ...styles2 };
 
-const transferText = 'Transferência';
+const TRANSFER_TYPE = 'Transferência';
 const indexes = [0, 1, 2, 3];
 
 export default function NewTransaction() {
   const dispatch = useDispatch();
-  const { createTransaction, getAllTransactions, updateTransaction } = useTransaction();
+  // const { getAllTransactions } = useTransaction();
   const {
     form,
     setForm,
@@ -32,31 +33,32 @@ export default function NewTransaction() {
     handleChangeType,
     handleChangeAccount,
   } = useChangeFormTrans();
-  const { editTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const { editTransaction,
+    newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const { uid } = useSelector(({ user }: StateRedux) => user);
   const { banks,
-    configurations } = useSelector(({ data }: StateRedux) => data);
+    configurations, transactions } = useSelector(({ data }: StateRedux) => data);
   const { accounts } = banks;
   const { categories, subCategories } = configurations;
 
   const destinyAccounts = accounts.filter((account) => account.name !== form.account);
 
-  const allTransactions: TransactionType[] = getAllTransactions();
+  // const allTransactions: TransactionType[] = getAllTransactions();
 
-  useEffect(() => {
-    const index = allTransactions.findIndex(({ id }) => id === editTransaction);
-    if (index !== -1) {
-      const { id, account, ...formTrans } = allTransactions[index];
-      const { installments, period } = formTrans;
-      const [originAcc, destinyAcc] = account.split('>');
-      setForm({
-        ...formTrans,
-        period,
-        account: originAcc,
-        isFixed: installments === 'F',
-        accountDestiny: destinyAcc || '',
-      });
-    }
-  }, [editTransaction]);
+  // useEffect(() => {
+  //   const index = allTransactions.findIndex(({ id }) => id === editTransaction);
+  //   if (index !== -1) {
+  //     const { id, account, ...formTrans } = allTransactions[index];
+  //     const { installments, period } = formTrans;
+  //     const [originAcc, destinyAcc] = account.split('>');
+  //     setForm({
+  //       ...formTrans,
+  //       period,
+  //       account: originAcc,
+  //       accountDestiny: destinyAcc || '',
+  //     });
+  //   }
+  // }, [editTransaction]);
 
   return (
     <FormLayout>
@@ -64,11 +66,10 @@ export default function NewTransaction() {
         className={ styles.containerForm }
         onSubmit={ async (e) => {
           e.preventDefault();
-          if (editTransaction) {
-            await updateTransaction(form);
-            dispatch(changeOperationls({ editTransaction: null }));
-          } else {
-            await createTransaction(form);
+          if (form.type !== TRANSFER_TYPE) {
+            const register = new Transaction(form);
+            await register.create(uid, transactions);
+            dispatch(changeOperationls({ newTransaction: !newTransaction }));
           }
         } }
       >
@@ -95,7 +96,7 @@ export default function NewTransaction() {
               type="date"
               id="date"
               className={ styles.input }
-              value={ form.date }
+              value={ form.date.slice(0, 10) }
               onChange={ handleChange }
             />
           </label>
@@ -138,7 +139,7 @@ export default function NewTransaction() {
           />
         </label>
         <label htmlFor="account" className={ styles.label }>
-          { form.type !== transferText ? 'Conta:' : 'Conta de Origem:' }
+          { form.type !== TRANSFER_TYPE ? 'Conta:' : 'Conta de Origem:' }
           <select
             id="account"
             className={ styles.input }
@@ -152,7 +153,7 @@ export default function NewTransaction() {
             )) }
           </select>
         </label>
-        { form.type === transferText && (
+        { form.type === TRANSFER_TYPE && (
           <label
             htmlFor="accountDestiny"
             className={ styles.label }
@@ -173,7 +174,7 @@ export default function NewTransaction() {
             </select>
           </label>
         )}
-        { form.type !== transferText && (
+        { form.type !== TRANSFER_TYPE && (
           <>
             <label htmlFor="category" className={ styles.label }>
               Categoria:
@@ -212,7 +213,7 @@ export default function NewTransaction() {
         { !editTransaction && (
           <PaymentMethod form={ form } setForm={ setForm } />
         ) }
-        { (form.installments || form.isFixed) && !editTransaction && (
+        { (form.installments !== 'U') && !editTransaction && (
           <Installment form={ form } setForm={ setForm } />
         )}
         <BtnsForm<NewTransactionType>

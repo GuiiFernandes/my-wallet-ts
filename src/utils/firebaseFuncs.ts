@@ -2,30 +2,34 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { User } from '../types/State';
 import { db } from '../services/firebase';
 import { banksModel, budgetsModel, configurationsModel,
-  investmentsModel, keyByType, transactionsModel } from './dataModel';
-import { AccountType, Banks, KeyTrans,
-  TransactionType, TransactionsType } from '../types/Data';
-import { FormTransaction } from '../types/LocalStates';
+  investmentsModel, transactionsModel } from './dataModel';
+import { AccountType, Banks, TransactionsKeys } from '../types/Data';
 
-type PrevData<T> = {
-  [key: string]: T[];
-};
+// type PrevData<T> = {
+//   [key: string]: T[];
+// };
 
-type NewData<T> = {
-  [key: string]: T;
-};
+// type NewData<T> = {
+//   [key: string]: T;
+// };
 
-type MetaInfos = {
+// export type MetaInfos = {
+//   uid: string;
+//   docName: string;
+//   key: KeyTrans;
+// };
+
+export type MetaCreateInfos = {
   uid: string;
   docName: string;
-  key: KeyTrans;
+  key: TransactionsKeys;
 };
 
-type TransactionsObj = {
-  newTransactions: TransactionType[],
-  againstTransactions: TransactionType[],
-  transactions: TransactionsType,
-};
+// type TransactionsObj = {
+//   newTransactions: TransactionType[],
+//   againstTransactions: TransactionType[],
+//   transactions: TransactionsType,
+// };
 
 const addNewUser = async (user: User): Promise<void> => {
   const docRef = doc(db, user.uid, 'transactions');
@@ -41,10 +45,10 @@ const addNewUser = async (user: User): Promise<void> => {
   }
 };
 
-const create = async <T, R>(
-  { uid, docName, key }: MetaInfos,
-  prevData: PrevData<T>,
-  newData: NewData<R>,
+const create = async (
+  { uid, docName, key }: MetaCreateInfos,
+  prevData: any,
+  newData: any,
 ) => {
   const resultData = {
     ...prevData,
@@ -54,10 +58,10 @@ const create = async <T, R>(
   return resultData;
 };
 
-const bulkCreate = async <T, R>(
-  { uid, docName, key }: MetaInfos,
-  prevData: PrevData<T>,
-  newData: NewData<R>[],
+const bulkCreate = async (
+  { uid, docName, key }: MetaCreateInfos,
+  prevData: any,
+  newData: any,
 ) => {
   const resultData = {
     ...prevData,
@@ -67,10 +71,10 @@ const bulkCreate = async <T, R>(
   return resultData;
 };
 
-const bulkUpdate = async <T, R>(
-  { uid, docName, key }: MetaInfos,
-  prevData: PrevData<T>,
-  newData: NewData<R>[],
+const bulkUpdate = async (
+  { uid, docName, key }: MetaCreateInfos,
+  prevData: any,
+  newData: any[],
 ) => {
   const resultData = {
     ...prevData,
@@ -80,21 +84,21 @@ const bulkUpdate = async <T, R>(
   return resultData;
 };
 
-const update = async <T, R>(
-  { uid, docName, key }: MetaInfos,
-  prevData: PrevData<T>,
-  newData: NewData<R>,
-) => {
-  const index = prevData[key].findIndex((item) => {
-    const itemData = item as unknown as any;
-    return itemData.id === newData.id;
-  });
-  const prevDataCopy = [...prevData[key]];
-  prevDataCopy[index] = newData as unknown as T;
-  const resultData = { ...prevData, [key]: prevDataCopy };
-  await setDoc(doc(db, uid, docName), resultData);
-  return resultData;
-};
+// const update = async <T, R>(
+//   { uid, docName, key }: MetaInfos,
+//   prevData: PrevData<T>,
+//   newData: NewData<R>,
+// ) => {
+//   const index = prevData[key].findIndex((item) => {
+//     const itemData = item as unknown as any;
+//     return itemData.id === newData.id;
+//   });
+//   const prevDataCopy = [...prevData[key]];
+//   prevDataCopy[index] = newData as unknown as T;
+//   const resultData = { ...prevData, [key]: prevDataCopy };
+//   await setDoc(doc(db, uid, docName), resultData);
+//   return resultData;
+// };
 
 const remove = async (
   accounts: AccountType[],
@@ -111,101 +115,109 @@ const remove = async (
   });
 };
 
-const manyCreate = async (
-  form: FormTransaction,
-  { uid, docName }: Omit<MetaInfos, 'key'>,
-  { newTransactions,
-    againstTransactions,
-    transactions } : TransactionsObj,
-) => {
-  const { type, isFixed } = form;
-  const key = keyByType(isFixed)[type];
-  let resultData = await bulkCreate(
-    { uid, docName, key },
-    transactions,
-    newTransactions,
-  );
-  if (againstTransactions.length) {
-    const transferKey = keyByType(isFixed, true)[type];
-    resultData = await bulkCreate(
-      { uid, docName, key: 'transfers' },
-      resultData,
-      newTransactions.map((transaction, index) => ({
-        ...transaction,
-        account: `${transaction.account}>${againstTransactions[index].account}`,
-      })),
-    );
-    await bulkCreate(
-      { uid, docName, key: transferKey },
-      resultData,
-      againstTransactions,
-    );
-  }
+// const manyCreate = async (
+//   form: FormTransaction,
+//   { uid, docName }: Omit<MetaInfos, 'key'>,
+//   { newTransactions,
+//     againstTransactions,
+//     transactions } : TransactionsObj,
+// ) => {
+//   const { type, isFixed } = form;
+//   const key = keyByType(isFixed)[type];
+//   let resultData = await bulkCreate(
+//     { uid, docName, key },
+//     transactions,
+//     newTransactions,
+//   );
+//   if (againstTransactions.length) {
+//     const transferKey = keyByType(isFixed, true)[type];
+//     resultData = await bulkCreate(
+//       { uid, docName, key: 'transfers' },
+//       resultData,
+//       newTransactions.map((transaction, index) => ({
+//         ...transaction,
+//         account: `${transaction.account}>${againstTransactions[index].account}`,
+//       })),
+//     );
+//     await bulkCreate(
+//       { uid, docName, key: transferKey },
+//       resultData,
+//       againstTransactions,
+//     );
+//   }
+// };
+
+// const manyUpdate = async (
+//   { uid, docName, transactionId }: Omit<MetaInfos, 'key'> & { transactionId: string },
+//   form: FormTransaction,
+//   { newTransactions,
+//     againstTransactions,
+//     transactions,
+//     key } : TransactionsObj & { key: KeyTrans },
+// ) => {
+//   let resultData = await bulkUpdate(
+//     { uid, docName, key },
+//     transactions,
+//     [
+//       ...filterTransactionsByUp(transactions, newTransactions, transactionId, key),
+//       ...newTransactions,
+//     ],
+//   );
+
+//   if (againstTransactions.length) {
+//     const transferKey = keyByType(form.isFixed, true)[form.type];
+//     resultData = await bulkUpdate(
+//       { uid, docName, key: 'transfers' },
+//       resultData,
+//       [
+//         ...filterTransactionsByUp(
+//           transactions,
+//           againstTransactions,
+//           transactionId,
+//           'transfers',
+//         ),
+//         ...newTransactions.map((transaction, index) => ({
+//           ...transaction,
+//           account: `${transaction.account}>${againstTransactions[index].account}`,
+//         })),
+//       ],
+//     );
+//     await bulkUpdate(
+//       { uid, docName, key: transferKey },
+//       resultData,
+//       [
+//         ...filterTransactionsByUp(
+//           transactions,
+//           againstTransactions,
+//           transactionId,
+//           transferKey,
+//         ),
+//         ...againstTransactions,
+//       ],
+//     );
+//   }
+// };
+
+// const filterTransactionsByUp = (
+//   transactions: TransactionsType,
+//   newTransArray: TransactionType[],
+//   transactionId: string,
+//   key: KeyTrans,
+// ) => transactions[key]
+//   .filter((transaction) => {
+//     const transParcel = Number(transaction.installments.split('/')[0]);
+//     const newTransParcel = Number(newTransArray[0].installments.split('/')[0]);
+//     const diffId = transaction.transactionId !== transactionId;
+//     return diffId || transParcel < newTransParcel;
+//   });
+
+export default {
+  addNewUser,
+  remove,
+  create,
+  // update,
+  bulkCreate,
+  bulkUpdate,
+  // manyCreate,
+  // manyUpdate,
 };
-
-const manyUpdate = async (
-  { uid, docName, transactionId }: Omit<MetaInfos, 'key'> & { transactionId: string },
-  form: FormTransaction,
-  { newTransactions,
-    againstTransactions,
-    transactions,
-    key } : TransactionsObj & { key: KeyTrans },
-) => {
-  let resultData = await bulkUpdate(
-    { uid, docName, key },
-    transactions,
-    [
-      ...filterTransactionsByUp(transactions, newTransactions, transactionId, key),
-      ...newTransactions,
-    ],
-  );
-
-  if (againstTransactions.length) {
-    const transferKey = keyByType(form.isFixed, true)[form.type];
-    resultData = await bulkUpdate(
-      { uid, docName, key: 'transfers' },
-      resultData,
-      [
-        ...filterTransactionsByUp(
-          transactions,
-          againstTransactions,
-          transactionId,
-          'transfers',
-        ),
-        ...newTransactions.map((transaction, index) => ({
-          ...transaction,
-          account: `${transaction.account}>${againstTransactions[index].account}`,
-        })),
-      ],
-    );
-    await bulkUpdate(
-      { uid, docName, key: transferKey },
-      resultData,
-      [
-        ...filterTransactionsByUp(
-          transactions,
-          againstTransactions,
-          transactionId,
-          transferKey,
-        ),
-        ...againstTransactions,
-      ],
-    );
-  }
-};
-
-const filterTransactionsByUp = (
-  transactions: TransactionsType,
-  newTransArray: TransactionType[],
-  transactionId: string,
-  key: KeyTrans,
-) => transactions[key]
-  .filter((transaction) => {
-    const transParcel = Number(transaction.installments.split('/')[0]);
-    const newTransParcel = Number(newTransArray[0].installments.split('/')[0]);
-    const diffId = transaction.transactionId !== transactionId;
-    return diffId || transParcel < newTransParcel;
-  });
-
-export { addNewUser, remove, create, update,
-  bulkCreate, bulkUpdate, manyCreate, manyUpdate };

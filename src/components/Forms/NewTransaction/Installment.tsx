@@ -1,5 +1,5 @@
 import { PropsNewTrans } from '../../../types/LocalStates';
-import { repeats } from '../../../utils/datas';
+import { frequencyRepeatNames } from '../../../utils/datas';
 import styles from '../FormLayout/formlayout.module.css';
 
 export default function Installment({ form, setForm }: PropsNewTrans) {
@@ -11,7 +11,7 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
 
   return (
     <div className={ styles.containerInstallments }>
-      { !form.isFixed && (
+      { form.installments !== 'F' && (
         <label htmlFor="installments" className={ styles.labelInstallments }>
           Parcelas:
           <input
@@ -33,14 +33,14 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
           value={ form.period }
           onChange={ handleChange }
         >
-          { Object.keys(repeats).map((repeat: string) => (
+          { frequencyRepeatNames.map((repeat: string) => (
             <option key={ repeat } value={ repeat } className={ styles.option }>
               { repeat }
             </option>
           )) }
         </select>
       </label>
-      { !form.isFixed && (
+      { form.installments !== 'F' && (
         <p className={ styles.parcelas }>
           {`${form.installments} parcelas
         de R$${(form.value / Number(form.installments)).toFixed(2)}`}
