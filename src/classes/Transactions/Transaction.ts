@@ -28,7 +28,10 @@ export default class Transaction extends FinancialRecord {
     if (this.installments === 'U') {
       // Se for uma receita única
       this.period = '';
-      await firebaseFuncs.create(meta, prevData, super.record);
+      await firebaseFuncs.create(meta, prevData, {
+        ...super.record,
+        period: '',
+      });
     } else if (this.installments === 'F') {
       // Se for uma receita fixa
       this.period = '';

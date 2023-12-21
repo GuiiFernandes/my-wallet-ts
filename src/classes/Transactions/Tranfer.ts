@@ -30,7 +30,7 @@ export default class Transfer extends FinancialRecord {
           ? this.value : super.calculateValue(i),
         type: 'Despesa',
         date: super.calculateNextDate(i),
-        period: this.formatedInstalments[this.installments] ? '' : this.period,
+        period: this.installments === 'U' ? '' : this.period,
         installments: this.formatedInstalments[this.installments]
         || `${this.installment}/${this.installments}`,
       };
