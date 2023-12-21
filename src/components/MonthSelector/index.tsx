@@ -1,14 +1,20 @@
 import { useDispatch, useSelector } from 'react-redux';
+import DatePicker from 'react-datepicker';
+import { pt } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 
+import { useState } from 'react';
 import { MonthSelected, StateRedux } from '../../types/State';
 import { months } from '../../utils/datas';
 import { changeOperationls } from '../../redux/reducers/operationals';
 import styles from './MonthSelector.module.css';
 import BtnTransaction from '../Btns/BtnTransaction';
+import './DataPicker.css';
 
 export default function MonthSelector() {
   const dispatch = useDispatch();
-  const { monthString, year } = useSelector(
+  const [date, setDate] = useState(new Date());
+  const { monthString, year, month } = useSelector(
     ({ operationals }: StateRedux) => operationals.monthSelected,
   );
 
@@ -23,50 +29,24 @@ export default function MonthSelector() {
       className={ styles.container }
       onSubmit={ (e) => { e.preventDefault(); } }
     >
-      <select
-        name="month"
-        value={ monthString }
-        className={ styles.select }
-        onChange={ ({ target: { value } }) => {
-          dispatch(changeOperationls<MonthSelected>({
-            monthSelected: { monthString: value, month: months.indexOf(value) + 1, year },
-          }));
-        } }
-      >
-        { months.map((month) => (
-          <option
-            key={ month }
-            value={ month }
-            className={ styles.option }
-          >
-            { month }
-          </option>
-        )) }
-      </select>
-      <select
-        name="year"
-        value={ year }
-        className={ styles.select }
-        onChange={ ({ target: { value } }) => {
+      <DatePicker
+        selected={ new Date(year, month - 1) }
+        // onChange={ (newDate) => console.log(newDate) }
+        onChange={ (newDate) => {
+          if (!newDate) return;
           dispatch(changeOperationls<MonthSelected>({
             monthSelected: {
-              monthString,
-              month: months.indexOf(monthString) + 1,
-              year: Number(value),
+              monthString: months[newDate.getMonth()],
+              month: newDate.getMonth() + 1,
+              year: newDate.getFullYear(),
             },
           }));
         } }
-      >
-        { years.map((yearIterable) => (
-          <option
-            key={ yearIterable }
-            value={ yearIterable }
-            className={ styles.option }
-          >
-            { yearIterable }
-          </option>
-        )) }
-      </select>
+        dateFormat="MM/yyyy"
+        locale={ pt }
+        showMonthYearPicker
+        className={ styles.select }
+      />
       <BtnTransaction />
     </form>
   );

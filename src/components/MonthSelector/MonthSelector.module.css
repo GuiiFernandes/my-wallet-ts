@@ -4,7 +4,6 @@
   justify-content: center;
   width: 80%;
   max-width: 800px;
-  gap: 20px;
 }
 
 .select {
@@ -14,6 +13,10 @@
   border-radius: 6px;
   padding: 5px 10px;
   font-size: 1.6rem;
+  margin-right: 20px;
+  cursor: pointer;
+  width: 100px;
+  text-align: center;
   outline: none;
 }
 

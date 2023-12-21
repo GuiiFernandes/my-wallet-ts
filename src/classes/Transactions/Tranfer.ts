@@ -23,29 +23,22 @@ export default class Transfer extends FinancialRecord {
     const newTransactions: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
     for (let i = 0; i < periodRepetion; i += 1) {
-      const objTrans: TransactionType = {
-        ...super.record,
-        id: i === 0 ? this.id : super.generateId(),
-        value: this.formatedInstalments[this.installments]
-          ? this.value : super.calculateValue(i),
-        type: 'Despesa',
-        date: super.calculateNextDate(i),
-        period: this.installments === 'U' ? '' : this.period,
-        installments: this.formatedInstalments[this.installments]
-        || `${this.installment}/${this.installments}`,
-      };
+      this.id = i === 0 ? this.id : super.generateId();
+      this.value = this.formatedInstalments[this.installments]
+        ? this.value : super.calculateValue(i);
+      this.date = super.calculateNextDate(i);
+      this.payday = i === 0 ? this.payday : null;
+      this.period = this.installments === 'U' ? '' : this.period;
       newTransfers.push({
-        ...objTrans,
+        ...super.record,
         account: `${this.account}>${this.accountDestiny}`,
-        type: 'Transferência',
       });
-      newTransactions.push(objTrans);
+      newTransactions.push(super.record);
       this.installment += 1;
     }
     const againstTransactions: TransactionType[] = newTransfers.map((transfer) => ({
       ...transfer,
       account: this.accountDestiny,
-      type: 'Receita',
     }));
     return [newTransfers, [...newTransactions, ...againstTransactions]];
   }

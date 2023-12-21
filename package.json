@@ -15,6 +15,7 @@
     "date-fns": "^3.0.5",
     "firebase": "^10.4.0",
     "react": "^18.2.0",
+    "react-datepicker": "^4.25.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
     "react-input-mask": "^2.0.4",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@trybe/eslint-config-frontend": "^1.11.4",
     "@types/react": "^18.2.15",
+    "@types/react-datepicker": "^4.19.4",
     "@types/react-dom": "^18.2.7",
     "@types/uuid": "^9.0.6",
     "@vitejs/plugin-react-swc": "^3.3.2",

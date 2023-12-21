@@ -16,11 +16,13 @@ export default function Header() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
   const { records } = transactions;
 
-  const total = records.reduce((sum, { payday, value, type }) => {
-    const mult = type === 'Despesa' ? -1 : 1;
-    const valueSum = payday ? value : 0;
-    return sum + (valueSum * mult);
-  }, 0);
+  const total = records
+    .filter(({ type }) => type !== 'Transferência')
+    .reduce((sum, { payday, value, type }) => {
+      const mult = type === 'Despesa' ? -1 : 1;
+      const valueSum = payday ? value : 0;
+      return sum + (valueSum * mult);
+    }, 0);
   const logout = async () => {
     const auth = getAuth();
     await signOut(auth);

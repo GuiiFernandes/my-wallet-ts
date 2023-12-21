@@ -63,8 +63,6 @@ const bulkCreate = async (
   prevData: any,
   newData: any,
 ) => {
-  console.log('prevData', prevData, key);
-
   const resultData = {
     ...prevData,
     [key]: [...prevData[key], ...newData],

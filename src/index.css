@@ -21,6 +21,8 @@
   --light-gray: #ccc;
 
   --blue: #79c7c5;
+
+  --font-default: 'Quicksand', sans-serif;
 }
 
 * {
@@ -31,7 +33,7 @@
 
 html {
   font-size: 62.5%;
-  font-family: 'Quicksand', sans-serif;
+  font-family: var(--font-default);
 }
 
 a {

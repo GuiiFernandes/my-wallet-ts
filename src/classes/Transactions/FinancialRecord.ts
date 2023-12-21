@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { add, format } from 'date-fns';
 import { KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
 import { InstallmentsTransType } from '../../types/Others';
@@ -34,7 +35,7 @@ export default abstract class FinancialRecord {
 
   private oneDay = 1000 * 60 * 60 * 24;
 
-  installmentsTransform: InstallmentsTransType = {
+  private installmentsTransform: InstallmentsTransType = {
     Diariamente: this.oneDay,
     Semanalmente: this.oneDay * 7,
     Quinzenalmente: this.oneDay * 14,
@@ -44,6 +45,19 @@ export default abstract class FinancialRecord {
     Semestralmente: this.oneDay * 186.64,
     Anualmente: this.oneDay * 365.28,
   };
+
+  objNexDate(i: number) {
+    return {
+      Diariamente: { days: 1 * i },
+      Semanalmente: { weeks: 1 * i },
+      Quinzenalmente: { weeks: 2 * i },
+      Mensalmente: { months: 1 * i },
+      Bimestralmente: { months: 2 * i },
+      Trimestralmente: { months: 3 * i },
+      Semestralmente: { months: 6 * i },
+      Anualmente: { years: 1 * i },
+    };
+  }
 
   private keyByInstalments: KeyByType = {
     U: 'records',
@@ -95,9 +109,9 @@ export default abstract class FinancialRecord {
     i: number = 1,
   ): string {
     const periodValid = this.period || 'Mensalmente';
-    const periodNumber = Math.floor(this.installmentsTransform[periodValid]);
-    const nextDate = new Date(this.date).getTime() + (periodNumber * i);
-    return new Date(nextDate).toISOString().slice(0, 10);
+    const nextDate = add(new Date(`${this.date}T00:00`), this.objNexDate(i)[periodValid]);
+    console.log(nextDate);
+    return format(nextDate, 'yyyy-MM-dd');
   }
 
   protected generateId(id?: string): string {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { format } from 'date-fns';
 
 import { FormTransaction } from '../types/LocalStates';
 import { TypesTransaction } from '../types/Data';
@@ -8,9 +9,9 @@ import { StateRedux } from '../types/State';
 export default function useChangeFormTrans() {
   const { accounts } = useSelector(({ data }: StateRedux) => data.banks);
   const selectedAccountText = accounts[0].name;
-  const now = new Date().toLocaleDateString().split('/').reverse();
+
   const INITIAL_STATE: FormTransaction = {
-    date: now.join('-'),
+    date: format(new Date(), 'yyyy-MM-dd'),
     payday: null,
     description: '',
     value: 0,

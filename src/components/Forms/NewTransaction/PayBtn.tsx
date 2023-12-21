@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { BiSolidLike, BiSolidDislike } from 'react-icons/bi';
 
 import styles from './NewTransaction.module.css';
@@ -12,10 +13,9 @@ const typeTexts = {
 
 export default function PayBtn({ form, setForm }: PropsNewTrans) {
   const changePayment = () => {
-    const now = new Date().toLocaleDateString().split('/').reverse();
     setForm({
       ...form,
-      payday: form.payday ? null : now.join('-'),
+      payday: form.payday ? null : format(new Date(), 'yyyy-MM-dd'),
     });
   };
 

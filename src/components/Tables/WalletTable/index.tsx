@@ -1,4 +1,5 @@
 import { useDispatch } from 'react-redux';
+import { format } from 'date-fns';
 import { NumericFormat } from 'react-number-format';
 import { AiFillEdit } from 'react-icons/ai';
 
@@ -16,6 +17,8 @@ const colors = {
   Transferência: 'var(--light-gray)',
   Investimento: 'var(--blue)',
 };
+
+const verifyInstallments = new Set(['U', 'F']);
 
 export default function WalletTable() {
   const dispatch = useDispatch();
@@ -63,7 +66,7 @@ export default function WalletTable() {
                 } }
               >
                 { payday
-                  ? new Date(payday).toLocaleDateString()
+                  ? format(new Date(payday), 'dd/MM/yyyy')
                   : '-'}
               </td>
               <td className={ styles.td }>
@@ -85,7 +88,12 @@ export default function WalletTable() {
                   } }
                 />
               </td>
-              <td className={ styles.td }>{ transaction.installments }</td>
+              <td className={ styles.td }>
+                { transaction.installment
+                  && !verifyInstallments.has(transaction.installments)
+                  ? `${transaction.installment}/${transaction.installments}`
+                  : transaction.installments }
+              </td>
               <td className={ styles.td }>{ transaction.category }</td>
               <td className={ styles.td }>{ transaction.subCategory }</td>
               <td className={ styles.td }>{ transaction.account }</td>

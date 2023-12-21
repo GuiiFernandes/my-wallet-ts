@@ -222,26 +222,34 @@ export default function useTransaction() {
     transDate: Date,
     nowDate: Date,
     period: keyof InstallmentsTransType,
+    createInMonth: boolean,
   ): boolean => {
-    const periodInMonths = installmentsTransform[period] / oneDay / 30.44;
+    const periodInMonths = Math.round(installmentsTransform[period] / oneDay / 30.44);
     const difference = differenceInMonths(nowDate, transDate);
-    if (difference % periodInMonths !== 0) {
+    if (difference % periodInMonths > 0) {
       return false;
     }
-
     const targetTransDate = startOfMonth(addMonths(transDate, difference));
     const targetNowDate = endOfMonth(addMonths(transDate, difference));
+    if (createInMonth) {
+      return nowDate >= targetTransDate && nowDate <= targetNowDate;
+    }
+    console.log(nowDate, targetNowDate, nowDate <= targetNowDate);
 
-    return nowDate >= targetTransDate && nowDate <= targetNowDate;
+    return nowDate <= targetNowDate;
   };
 
   const getByDate = (trans: TransactionType[], createInMonth: boolean = false) => trans
     .filter(({ date, installments, period }) => {
-      const transDate = new Date(date);
-      const initialMonth = new Date(`${year}-${month}-01`);
-      if (createInMonth) return isSameMonth(transDate, initialMonth);
+      const transDate = new Date(`${date}T00:00`);
+      const initialMonth = new Date(year, month - 1, 1, 0);
+      if (createInMonth) {
+        return isSameMonth(transDate, initialMonth);
+      }
       if (installments === 'F') {
-        return isValidPeriod(new Date(transDate), new Date(initialMonth), period);
+        console.log(isValidPeriod(new Date(transDate), initialMonth, period, createInMonth));
+
+        return isValidPeriod(new Date(transDate), new Date(initialMonth), period, createInMonth);
       }
       return isBefore(transDate, endOfMonth(initialMonth));
     });
