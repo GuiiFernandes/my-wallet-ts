@@ -1,7 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { addMonths, differenceInMonths, endOfMonth,
+  isBefore, isSameMonth, startOfMonth } from 'date-fns';
 
 import { StateRedux } from '../types/State';
 import { TransactionType } from '../types/Data';
+import { InstallmentsTransType } from '../types/Others';
 
 const TRANSFER_TYPE = 'Transferência';
 
@@ -202,31 +205,68 @@ export default function useTransaction() {
   //   //     await updateOneTrans(form, key);
   //   //   }
   //   // };
+  const oneDay = 1000 * 60 * 60 * 24;
+
+  const installmentsTransform: InstallmentsTransType = {
+    Diariamente: oneDay,
+    Semanalmente: oneDay * 7,
+    Quinzenalmente: oneDay * 14,
+    Mensalmente: oneDay * 30.44,
+    Bimestralmente: oneDay * 60.88,
+    Trimestralmente: oneDay * 91.32,
+    Semestralmente: oneDay * 186.64,
+    Anualmente: oneDay * 365.28,
+  };
+
+  const isValidPeriod = (
+    transDate: Date,
+    nowDate: Date,
+    period: keyof InstallmentsTransType,
+  ): boolean => {
+    const periodInMonths = installmentsTransform[period] / oneDay / 30.44;
+    const difference = differenceInMonths(nowDate, transDate);
+    if (difference % periodInMonths !== 0) {
+      return false;
+    }
+
+    const targetTransDate = startOfMonth(addMonths(transDate, difference));
+    const targetNowDate = endOfMonth(addMonths(transDate, difference));
+
+    return nowDate >= targetTransDate && nowDate <= targetNowDate;
+  };
 
   const getByDate = (trans: TransactionType[], createInMonth: boolean = false) => trans
-    .filter(({ date }) => {
-      const transDate = new Date(date).getTime();
-      const initialMonth = new Date(`${year}-${month}-01`).getTime();
-      const monthCompare = (month % 12) + 1;
-      const yearCompare = monthCompare < month ? year + 1 : year;
-      const finalMonth = new Date(`${yearCompare}-${monthCompare}-01`).getTime();
-      if (createInMonth) return transDate >= initialMonth && transDate <= finalMonth;
-      return transDate <= finalMonth;
+    .filter(({ date, installments, period }) => {
+      const transDate = new Date(date);
+      const initialMonth = new Date(`${year}-${month}-01`);
+      if (createInMonth) return isSameMonth(transDate, initialMonth);
+      if (installments === 'F') {
+        return isValidPeriod(new Date(transDate), new Date(initialMonth), period);
+      }
+      return isBefore(transDate, endOfMonth(initialMonth));
     });
 
   const getAllTransactions = () => {
-    const variableTransactions: TransactionType[] = getByDate(records, true);
-    const fixedTransactions: TransactionType[] = getByDate(fixeds);
-    const setVariableExpenses = new Set(variableTransactions
+    const recorsByDate: TransactionType[] = getByDate(records, true);
+    const fixedsByDate: TransactionType[] = getByDate(fixeds);
+    const setRecordsTransId = new Set(recorsByDate
       .map(({ transactionId }) => transactionId));
-    const fixedFilterTransactions = fixedTransactions
-      .filter(({ transactionId }) => !setVariableExpenses.has(transactionId));
-    const expensesWithoutTransfers = [...variableTransactions, ...fixedFilterTransactions]
-      .filter(({ type }) => type !== TRANSFER_TYPE);
-    return [...expensesWithoutTransfers, ...getByDate(transfers)]
-      .sort((a: TransactionType, b: TransactionType) => {
-        return Number(b.date.split('-')[2]) - Number(a.date.split('-')[2]);
-      });
+    const setTransfersTransId = new Set(transfers
+      .map(({ transactionId }) => transactionId));
+    const fixedFilterTransactions = fixedsByDate
+      .filter(({ transactionId }) => !setRecordsTransId.has(transactionId));
+    const expensesWithoutTransfers = [
+      ...recorsByDate
+        .filter(({ transactionId }) => !setTransfersTransId.has(transactionId)),
+      ...fixedFilterTransactions,
+    ];
+    return [
+      ...expensesWithoutTransfers,
+      ...getByDate(transfers, true).filter(({ installments }) => installments === 'U'),
+      ...getByDate(transfers).filter(({ installments }) => installments === 'F'),
+    ].sort((a: TransactionType, b: TransactionType) => {
+      return Number(b.date.split('-')[2]) - Number(a.date.split('-')[2]);
+    });
   };
 
   return { getAllTransactions };

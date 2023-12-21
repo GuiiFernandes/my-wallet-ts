@@ -45,37 +45,33 @@ export default abstract class FinancialRecord {
     Anualmente: this.oneDay * 365.28,
   };
 
-  constructor({
-    account,
-    date,
-    description,
-    category,
-    subCategory,
-    value,
-    transactionId,
-    installments,
-    period,
-    type,
-  }: Omit<TransactionType, 'id'>) {
-    this.account = account;
-    this.date = date;
-    this.description = description;
-    this.value = value;
-    this.period = period;
+  private keyByInstalments: KeyByType = {
+    U: 'records',
+    F: 'fixeds',
+    t: 'transfers',
+  };
+
+  constructor(form: Omit<TransactionType, 'id'>) {
+    this.account = form.account;
+    this.date = form.date;
+    this.description = form.description;
+    this.value = form.value;
+    this.period = form.period;
     this.installment = 1;
-    this.category = category || '';
-    this.subCategory = subCategory || '';
-    this.type = type;
+    this.category = form.category || '';
+    this.subCategory = form.subCategory || '';
+    this.type = form.type;
     this.id = this.generateId();
-    this.transactionId = transactionId || this.generateId();
-    this.installments = installments;
+    this.transactionId = form.transactionId || this.generateId();
+    this.installments = form.installments;
   }
 
   protected createMeta(uid: string): MetaCreateInfos {
+    const keyForKey = this.type === 'Transferência' ? 't' : this.installments;
     return {
       uid,
       docName: 'transactions',
-      key: this.keyByType()[this.installments] || 'records',
+      key: this.keyByInstalments[keyForKey] || 'records',
     };
   }
 
@@ -102,13 +98,6 @@ export default abstract class FinancialRecord {
     const periodNumber = Math.floor(this.installmentsTransform[periodValid]);
     const nextDate = new Date(this.date).getTime() + (periodNumber * i);
     return new Date(nextDate).toISOString().slice(0, 10);
-  }
-
-  protected keyByType(): KeyByType {
-    return {
-      U: 'records',
-      F: 'fixeds',
-    };
   }
 
   protected generateId(id?: string): string {

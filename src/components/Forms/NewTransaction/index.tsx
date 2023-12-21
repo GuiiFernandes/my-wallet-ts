@@ -13,7 +13,8 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { changeOperationls } from '../../../redux/reducers/operationals';
-import { Transaction } from '../../../classes/Transactions';
+import { Transaction, Transfer } from '../../../classes/Transactions';
+import { toast } from '../../../utils/swal';
 // import { TransactionType } from '../../../types/Data';
 // import useTransaction from '../../../hooks/useTransaction';
 
@@ -66,10 +67,21 @@ export default function NewTransaction() {
         className={ styles.containerForm }
         onSubmit={ async (e) => {
           e.preventDefault();
-          if (form.type !== TRANSFER_TYPE) {
-            const register = new Transaction(form);
-            await register.create(uid, transactions);
+          try {
+            if (form.type !== TRANSFER_TYPE) {
+              const register = new Transaction(form);
+              await register.create(uid, transactions);
+            } else {
+              const resgister = new Transfer(form);
+              await resgister.create(uid, transactions);
+            }
             dispatch(changeOperationls({ newTransaction: !newTransaction }));
+          } catch (error) {
+            toast.fire({
+              icon: 'error',
+              title: 'Erro ao cadastrar transação',
+            });
+            console.error(error);
           }
         } }
       >

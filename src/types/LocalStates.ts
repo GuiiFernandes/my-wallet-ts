@@ -8,7 +8,7 @@ export type FormAccount = {
   type: 'conta-corrente' | 'conta-investimento' | 'carteira',
 };
 
-type FormWithoutId = Omit<TransactionType, 'id'>;
+export type FormWithoutId = Omit<TransactionType, 'id'>;
 
 export type FormTransaction = {
   accountDestiny: string,

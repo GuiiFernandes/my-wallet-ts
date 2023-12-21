@@ -34,7 +34,7 @@ export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transfe
 export type Period = 'Diariamente' | 'Semanalmente'
 | 'Quinzenalmente' | 'Mensalmente'
 | 'Bimestralmente' | 'Trimestralmente'
-| 'Semestralmente' | 'Anualmente';
+| 'Semestralmente' | 'Anualmente' | '';
 
 export type TransactionType = {
   id: string,

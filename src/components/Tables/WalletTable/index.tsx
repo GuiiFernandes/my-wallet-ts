@@ -13,8 +13,8 @@ const styles = { ...styleGlobal, ...styleTable };
 const colors = {
   Receita: 'var(--light-green)',
   Despesa: 'var(--light-red)',
-  Transferência: 'var(--blue)',
-  Investimento: 'var(--light-yellow)',
+  Transferência: 'var(--light-gray)',
+  Investimento: 'var(--blue)',
 };
 
 export default function WalletTable() {
