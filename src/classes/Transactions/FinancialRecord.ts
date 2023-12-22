@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-
 import { add, format } from 'date-fns';
+
 import { KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
-import { InstallmentsTransType } from '../../types/Others';
 import { MetaCreateInfos } from '../../utils/firebaseFuncs';
+import { installmentsTransform } from '../../utils/auxFunctions';
 
 export default abstract class FinancialRecord {
   id: string;
@@ -17,7 +17,7 @@ export default abstract class FinancialRecord {
 
   description: string;
 
-  payday: string | null = null;
+  payday: string | null;
 
   value: number;
 
@@ -33,20 +33,7 @@ export default abstract class FinancialRecord {
 
   type: TypesTransaction;
 
-  private oneDay = 1000 * 60 * 60 * 24;
-
-  private installmentsTransform: InstallmentsTransType = {
-    Diariamente: this.oneDay,
-    Semanalmente: this.oneDay * 7,
-    Quinzenalmente: this.oneDay * 14,
-    Mensalmente: this.oneDay * 30.44,
-    Bimestralmente: this.oneDay * 60.88,
-    Trimestralmente: this.oneDay * 91.32,
-    Semestralmente: this.oneDay * 186.64,
-    Anualmente: this.oneDay * 365.28,
-  };
-
-  objNexDate(i: number) {
+  objNextDate(i: number) {
     return {
       Diariamente: { days: 1 * i },
       Semanalmente: { weeks: 1 * i },
@@ -71,6 +58,7 @@ export default abstract class FinancialRecord {
     this.description = form.description;
     this.value = form.value;
     this.period = form.period;
+    this.payday = form.payday;
     this.installment = 1;
     this.category = form.category || '';
     this.subCategory = form.subCategory || '';
@@ -90,8 +78,8 @@ export default abstract class FinancialRecord {
   }
 
   protected calcIntervalMonthRepeat(): number {
-    const monthInterval = this.installmentsTransform.Mensalmente;
-    const transFrequency = this.installmentsTransform[this.period];
+    const monthInterval = installmentsTransform.Mensalmente;
+    const transFrequency = installmentsTransform[this.period];
     return Math.floor(monthInterval / transFrequency);
   }
 
@@ -109,8 +97,10 @@ export default abstract class FinancialRecord {
     i: number = 1,
   ): string {
     const periodValid = this.period || 'Mensalmente';
-    const nextDate = add(new Date(`${this.date}T00:00`), this.objNexDate(i)[periodValid]);
-    console.log(nextDate);
+    const nextDate = add(
+      new Date(`${this.date}T00:00`),
+      this.objNextDate(i)[periodValid],
+    );
     return format(nextDate, 'yyyy-MM-dd');
   }
 

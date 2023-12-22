@@ -10,8 +10,8 @@
 .react-datepicker {
   font-family: var(--font-default);
   font-size: 1.6rem;
-  background-color: var(--dark-gray);
-  color: var(--white);
+  background-color: var(--gray);
+  color: var(--green);
 }
 
 .react-datepicker__month-text--selected {

@@ -13,16 +13,9 @@ import './DataPicker.css';
 
 export default function MonthSelector() {
   const dispatch = useDispatch();
-  const [date, setDate] = useState(new Date());
-  const { monthString, year, month } = useSelector(
+  const { year, month } = useSelector(
     ({ operationals }: StateRedux) => operationals.monthSelected,
   );
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from(
-    { length: currentYear + 5 - 2000 },
-    (_, i) => i + currentYear - 10,
-  ).reverse();
 
   return (
     <form
@@ -31,7 +24,6 @@ export default function MonthSelector() {
     >
       <DatePicker
         selected={ new Date(year, month - 1) }
-        // onChange={ (newDate) => console.log(newDate) }
         onChange={ (newDate) => {
           if (!newDate) return;
           dispatch(changeOperationls<MonthSelected>({

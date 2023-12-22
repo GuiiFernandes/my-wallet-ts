@@ -8,12 +8,11 @@ export default class Transaction extends FinancialRecord {
     const periodRepetion = repetitions || Number(this.installments);
     for (let i = 0; i < periodRepetion; i += 1) {
       this.id = i === 0 ? this.id : super.generateId();
-      this.payday = i === 0 ? this.payday : null;
-      this.value = this.installments === 'F' ? this.value : super.calculateValue(i);
-      this.date = super.calculateNextDate(i);
-      newTransactions.push({
-        ...super.record,
-      });
+      const value = this.installments === 'F' ? this.value : super.calculateValue(i);
+      const date = super.calculateNextDate(i);
+      const payday = i === 0 && this.installments !== 'F' ? this.payday : null;
+      this.period = this.installments === 'U' ? '' : this.period;
+      newTransactions.push({ ...super.record, payday, value, date });
       this.installment += 1;
     }
     return newTransactions;
@@ -27,9 +26,7 @@ export default class Transaction extends FinancialRecord {
     if (this.installments === 'U') {
       // Se for uma receita única
       this.period = '';
-      await firebaseFuncs.create(meta, prevData, {
-        ...super.record,
-      });
+      await firebaseFuncs.create(meta, prevData, super.record);
     } else if (this.installments === 'F') {
       // Se for uma receita fixa
       const repetitions = super.calcIntervalMonthRepeat();
@@ -40,7 +37,7 @@ export default class Transaction extends FinancialRecord {
           await firebaseFuncs.create(
             { ...meta, key: 'records' },
             prevData,
-            newTransactions[0],
+            { ...newTransactions[0], payday: this.payday },
           );
         }
       } else {

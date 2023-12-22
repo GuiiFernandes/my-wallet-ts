@@ -20,27 +20,33 @@ export default class Transfer extends FinancialRecord {
 
   private formatTrans(repetitions?: number): FormatedTrans {
     const newTransfers: TransactionType[] = [];
-    const newTransactions: TransactionType[] = [];
+    const expensesRecords: TransactionType[] = [];
+    const revenueRecords: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
     for (let i = 0; i < periodRepetion; i += 1) {
       this.id = i === 0 ? this.id : super.generateId();
-      this.value = this.formatedInstalments[this.installments]
+      const value = this.formatedInstalments[this.installments]
         ? this.value : super.calculateValue(i);
-      this.date = super.calculateNextDate(i);
-      this.payday = i === 0 ? this.payday : null;
+      const date = super.calculateNextDate(i);
       this.period = this.installments === 'U' ? '' : this.period;
-      newTransfers.push({
-        ...super.record,
-        account: `${this.account}>${this.accountDestiny}`,
-      });
-      newTransactions.push(super.record);
+      const payday = i === 0 ? this.payday : null;
+      const account = `${this.account}>${this.accountDestiny}`;
+      const newData = super.record;
+      newTransfers.push({ ...newData, value, date, payday: null, account });
+      if (payday) {
+        expensesRecords.push({ ...newData, value, payday, date, type: 'Despesa' });
+        revenueRecords.push({ ...newData,
+          id: super.generateId(),
+          payday,
+          value,
+          date,
+          account: this.accountDestiny,
+          type: 'Receita' });
+      }
       this.installment += 1;
     }
-    const againstTransactions: TransactionType[] = newTransfers.map((transfer) => ({
-      ...transfer,
-      account: this.accountDestiny,
-    }));
-    return [newTransfers, [...newTransactions, ...againstTransactions]];
+
+    return [newTransfers, [...expensesRecords, ...revenueRecords]];
   }
 
   async create(
@@ -48,35 +54,26 @@ export default class Transfer extends FinancialRecord {
     prevData: TransactionsType,
   ): Promise<void> {
     const meta = super.createMeta(uid);
-
+    let [newTransfers, newTransactions]: FormatedTrans = [[], []];
     if (this.installments === 'U') {
       // Se for uma transferência única
-      const [newTransfers, newTransactions] = this.formatTrans(1);
-      const result = await firebaseFuncs.bulkCreate(meta, prevData, newTransfers);
-      await firebaseFuncs.bulkCreate(
-        { ...meta, key: 'records' },
-        result,
-        newTransactions,
-      );
+      [newTransfers, newTransactions] = this.formatTrans(1);
     } else if (this.installments === 'F') {
       // Se for uma transferência fixa
       const repetitions = super.calcIntervalMonthRepeat();
       if (repetitions > 1) {
-        const [newTransfers] = this.formatTrans(repetitions);
-        await firebaseFuncs.bulkCreate(meta, prevData, newTransfers);
+        [newTransfers, newTransactions] = this.formatTrans(repetitions);
       } else {
-        const [newTransfers, newTransactions] = this.formatTrans(1);
-        const result = await firebaseFuncs.bulkCreate(meta, prevData, newTransfers);
-        await firebaseFuncs.bulkCreate(
-          { ...meta, key: 'records' },
-          result,
-          newTransactions,
-        );
+        const [formatedTransfer, formatedTransactions] = this.formatTrans(1);
+        newTransfers = formatedTransfer;
+        newTransactions = formatedTransactions;
       }
     } else {
       // Se for uma transferência parcelada
-      const [newTransfers, newTransactions] = this.formatTrans();
-      const result = await firebaseFuncs.bulkCreate(meta, prevData, newTransfers);
+      [newTransfers, newTransactions] = this.formatTrans();
+    }
+    const result = await firebaseFuncs.bulkCreate(meta, prevData, newTransfers);
+    if (newTransactions.length) {
       await firebaseFuncs.bulkCreate(
         { ...meta, key: 'records' },
         result,

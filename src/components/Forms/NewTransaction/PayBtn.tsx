@@ -15,7 +15,7 @@ export default function PayBtn({ form, setForm }: PropsNewTrans) {
   const changePayment = () => {
     setForm({
       ...form,
-      payday: form.payday ? null : format(new Date(), 'yyyy-MM-dd'),
+      payday: form.payday ? null : form.date,
     });
   };
 
