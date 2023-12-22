@@ -1,4 +1,5 @@
-import { TransactionType, TransactionsType } from '../../types/Data';
+import { AccountType, TransactionKeys,
+  TransactionType, TransactionsType } from '../../types/Data';
 import firebaseFuncs from '../../utils/firebaseFuncs';
 import FinancialRecord from './FinancialRecord';
 
@@ -20,36 +21,57 @@ export default class Transaction extends FinancialRecord {
 
   async create(
     uid: string,
-    prevData: TransactionsType,
+    transactions: TransactionsType,
+    accounts: AccountType[],
   ): Promise<void> {
-    const meta = super.createMeta(uid);
+    const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
       // Se for uma receita única
       this.period = '';
-      await firebaseFuncs.create(meta, prevData, super.record);
+      const newTransaction = super.record;
+      await Promise.all([firebaseFuncs.create(
+        meta,
+        [...transactions[meta.key], newTransaction],
+      ),
+      firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
     } else if (this.installments === 'F') {
       // Se for uma receita fixa
       const repetitions = super.calcIntervalMonthRepeat();
       if (repetitions > 1) {
         const newTransactions = this.formatTrans(repetitions);
-        await firebaseFuncs.bulkCreate(meta, prevData, newTransactions);
+        await firebaseFuncs.create(
+          meta,
+          [transactions[meta.key], ...newTransactions],
+        );
         if (this.payday) {
-          await firebaseFuncs.create(
+          await Promise.all([firebaseFuncs.create(
             { ...meta, key: 'records' },
-            prevData,
-            { ...newTransactions[0], payday: this.payday },
-          );
+            [...transactions.records, { ...newTransactions[0], payday: this.payday }],
+          ),
+          firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
         }
       } else {
-        await firebaseFuncs.create(meta, prevData, super.record);
+        await firebaseFuncs.create(meta, [
+          ...transactions[meta.key],
+          { ...super.record, payday: null },
+        ]);
         if (this.payday) {
-          await firebaseFuncs.create({ ...meta, key: 'records' }, prevData, super.record);
+          const newTransaction = super.record;
+          await Promise.all([firebaseFuncs.create(
+            { ...meta, key: 'records' },
+            [...transactions[meta.key], newTransaction],
+          ),
+          firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
         }
       }
     } else {
       // Se for uma receita parcelada
       const newTransactions = this.formatTrans();
-      await firebaseFuncs.bulkCreate(meta, prevData, newTransactions);
+      await Promise.all([await firebaseFuncs.create(
+        meta,
+        [...transactions[meta.key], ...newTransactions],
+      ),
+      firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
     }
   }
 }

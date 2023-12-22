@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
 import { Options, swalRemove, toast } from '../utils/swal';
-import firebase from '../utils/firebaseFuncs';
+import firebaseFuncs from '../utils/firebaseFuncs';
 import { RemoveAccountParams } from '../types/Others';
 import { FormAccount, RealForm } from '../types/LocalStates';
 import { AccountType } from '../types/Data';
@@ -41,7 +41,10 @@ export default function useLogin() {
       real: balanceNumber,
       type: form.type,
     };
-    await firebase.create({ uid, docName: 'banks', key: 'accounts' }, banks, newAccount);
+    await firebaseFuncs.create(
+      { uid, docName: 'banks', key: 'accounts' },
+      [...accounts, newAccount],
+    );
     dispatch(changeOperationls<NewAccountType>({ newAccount: false }));
   };
 
@@ -56,7 +59,7 @@ export default function useLogin() {
         icon: 'warning',
       };
       swalRemove<RemoveAccountParams, void>(
-        firebase.remove,
+        firebaseFuncs.remove,
         options,
         accounts,
         banks,
@@ -74,7 +77,7 @@ export default function useLogin() {
       account.real = Number(realForm[name]);
       accountsChanged[indexAccount] = account;
     }
-    await firebase.bulkUpdate({
+    await firebaseFuncs.bulkUpdate({
       uid, docName: 'banks', key: 'accounts',
     }, banks, accountsChanged);
   };

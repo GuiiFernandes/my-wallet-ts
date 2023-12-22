@@ -70,10 +70,10 @@ export default function NewTransaction() {
           try {
             if (form.type !== TRANSFER_TYPE) {
               const register = new Transaction(form);
-              await register.create(uid, transactions);
+              await register.create(uid, transactions, accounts);
             } else {
               const resgister = new Transfer(form);
-              await resgister.create(uid, transactions);
+              await resgister.create(uid, transactions, accounts);
             }
             dispatch(changeOperationls({ newTransaction: !newTransaction }));
           } catch (error) {

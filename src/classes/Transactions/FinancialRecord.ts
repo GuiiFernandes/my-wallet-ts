@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { add, format } from 'date-fns';
 
-import { KeyByType, Period, TransactionType,
+import { AccountType, KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
 import { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import { installmentsTransform } from '../../utils/auxFunctions';
@@ -68,12 +68,12 @@ export default abstract class FinancialRecord {
     this.installments = form.installments;
   }
 
-  protected createMeta(uid: string): MetaCreateInfos {
+  protected createMeta<T>(uid: string): MetaCreateInfos<T> {
     const keyForKey = this.type === 'Transferência' ? 't' : this.installments;
     return {
       uid,
       docName: 'transactions',
-      key: this.keyByInstalments[keyForKey] || 'records',
+      key: (this.keyByInstalments[keyForKey] || 'records') as T,
     };
   }
 
@@ -128,7 +128,8 @@ export default abstract class FinancialRecord {
 
   abstract create(
     uid: string,
-    prevData: TransactionsType,
+    transactions: TransactionsType,
+    accounts: AccountType[],
   ): Promise<void>;
   // abstract update(): void;
   // abstract remove(): void;

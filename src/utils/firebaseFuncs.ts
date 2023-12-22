@@ -1,9 +1,9 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { User } from '../types/State';
 import { db } from '../services/firebase';
 import { banksModel, budgetsModel, configurationsModel,
   investmentsModel, transactionsModel } from './dataModel';
-import { AccountType, Banks, TransactionsKeys } from '../types/Data';
+import { AccountType, Banks, TransactionType } from '../types/Data';
 
 // type PrevData<T> = {
 //   [key: string]: T[];
@@ -19,10 +19,10 @@ import { AccountType, Banks, TransactionsKeys } from '../types/Data';
 //   key: KeyTrans;
 // };
 
-export type MetaCreateInfos = {
+export type MetaCreateInfos<T> = {
   uid: string;
   docName: string;
-  key: TransactionsKeys;
+  key: T;
 };
 
 // type TransactionsObj = {
@@ -45,43 +45,54 @@ const addNewUser = async (user: User): Promise<void> => {
   }
 };
 
-const create = async (
-  { uid, docName, key }: MetaCreateInfos,
-  prevData: any,
+const create = async <T>(
+  { uid, docName, key }: MetaCreateInfos<T>,
   newData: any,
 ) => {
+  if (typeof key !== 'string') throw new Error('Key must be a string');
   const resultData = {
-    ...prevData,
-    [key]: [...prevData[key], newData],
+    [key]: newData,
   };
-  await setDoc(doc(db, uid, docName), resultData);
+  await updateDoc(doc(db, uid, docName), resultData);
   return resultData;
 };
 
-const bulkCreate = async (
-  { uid, docName, key }: MetaCreateInfos,
-  prevData: any,
-  newData: any,
-) => {
-  const resultData = {
-    ...prevData,
-    [key]: [...prevData[key], ...newData],
-  };
-  await setDoc(doc(db, uid, docName), resultData);
-  return resultData;
-};
-
-const bulkUpdate = async (
-  { uid, docName, key }: MetaCreateInfos,
+const bulkUpdate = async <T>(
+  { uid, docName, key }: MetaCreateInfos<T>,
   prevData: any,
   newData: any[],
 ) => {
+  if (typeof key !== 'string') throw new Error('Key must be a string');
   const resultData = {
     ...prevData,
     [key]: newData,
   };
   await setDoc(doc(db, uid, docName), resultData);
   return resultData;
+};
+
+const updateBalance = async (
+  uid: string,
+  prevAccounts: AccountType[],
+  transactions: TransactionType[],
+) => {
+  const mult = {
+    Despesa: -1,
+    Receita: 1,
+    Transferência: 0,
+    Investimento: 0,
+  };
+  const accounts = [...prevAccounts];
+  transactions.forEach(({ account, value, type }) => {
+    const accountIndex = accounts.findIndex((acc) => acc.name === account);
+    if (accountIndex === -1) throw new Error('Conta não encontrada');
+    const copyAccount = { ...accounts[accountIndex] };
+    copyAccount.balance += (value * mult[type]);
+    accounts[accountIndex] = copyAccount;
+  });
+  const newData = { accounts };
+  await updateDoc(doc(db, uid, 'banks'), newData);
+  return newData;
 };
 
 // const update = async <T, R>(
@@ -215,8 +226,8 @@ export default {
   addNewUser,
   remove,
   create,
+  updateBalance,
   // update,
-  bulkCreate,
   bulkUpdate,
   // manyCreate,
   // manyUpdate,

@@ -15,7 +15,13 @@ export default function AccountsCard() {
         { !accounts.length ? (
           <p>Não há contas cadastradas.</p>
         ) : accounts.map(({ name, balance, real }) => (
-          <div className={ styles.card } key={ name }>
+          <div
+            className={ styles.card }
+            key={ name }
+            style={ balance - real !== 0
+              ? { borderBottom: '1px solid var(--light-red)' }
+              : { borderBottom: '1px solid var(--white)' } }
+          >
             <h3
               style={ balance - real !== 0
                 ? { color: 'var(--light-red)' }

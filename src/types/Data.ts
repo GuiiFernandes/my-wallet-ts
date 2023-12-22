@@ -93,8 +93,10 @@ export type ConfigurationsType = {
   currency: string,
 };
 
-export type TransactionsKeys = 'fixeds' | 'records' | 'transfers' | 'accounts';
+export type ObjectDatasKeys = TransactionKeys | 'accounts';
+
+export type TransactionKeys = 'fixeds' | 'records' | 'transfers';
 
 export type KeyByType = {
-  [key: string]: TransactionsKeys;
+  [key: string]: TransactionKeys;
 };
