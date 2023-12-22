@@ -19,9 +19,10 @@ export default function NewCategory() {
         className={ styles.containerForm }
         onSubmit={ async (e) => {
           e.preventDefault();
-          await firebaseFuncs.create({
-            uid, docName: 'configurations', key: 'categories',
-          }, [...categories, category]);
+          await firebaseFuncs.create(
+            { uid, docName: 'configurations', key: 'categories' },
+            [...categories, category].sort((a, b) => a.localeCompare(b)),
+          );
           dispatch(changeOperationls({ newCategory: false }));
         } }
       >
