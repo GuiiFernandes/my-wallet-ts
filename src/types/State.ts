@@ -1,4 +1,4 @@
-import { Data } from './Data';
+import { ConfigurationsType, Data } from './Data';
 
 export type User = {
   uid: string;
@@ -53,10 +53,15 @@ export type EditTransactionType = {
   editTransaction: string | null;
 };
 
+export type NewCategoryType = {
+  newCategory: boolean;
+};
+
 export type Operationals = EditTransactionType
 & NewAccountType
 & DeleteAccountType
 & MonthSelected
+& NewCategoryType
 & NewTransactionType
 & { [key: string]: boolean | DateSelected | string | null };
 

@@ -15,6 +15,7 @@ export const initialState = {
     year: date.getFullYear(),
   },
   editTransaction: null,
+  newCategory: false,
 };
 
 const OperationalsSlice = createSlice({

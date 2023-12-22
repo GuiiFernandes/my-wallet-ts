@@ -8,6 +8,7 @@ import Header from '../Header';
 import { StateRedux } from '../../types/State';
 import NewAccount from '../Forms/NewAccount';
 import NewTransaction from '../Forms/NewTransaction';
+import NewCategory from '../Forms/NewCategory';
 
 export default function AppLayout() {
   const { listenerData } = useLogin();
@@ -16,6 +17,7 @@ export default function AppLayout() {
     newAccount,
     newTransaction,
     editTransaction,
+    newCategory,
   } = useSelector(({ operationals }: StateRedux) => operationals);
 
   useEffect(() => {
@@ -35,6 +37,9 @@ export default function AppLayout() {
       )}
       { (newTransaction || editTransaction) && (
         <NewTransaction />
+      )}
+      { newCategory && (
+        <NewCategory />
       )}
     </main>
   );

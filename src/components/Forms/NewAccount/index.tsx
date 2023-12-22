@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
-import styles from '../FormLayout/formlayout.module.css';
 
 import FormLayout from '../FormLayout';
 import { NewAccountType, StateRedux } from '../../../types/State';
 import useLogin from '../../../hooks/useAccount';
 import { FormAccount } from '../../../types/LocalStates';
 import BtnsForm from '../BtnsForm';
+import styles from '../FormLayout/formlayout.module.css';
 
 const INITIAL_STATE: FormAccount = {
   name: '',
