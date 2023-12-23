@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--white);
+  border-radius: 16px;
+  max-width: 1200px;
+  width: 89%;
+}
+
+.menuBtn {
+  background-color: transparent;
+  gap: 10px;
+  color: var(--white);
+  border: none;
+  font-size: 2.2rem;
+  display: flex;
+  padding: 10px;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  font-weight: 700;
+  cursor: pointer;
+}
