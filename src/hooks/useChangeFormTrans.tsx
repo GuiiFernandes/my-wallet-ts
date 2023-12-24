@@ -8,6 +8,8 @@ import { StateRedux } from '../types/State';
 
 export default function useChangeFormTrans() {
   const { accounts } = useSelector(({ data }: StateRedux) => data.banks);
+  const { categories,
+    subCategories } = useSelector(({ data }: StateRedux) => data.configurations);
   const selectedAccountText = accounts[0].name;
 
   const INITIAL_STATE: FormTransaction = {
@@ -18,8 +20,10 @@ export default function useChangeFormTrans() {
     account: selectedAccountText,
     accountDestiny: accounts.filter(({ name }) => name !== selectedAccountText)[0].name,
     type: 'Despesa',
-    category: '',
-    subCategory: '',
+    category: categories[0],
+    subCategory: subCategories.length
+      ? subCategories.filter(({ category }) => category === categories[0])[0].name
+      : '',
     installments: 'U',
     period: 'Mensalmente',
   };

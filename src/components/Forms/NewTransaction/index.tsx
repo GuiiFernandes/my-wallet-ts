@@ -15,6 +15,7 @@ import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { changeOperationls } from '../../../redux/reducers/operationals';
 import { Transaction, Transfer } from '../../../classes/Transactions';
 import { toast } from '../../../utils/swal';
+import CategoriesSelects from './CategoriesSelects';
 // import { TransactionType } from '../../../types/Data';
 // import useTransaction from '../../../hooks/useTransaction';
 
@@ -165,7 +166,7 @@ export default function NewTransaction() {
             )) }
           </select>
         </label>
-        { form.type === TRANSFER_TYPE && (
+        { form.type === TRANSFER_TYPE ? (
           <label
             htmlFor="accountDestiny"
             className={ styles.label }
@@ -185,42 +186,14 @@ export default function NewTransaction() {
               )) }
             </select>
           </label>
-        )}
-        { form.type !== TRANSFER_TYPE && (
-          <>
-            <label htmlFor="category" className={ styles.label }>
-              Categoria:
-              <select
-                id="category"
-                className={ styles.input }
-                value={ form.category || '' }
-                onChange={ handleChange }
-              >
-                { categories.map((category) => (
-                  <option key={ category } value={ category } className="">
-                    { category }
-                  </option>
-                )) }
-              </select>
-            </label>
-            <label htmlFor="subCategory" className={ styles.label }>
-              Sub-Categoria:
-              <select
-                id="subCategory"
-                className={ styles.input }
-                value={ form.subCategory || '' }
-                onChange={ handleChange }
-              >
-                { subCategories
-                  .filter(({ category }) => category === form.category)
-                  .map(({ name }) => (
-                    <option key={ name } value={ name } className="">
-                      { name }
-                    </option>
-                  )) }
-              </select>
-            </label>
-          </>
+        ) : (
+          <CategoriesSelects
+            form={ form }
+            handleChange={ handleChange }
+            categories={ categories }
+            subCategories={ subCategories }
+            setForm={ setForm }
+          />
         )}
         { !editTransaction && (
           <PaymentMethod form={ form } setForm={ setForm } />

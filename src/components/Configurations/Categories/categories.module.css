@@ -1,15 +1,3 @@
-.addBtn {
-  background: transparent;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  color: var(--green);
-  border-radius: 2px;
-  font-size: 1.6rem;
-}
-
 .listCatContainer {
   display: flex;
   flex-direction: column;

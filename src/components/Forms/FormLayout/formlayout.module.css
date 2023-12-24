@@ -127,3 +127,25 @@
   line-height: 1.6rem;
   color: var(--light-gray);
 }
+
+.addBtn {
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: var(--light-green);
+}
+
+.addBtn:hover {
+  color: var(--blue);
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 300px;
+}

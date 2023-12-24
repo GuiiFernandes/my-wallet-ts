@@ -1,6 +1,4 @@
 import { useSelector } from 'react-redux';
-import { IoAdd } from 'react-icons/io5';
-
 import { useState } from 'react';
 
 import { StateRedux } from '../../../types/State';
@@ -9,13 +7,10 @@ import styles1 from './categories.module.css';
 import firebaseFuncs from '../../../utils/firebaseFuncs';
 import { SubCategory } from '../../../types/Data';
 import styles2 from '../configurations.module.css';
-
-type ObjInit = {
-  [key: string]: boolean;
-};
+import BtnAddCat from '../../Btns/BtnAddCat';
 
 const styles = { ...styles1, ...styles2 };
-const objInit: ObjInit = {};
+const objInit: Record<string, boolean> = {};
 
 export default function Categories() {
   const { uid } = useSelector(({ user }: StateRedux) => user);
@@ -54,18 +49,11 @@ export default function Categories() {
           <li key={ category } className={ styles.listCatItem }>
             <div className={ styles.categoryContainer }>
               {category}
-              <button
-                className={ styles.addBtn }
-                type="button"
-                onClick={ () => setAddSub({ ...addSub, [category]: !addSub[category] }) }
-                style={ {
-                  transform: addSub[category] ? 'rotate(45deg)' : 'rotate(0deg)',
-                  color: addSub[category] ? 'var(--light-red)' : 'var(--light-green)',
-                  transition: 'transform 0.3s ease-in',
-                } }
-              >
-                <IoAdd size="25px" className={ styles.addIcon } />
-              </button>
+              <BtnAddCat
+                keyState={ category }
+                addSub={ addSub }
+                setAddSub={ setAddSub }
+              />
             </div>
             <ul className={ styles.subCatContainer }>
               {subCategories

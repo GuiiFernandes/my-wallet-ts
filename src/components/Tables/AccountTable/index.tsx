@@ -47,7 +47,7 @@ export default function AccountTable() {
             <td className={ styles.td }>
               <NumericFormat
                 value={ balance }
-                allowNegative={ false }
+                allowNegative
                 displayType="text"
                 decimalScale={ 2 }
                 fixedDecimalScale
