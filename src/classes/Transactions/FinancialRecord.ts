@@ -5,6 +5,7 @@ import { AccountType, KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
 import { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import { installmentsTransform } from '../../utils/auxFunctions';
+import { FormTransaction } from '../../types/LocalStates';
 
 export default abstract class FinancialRecord {
   id: string;
@@ -52,7 +53,7 @@ export default abstract class FinancialRecord {
     t: 'transfers',
   };
 
-  constructor(form: Omit<TransactionType, 'id'>) {
+  constructor(form: FormTransaction) {
     this.account = form.account;
     this.date = form.date;
     this.description = form.description;
@@ -63,7 +64,7 @@ export default abstract class FinancialRecord {
     this.category = form.category || '';
     this.subCategory = form.subCategory || '';
     this.type = form.type;
-    this.id = this.generateId();
+    this.id = form.id || this.generateId();
     this.transactionId = form.transactionId || this.generateId();
     this.installments = form.installments;
   }
@@ -108,6 +109,17 @@ export default abstract class FinancialRecord {
     return id || uuidv4();
   }
 
+  protected editRecords(
+    transactions: TransactionType[],
+    editedRecord?: TransactionType,
+  ): [TransactionType[], TransactionType, TransactionType] | null {
+    const index = transactions.findIndex(({ id }) => id === this.id);
+    if (index === -1) return null;
+    const prevDataCopy = [...transactions];
+    prevDataCopy[index] = editedRecord || this.record;
+    return [prevDataCopy, transactions[index], prevDataCopy[index]];
+  }
+
   get record(): TransactionType {
     return {
       id: this.id,
@@ -131,9 +143,11 @@ export default abstract class FinancialRecord {
     transactions: TransactionsType,
     accounts: AccountType[],
   ): Promise<void>;
-  // abstract update(): void;
+  abstract edit(
+    uid: string,
+    transactions: TransactionsType,
+    accounts: AccountType[],
+  ): Promise<void>;
   // abstract remove(): void;
   // abstract changeStatus(): void;
-  // abstract listOne(): void;
-  // abstract listAll(): void;
 }

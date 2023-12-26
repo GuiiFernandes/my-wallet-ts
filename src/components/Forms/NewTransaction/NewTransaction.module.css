@@ -52,6 +52,7 @@
   background-color: transparent;
   border: none;
   color: var(--white);
+  cursor: pointer;
 }
 
 .spanAddCat {

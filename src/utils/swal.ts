@@ -39,7 +39,7 @@ const swalUpTrans = () => Swal.fire({
   confirmButtonColor: 'var(--light-green)',
   cancelButtonColor: 'var(--red)',
   confirmButtonText: 'Confirmar',
-  cancelButtonText: 'Não',
+  cancelButtonText: 'Cancelar',
   inputOptions: {
     false: 'Somente este',
     true: 'Este e os próximos',

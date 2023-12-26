@@ -41,7 +41,7 @@ export default function useLogin() {
       real: balanceNumber,
       type: form.type,
     };
-    await firebaseFuncs.create(
+    await firebaseFuncs.update(
       { uid, docName: 'banks', key: 'accounts' },
       [...accounts, newAccount],
     );
@@ -77,9 +77,9 @@ export default function useLogin() {
       account.real = Number(realForm[name]);
       accountsChanged[indexAccount] = account;
     }
-    await firebaseFuncs.bulkUpdate({
+    await firebaseFuncs.update({
       uid, docName: 'banks', key: 'accounts',
-    }, banks, accountsChanged);
+    }, accountsChanged);
   };
 
   return { deleteAccount, saveReal, createAccount };

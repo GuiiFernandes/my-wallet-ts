@@ -1,6 +1,6 @@
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
-import { FormWithoutId } from '../../types/LocalStates';
+import { FormTransaction } from '../../types/LocalStates';
 import firebaseFuncs from '../../utils/firebaseFuncs';
 import FinancialRecord from './FinancialRecord';
 
@@ -14,7 +14,7 @@ export default class Transfer extends FinancialRecord {
     U: 'U',
   };
 
-  constructor(form: FormWithoutId & { accountDestiny: string }) {
+  constructor(form: FormTransaction) {
     super(form);
     this.accountDestiny = form.accountDestiny;
   }
@@ -77,14 +77,14 @@ export default class Transfer extends FinancialRecord {
       // Se for uma transferência parcelada
       [newTransfers, newTransactions] = this.formatTrans();
     }
-    await firebaseFuncs.create<TransactionKeys>(
+    await firebaseFuncs.update<TransactionKeys>(
       meta,
       [...transactions[meta.key], ...newTransfers],
     );
     if (newTransactions.length) {
       const [expense, revenue] = newTransactions;
       await Promise.all([
-        await firebaseFuncs.create(
+        await firebaseFuncs.update(
           { ...meta, key: 'records' },
           [...transactions.records, ...newTransactions],
         ),

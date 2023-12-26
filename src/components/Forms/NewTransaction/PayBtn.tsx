@@ -1,8 +1,10 @@
 import { format } from 'date-fns';
 import { BiSolidLike, BiSolidDislike } from 'react-icons/bi';
 
+import { useSelector } from 'react-redux';
 import styles from './NewTransaction.module.css';
 import { PropsNewTrans } from '../../../types/LocalStates';
+import { StateRedux } from '../../../types/State';
 
 const typeTexts = {
   Despesa: 'Pagamento:',
@@ -12,10 +14,12 @@ const typeTexts = {
 };
 
 export default function PayBtn({ form, setForm }: PropsNewTrans) {
+  const { newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
+  const date = newTransaction ? form.date : format(new Date(), 'yyyy-MM-dd');
   const changePayment = () => {
     setForm({
       ...form,
-      payday: form.payday ? null : form.date,
+      payday: form.payday ? null : date,
     });
   };
 

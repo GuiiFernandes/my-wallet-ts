@@ -5,7 +5,7 @@ import { addMonths, differenceInMonths, endOfMonth,
 import { StateRedux } from '../types/State';
 import { TransactionType } from '../types/Data';
 import { InstallmentsTransType } from '../types/Others';
-import { FormTransaction } from '../types/LocalStates';
+import { TransactionType } from '../types/LocalStates';
 
 const TRANSFER_TYPE = 'Transferência';
 
@@ -24,7 +24,7 @@ export default function useTransaction() {
   const generateId = (id: string | undefined) => id || uuidv4();
 
   const formatedTransactions = (
-    form: FormTransaction,
+    form: TransactionType,
     interval?: Interval,
     transId?: string,
   ) => {
@@ -76,7 +76,7 @@ export default function useTransaction() {
 
   const searchAndFormatedTrans = (
     transactionUp: TransactionType | undefined,
-    form: FormTransaction,
+    form: TransactionType,
     key: KeyTrans,
   ) => {
     const { transactionId } = transactionUp || { transactionId: '' };
@@ -97,7 +97,7 @@ export default function useTransaction() {
   };
 
   const updateOneFixedTrans = async (
-    form: FormTransaction,
+    form: TransactionType,
     key: KeyTrans,
   ) => {
     const { isFixed } = form;
@@ -134,7 +134,7 @@ export default function useTransaction() {
     }
   };
 
-  const updateOneTrans = async (form: FormTransaction, key: KeyTrans) => {
+  const updateOneTrans = async (form: TransactionType, key: KeyTrans) => {
     const newForm: any = { ...form };
 
     delete newForm.accountDestiny;
@@ -152,14 +152,14 @@ export default function useTransaction() {
     );
   };
 
-  const updateTransaction2 = async (form: FormTransaction) => {
+  const updateTransaction2 = async (form: TransactionType) => {
     if (form.type === 'Transferência') {
       await analyzeTransfer(form);
     }
   };
 
   const updateTransaction = async (
-    form: FormTransaction,
+    form: TransactionType,
   ) => {
     const { type, isFixed } = form;
     const key = keyByType(false)[type];

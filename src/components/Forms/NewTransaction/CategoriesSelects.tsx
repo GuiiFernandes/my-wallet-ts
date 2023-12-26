@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BiSolidMessageSquareAdd } from 'react-icons/bi';
 
-import { set } from 'date-fns';
 import { SubCategory } from '../../../types/Data';
 import { FormTransaction } from '../../../types/LocalStates';
 import styles1 from '../FormLayout/formlayout.module.css';
@@ -37,7 +36,7 @@ export default function CategoriesSelects({
   const { uid } = useSelector(({ user }: StateRedux) => user);
 
   const addCategory = async () => {
-    await firebaseFuncs.create(
+    await firebaseFuncs.update(
       { uid, docName: 'configurations', key: 'categories' },
       [...categories, catForm.category].sort((a, b) => a.localeCompare(b)),
     );
@@ -51,7 +50,7 @@ export default function CategoriesSelects({
       category: form.category,
       name: catForm.subCategory,
     };
-    await firebaseFuncs.create(
+    await firebaseFuncs.update(
       { uid, docName: 'configurations', key: 'subCategories' },
       [...subCategories, subCat].sort((a, b) => a.name.localeCompare(b.name)),
     );

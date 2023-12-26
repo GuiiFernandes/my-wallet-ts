@@ -45,7 +45,7 @@ const addNewUser = async (user: User): Promise<void> => {
   }
 };
 
-const create = async <T>(
+const update = async <T>(
   { uid, docName, key }: MetaCreateInfos<T>,
   newData: any,
 ) => {
@@ -57,19 +57,17 @@ const create = async <T>(
   return resultData;
 };
 
-const bulkUpdate = async <T>(
-  { uid, docName, key }: MetaCreateInfos<T>,
-  prevData: any,
-  newData: any[],
-) => {
-  if (typeof key !== 'string') throw new Error('Key must be a string');
-  const resultData = {
-    ...prevData,
-    [key]: newData,
-  };
-  await setDoc(doc(db, uid, docName), resultData);
-  return resultData;
-};
+// const bulkUpdate = async <T>(
+//   { uid, docName, key }: MetaCreateInfos<T>,
+//   newData: any[],
+// ) => {
+//   if (typeof key !== 'string') throw new Error('Key must be a string');
+//   const resultData = {
+//     [key]: newData,
+//   };
+//   await updateDoc(doc(db, uid, docName), resultData);
+//   return resultData;
+// };
 
 const updateBalance = async (
   uid: string,
@@ -95,10 +93,18 @@ const updateBalance = async (
   return newData;
 };
 
+// const searchRecordAndUpdate = async <T>(
+//   { uid, docName, key }: MetaCreateInfos<T>,
+//   prevData: any,
+//   newData: any,
+// ) => {
+
+// };
+
 // const update = async <T, R>(
-//   { uid, docName, key }: MetaInfos,
-//   prevData: PrevData<T>,
-//   newData: NewData<R>,
+//   { uid, docName, key }: MetaCreateInfos<T>,
+//   prevData: any,
+//   newData: any,
 // ) => {
 //   const index = prevData[key].findIndex((item) => {
 //     const itemData = item as unknown as any;
@@ -225,10 +231,10 @@ const remove = async (
 export default {
   addNewUser,
   remove,
-  create,
+  update,
   updateBalance,
   // update,
-  bulkUpdate,
+  // bulkUpdate,
   // manyCreate,
   // manyUpdate,
 };

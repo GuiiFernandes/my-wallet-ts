@@ -1,4 +1,4 @@
-import { ConfigurationsType, Data } from './Data';
+import { Data } from './Data';
 
 export type User = {
   uid: string;

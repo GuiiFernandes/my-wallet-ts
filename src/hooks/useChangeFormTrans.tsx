@@ -13,6 +13,7 @@ export default function useChangeFormTrans() {
   const selectedAccountText = accounts[0].name;
 
   const INITIAL_STATE: FormTransaction = {
+    id: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     payday: null,
     description: '',

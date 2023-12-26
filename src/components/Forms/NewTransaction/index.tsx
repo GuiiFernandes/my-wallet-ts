@@ -1,7 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
-// import useTransaction from '../../../hooks/useTransaction';
+import { useEffect } from 'react';
+import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
 import Installment from './Installment';
@@ -13,10 +14,10 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { changeOperationls } from '../../../redux/reducers/operationals';
-import { Transaction, Transfer } from '../../../classes/Transactions';
+import FinancialRecord, { Transaction, Transfer } from '../../../classes/Transactions';
 import { toast } from '../../../utils/swal';
 import CategoriesSelects from './CategoriesSelects';
-// import { TransactionType } from '../../../types/Data';
+import { TransactionType } from '../../../types/Data';
 // import useTransaction from '../../../hooks/useTransaction';
 
 const styles = { ...style1, ...styles2 };
@@ -26,7 +27,7 @@ const indexes = [0, 1, 2, 3];
 
 export default function NewTransaction() {
   const dispatch = useDispatch();
-  // const { getAllTransactions } = useTransaction();
+  const { getAllTransactions } = useTransaction();
   const {
     form,
     setForm,
@@ -45,22 +46,20 @@ export default function NewTransaction() {
 
   const destinyAccounts = accounts.filter((account) => account.name !== form.account);
 
-  // const allTransactions: TransactionType[] = getAllTransactions();
+  const allTransactions: TransactionType[] = getAllTransactions();
 
-  // useEffect(() => {
-  //   const index = allTransactions.findIndex(({ id }) => id === editTransaction);
-  //   if (index !== -1) {
-  //     const { id, account, ...formTrans } = allTransactions[index];
-  //     const { installments, period } = formTrans;
-  //     const [originAcc, destinyAcc] = account.split('>');
-  //     setForm({
-  //       ...formTrans,
-  //       period,
-  //       account: originAcc,
-  //       accountDestiny: destinyAcc || '',
-  //     });
-  //   }
-  // }, [editTransaction]);
+  useEffect(() => {
+    const index = allTransactions.findIndex(({ id }) => id === editTransaction);
+    if (index !== -1) {
+      const { account, ...formTrans } = allTransactions[index];
+      const [originAcc, destinyAcc] = account.split('>');
+      setForm({
+        ...formTrans,
+        account: originAcc,
+        accountDestiny: destinyAcc || '',
+      });
+    }
+  }, [editTransaction]);
 
   return (
     <FormLayout>
@@ -69,14 +68,16 @@ export default function NewTransaction() {
         onSubmit={ async (e) => {
           e.preventDefault();
           try {
-            if (form.type !== TRANSFER_TYPE) {
-              const register = new Transaction(form);
+            const register: FinancialRecord = form.type !== TRANSFER_TYPE
+              ? new Transaction(form) : new Transfer(form);
+            if (newTransaction) {
               await register.create(uid, transactions, accounts);
             } else {
-              const resgister = new Transfer(form);
-              await resgister.create(uid, transactions, accounts);
+              await register.edit(uid, transactions, accounts);
             }
-            dispatch(changeOperationls({ newTransaction: !newTransaction }));
+            dispatch(changeOperationls({
+              newTransaction: false, editTransaction: null,
+            }));
           } catch (error) {
             toast.fire({
               icon: 'error',
