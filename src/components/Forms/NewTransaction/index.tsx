@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
 import { useEffect } from 'react';
+import { endOfMonth, format } from 'date-fns';
 import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
@@ -36,13 +37,14 @@ export default function NewTransaction() {
     handleChangeType,
     handleChangeAccount,
   } = useChangeFormTrans();
-  const { editTransaction,
+  const { editTransaction, monthSelected,
     newTransaction } = useSelector(({ operationals }: StateRedux) => operationals);
   const { uid } = useSelector(({ user }: StateRedux) => user);
   const { banks,
     configurations, transactions } = useSelector(({ data }: StateRedux) => data);
   const { accounts } = banks;
   const { categories, subCategories } = configurations;
+  const { month, year } = monthSelected;
 
   const destinyAccounts = accounts.filter((account) => account.name !== form.account);
 
@@ -55,6 +57,10 @@ export default function NewTransaction() {
       const [originAcc, destinyAcc] = account.split('>');
       setForm({
         ...formTrans,
+        date: format(
+          new Date(year, month - 1, Number(formTrans.date.split('-')[2])),
+          'yyyy-MM-dd',
+        ),
         account: originAcc,
         accountDestiny: destinyAcc || '',
       });
@@ -68,16 +74,20 @@ export default function NewTransaction() {
         onSubmit={ async (e) => {
           e.preventDefault();
           try {
+            let goDispatch = true;
             const register: FinancialRecord = form.type !== TRANSFER_TYPE
               ? new Transaction(form) : new Transfer(form);
             if (newTransaction) {
               await register.create(uid, transactions, accounts);
             } else {
-              await register.edit(uid, transactions, accounts);
+              const date = endOfMonth(new Date(year, month - 1));
+              goDispatch = await register.edit(uid, transactions, accounts, date);
             }
-            dispatch(changeOperationls({
-              newTransaction: false, editTransaction: null,
-            }));
+            if (goDispatch) {
+              dispatch(changeOperationls({
+                newTransaction: false, editTransaction: null,
+              }));
+            }
           } catch (error) {
             toast.fire({
               icon: 'error',

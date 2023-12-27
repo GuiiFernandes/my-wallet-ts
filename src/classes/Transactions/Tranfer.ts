@@ -24,7 +24,7 @@ export default class Transfer extends FinancialRecord {
     const records: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
     for (let i = 0; i < periodRepetion; i += 1) {
-      this.id = i === 0 ? this.id : super.generateId();
+      this.id = super.generateId();
       const value = this.formatedInstalments[this.installments]
         ? this.value : super.calculateValue(i);
       const date = super.calculateNextDate(i);

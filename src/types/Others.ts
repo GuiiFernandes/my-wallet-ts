@@ -1,4 +1,5 @@
-import { AccountType, Banks } from './Data';
+import { MetaCreateInfos } from '../utils/firebaseFuncs';
+import { AccountType, Banks, TransactionKeys, TransactionsType } from './Data';
 
 export type Interval = { initialDate: string, endDate: string };
 
@@ -20,3 +21,11 @@ export type RemoveAccountParams = [
   string,
   number,
 ];
+
+export type ParamupdateAllWithPayday = {
+  data: TransactionsType,
+  uid: string,
+  date: Date,
+  accounts: AccountType[],
+  meta: MetaCreateInfos<TransactionKeys>,
+};

@@ -48,7 +48,7 @@ const addNewUser = async (user: User): Promise<void> => {
 const update = async <T>(
   { uid, docName, key }: MetaCreateInfos<T>,
   newData: any,
-) => {
+): Promise<any> => {
   if (typeof key !== 'string') throw new Error('Key must be a string');
   const resultData = {
     [key]: newData,
@@ -81,13 +81,17 @@ const updateBalance = async (
     Investimento: 0,
   };
   const accounts = [...prevAccounts];
-  transactions.forEach(({ account, value, type }) => {
+  let change = false;
+  transactions.forEach(({ account, value, type, payday }) => {
+    if (!payday) return;
+    change = true;
     const accountIndex = accounts.findIndex((acc) => acc.name === account);
     if (accountIndex === -1) throw new Error('Conta não encontrada');
     const copyAccount = { ...accounts[accountIndex] };
     copyAccount.balance += (value * mult[type]);
     accounts[accountIndex] = copyAccount;
   });
+  if (!change) return;
   const newData = { accounts };
   await updateDoc(doc(db, uid, 'banks'), newData);
   return newData;

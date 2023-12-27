@@ -43,7 +43,7 @@ export type TransactionType = {
   category: string,
   subCategory: string,
   period: Period,
-  installment?: number,
+  installment: number,
   installments: string,
   transactionId?: string,
   date: string,

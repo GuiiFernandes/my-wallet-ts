@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { add, format } from 'date-fns';
+import { add, format, sub } from 'date-fns';
 
 import { AccountType, KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
@@ -60,7 +60,7 @@ export default abstract class FinancialRecord {
     this.value = form.value;
     this.period = form.period;
     this.payday = form.payday;
-    this.installment = 1;
+    this.installment = form.installment;
     this.category = form.category || '';
     this.subCategory = form.subCategory || '';
     this.type = form.type;
@@ -84,22 +84,39 @@ export default abstract class FinancialRecord {
     return Math.floor(monthInterval / transFrequency);
   }
 
+  protected calcIntervalEditRepeat(
+    recordsByFixeds: TransactionType[],
+    date: Date,
+    initialDate: Date,
+  ): number {
+    const transFrequency = installmentsTransform[this.period];
+    const endDate = sub(
+      date,
+      this.objNextDate(1)[recordsByFixeds[0].period || 'Mensalmente'],
+    );
+    return Math.floor((endDate.getTime() - initialDate.getTime()) / transFrequency);
+  }
+
   protected calculateValue(
     i: number = 1,
+    transaction?: TransactionType,
   ) {
-    const numInstallments = Number(this.installments);
-    const baseValue = Math.floor((this.value / numInstallments) * 100) / 100;
+    const trans = transaction || this.record;
+    const numInstallments = Number(trans.installments);
+    const baseValue = Math.floor((trans.value / numInstallments) * 100) / 100;
     const totalBase = baseValue * numInstallments;
-    const restValue = (this.value - totalBase) * 100;
+    const restValue = (trans.value - totalBase) * 100;
     return i < restValue - 1 ? baseValue + 0.01 : baseValue;
   }
 
   protected calculateNextDate(
     i: number = 1,
+    transaction?: TransactionType,
   ): string {
-    const periodValid = this.period || 'Mensalmente';
+    const trans = transaction || this.record;
+    const periodValid = trans.period || 'Mensalmente';
     const nextDate = add(
-      new Date(`${this.date}T00:00`),
+      new Date(`${trans.date}T00:00`),
       this.objNextDate(i)[periodValid],
     );
     return format(nextDate, 'yyyy-MM-dd');
@@ -109,15 +126,17 @@ export default abstract class FinancialRecord {
     return id || uuidv4();
   }
 
-  protected editRecords(
+  protected editFinRecords(
     transactions: TransactionType[],
     editedRecord?: TransactionType,
+    key: keyof TransactionType = 'transactionId',
   ): [TransactionType[], TransactionType, TransactionType] | null {
-    const index = transactions.findIndex(({ id }) => id === this.id);
+    const index = transactions
+      .findIndex((trans) => trans[key] === this[key]);
     if (index === -1) return null;
-    const prevDataCopy = [...transactions];
-    prevDataCopy[index] = editedRecord || this.record;
-    return [prevDataCopy, transactions[index], prevDataCopy[index]];
+    const data = [...transactions];
+    data[index] = editedRecord || this.record;
+    return [data, transactions[index], data[index]];
   }
 
   get record(): TransactionType {
@@ -147,7 +166,8 @@ export default abstract class FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<void>;
+    date: Date,
+  ): Promise<boolean>;
   // abstract remove(): void;
   // abstract changeStatus(): void;
 }

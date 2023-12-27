@@ -8,13 +8,18 @@ import { StateRedux } from '../types/State';
 
 export default function useChangeFormTrans() {
   const { accounts } = useSelector(({ data }: StateRedux) => data.banks);
+  const { monthSelected } = useSelector(({ operationals }: StateRedux) => operationals);
   const { categories,
     subCategories } = useSelector(({ data }: StateRedux) => data.configurations);
+  const { month, year } = monthSelected;
   const selectedAccountText = accounts[0].name;
 
   const INITIAL_STATE: FormTransaction = {
     id: '',
-    date: format(new Date(), 'yyyy-MM-dd'),
+    date: format(
+      new Date(year, month - 1, new Date().getDate()),
+      'yyyy-MM-dd',
+    ),
     payday: null,
     description: '',
     value: 0,
@@ -25,6 +30,7 @@ export default function useChangeFormTrans() {
     subCategory: subCategories.length
       ? subCategories.filter(({ category }) => category === categories[0])[0].name
       : '',
+    installment: 1,
     installments: 'U',
     period: 'Mensalmente',
   };
