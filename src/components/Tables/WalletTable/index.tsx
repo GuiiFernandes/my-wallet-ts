@@ -66,7 +66,7 @@ export default function WalletTable() {
                 } }
               >
                 { payday
-                  ? format(new Date(payday), 'dd/MM/yyyy')
+                  ? format(new Date(`${payday}T00:00`), 'dd/MM/yyyy')
                   : '-'}
               </td>
               <td className={ styles.td }>

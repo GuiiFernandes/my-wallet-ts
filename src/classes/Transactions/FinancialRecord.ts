@@ -85,15 +85,11 @@ export default abstract class FinancialRecord {
   }
 
   protected calcIntervalEditRepeat(
-    recordsByFixeds: TransactionType[],
-    date: Date,
+    date: string,
     initialDate: Date,
   ): number {
     const transFrequency = installmentsTransform[this.period];
-    const endDate = sub(
-      date,
-      this.objNextDate(1)[recordsByFixeds[0].period || 'Mensalmente'],
-    );
+    const endDate = new Date(`${date}T00:00`);
     return Math.floor((endDate.getTime() - initialDate.getTime()) / transFrequency);
   }
 

@@ -21,11 +21,3 @@ export type RemoveAccountParams = [
   string,
   number,
 ];
-
-export type ParamupdateAllWithPayday = {
-  data: TransactionsType,
-  uid: string,
-  date: Date,
-  accounts: AccountType[],
-  meta: MetaCreateInfos<TransactionKeys>,
-};
