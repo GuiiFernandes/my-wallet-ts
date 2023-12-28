@@ -1,5 +1,4 @@
-import { MetaCreateInfos } from '../utils/firebaseFuncs';
-import { AccountType, Banks, TransactionKeys, TransactionsType } from './Data';
+import { AccountType, Banks } from './Data';
 
 export type Interval = { initialDate: string, endDate: string };
 

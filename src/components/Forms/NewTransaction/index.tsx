@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
 import { useEffect } from 'react';
-import { endOfMonth, format } from 'date-fns';
+import { format } from 'date-fns';
 import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
@@ -19,7 +19,6 @@ import FinancialRecord, { Transaction, Transfer } from '../../../classes/Transac
 import { toast } from '../../../utils/swal';
 import CategoriesSelects from './CategoriesSelects';
 import { TransactionType } from '../../../types/Data';
-// import useTransaction from '../../../hooks/useTransaction';
 
 const styles = { ...style1, ...styles2 };
 

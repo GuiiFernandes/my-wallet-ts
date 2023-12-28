@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { add, format, sub } from 'date-fns';
+import { add, format } from 'date-fns';
 
 import { AccountType, KeyByType, Period, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
