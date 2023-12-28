@@ -1,6 +1,7 @@
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
+import { YearAndMonth } from '../../types/Others';
 import firebaseFuncs from '../../utils/firebaseFuncs';
 import FinancialRecord from './FinancialRecord';
 
@@ -91,5 +92,32 @@ export default class Transfer extends FinancialRecord {
         await firebaseFuncs.updateBalance(uid, accounts, [expense, revenue]),
       ]);
     }
+  }
+
+  async edit(
+    uid: string,
+    transactions: TransactionsType,
+    accounts: AccountType[],
+    yearAndMonth: YearAndMonth,
+  ): Promise<any> {
+    const meta = super.createMeta<TransactionKeys>(uid);
+    if (this.installments === 'U') {
+      // Se for uma transferência única
+      const [formatedTransfers, formatedRecords] = this.formatTrans(1);
+      const [newTransfers] = super
+        .editFinRecords(transactions[meta.key], formatedTransfers, 'id');
+      console.log(formatedTransfers);
+      console.log(formatedRecords);
+      const [newRecords, prevRecords, nextRecords] = super
+        .editFinRecords(transactions.records, formatedRecords, 'id');
+      const arrayNewBalance = this.createArrayBalance(prevRecords, nextRecords);
+      await Promise.all([
+        firebaseFuncs.update(meta, newTransfers),
+        firebaseFuncs.update({ ...meta, key: 'records' }, newRecords),
+        firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance),
+      ]);
+      return [newTransfers, newRecords, arrayNewBalance];
+    }
+    return null;
   }
 }

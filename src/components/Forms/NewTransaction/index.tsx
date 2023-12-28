@@ -23,7 +23,7 @@ import { TransactionType } from '../../../types/Data';
 const styles = { ...style1, ...styles2 };
 
 const TRANSFER_TYPE = 'Transferência';
-const indexes = [0, 1, 2, 3];
+const indexes = [0, 1, 2];
 
 export default function NewTransaction() {
   const dispatch = useDispatch();

@@ -26,11 +26,11 @@ const infos = [
     color: 'var(--light-gray)',
     icon: (<FaMoneyBillTransfer size="30px" />),
   },
-  {
-    title: 'Investimento',
-    color: 'var(--blue)',
-    icon: (<TbPigMoney size="30px" />),
-  },
+  // {
+  //   title: 'Investimento',
+  //   color: 'var(--blue)',
+  //   icon: (<TbPigMoney size="30px" />),
+  // },
 ];
 
 export default function TypeBtn({ index, type, handleChange }: Props) {

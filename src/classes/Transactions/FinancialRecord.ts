@@ -124,16 +124,42 @@ export default abstract class FinancialRecord {
 
   protected editFinRecords(
     transactions: TransactionType[],
-    editedRecord?: TransactionType,
+    editedRecord?: TransactionType[],
     key: keyof TransactionType = 'transactionId',
-  ): [TransactionType[], TransactionType, TransactionType] | null {
-    const newRecord = editedRecord || this.record;
-    const index = transactions
-      .findIndex((trans) => trans[key] === newRecord[key]);
-    if (index === -1) return null;
+  ): [TransactionType[], TransactionType[], TransactionType[]] {
+    const newRecord = editedRecord || [this.record];
     const data = [...transactions];
-    data[index] = newRecord;
-    return [data, transactions[index], data[index]];
+    const prevRecords: TransactionType[] = [];
+    const nextRecords: TransactionType[] = [];
+    console.log(transactions);
+    console.log(newRecord);
+    newRecord.forEach((record) => {
+      const index = transactions
+        .findIndex((trans) => trans[key] === record[key]);
+      if (index === -1) throw new Error('Record not found');
+      data[index] = record;
+      prevRecords.push(transactions[index]);
+      nextRecords.push(record);
+    });
+    return [data, prevRecords, nextRecords];
+  }
+
+  protected createArrayBalance(
+    prevRecord: TransactionType[],
+    newRecord: TransactionType[],
+  ) {
+    const arrayNewBalance: TransactionType[] = [];
+    prevRecord.forEach((record) => {
+      if (record.payday) {
+        arrayNewBalance.push({ ...record, value: -record.value });
+      }
+    });
+    newRecord.forEach((record) => {
+      if (record.payday) {
+        arrayNewBalance.push(record);
+      }
+    });
+    return arrayNewBalance;
   }
 
   get record(): TransactionType {
@@ -164,7 +190,7 @@ export default abstract class FinancialRecord {
     transactions: TransactionsType,
     accounts: AccountType[],
     yearAndMonth: YearAndMonth,
-  ): Promise<boolean>;
+  ): Promise<any>;
   // abstract remove(): void;
   // abstract changeStatus(): void;
 }

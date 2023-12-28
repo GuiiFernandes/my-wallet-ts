@@ -55,8 +55,6 @@ export default function useTransaction() {
     const fixedsByDate: TransactionType[] = getByDate(fixeds, initialMonth);
     const transfersByDate: TransactionType[] = getByDate(transfers, initialMonth);
 
-    console.log(fixedsByDate);
-
     const setRecordsTransIdAndDate = new Set(recorsByDate
       .map(({ transactionId, date }) => `${transactionId}-${date.split('-')[2]}`));
     const setTransfersTransId = new Set(transfers
@@ -71,7 +69,6 @@ export default function useTransaction() {
     const recordsFilterTransfers = recorsByDate
       .filter(({ transactionId }) => !setTransfersTransId.has(transactionId));
 
-    console.log(fixedFilterTransactions);
     const transferWithPayday = transfersfiltered.map((transfer) => {
       const record = recorsByDate
         .find(({ transactionId, date }) => (
