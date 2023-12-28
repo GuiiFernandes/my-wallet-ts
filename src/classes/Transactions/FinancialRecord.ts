@@ -6,6 +6,7 @@ import { AccountType, KeyByType, Period, TransactionType,
 import { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import { installmentsTransform } from '../../utils/auxFunctions';
 import { FormTransaction } from '../../types/LocalStates';
+import { YearAndMonth } from '../../types/Others';
 
 export default abstract class FinancialRecord {
   id: string;
@@ -34,7 +35,7 @@ export default abstract class FinancialRecord {
 
   type: TypesTransaction;
 
-  objNextDate(i: number) {
+  objNextDate(i: number): { [key in string]: { [key2 in string]: number } } {
     return {
       Diariamente: { days: 1 * i },
       Semanalmente: { weeks: 1 * i },
@@ -85,11 +86,10 @@ export default abstract class FinancialRecord {
   }
 
   protected calcIntervalEditRepeat(
-    date: string,
+    endDate: Date,
     initialDate: Date,
   ): number {
     const transFrequency = installmentsTransform[this.period];
-    const endDate = new Date(`${date}T00:00`);
     return Math.floor((endDate.getTime() - initialDate.getTime()) / transFrequency);
   }
 
@@ -127,11 +127,12 @@ export default abstract class FinancialRecord {
     editedRecord?: TransactionType,
     key: keyof TransactionType = 'transactionId',
   ): [TransactionType[], TransactionType, TransactionType] | null {
+    const newRecord = editedRecord || this.record;
     const index = transactions
-      .findIndex((trans) => trans[key] === this[key]);
+      .findIndex((trans) => trans[key] === newRecord[key]);
     if (index === -1) return null;
     const data = [...transactions];
-    data[index] = editedRecord || this.record;
+    data[index] = newRecord;
     return [data, transactions[index], data[index]];
   }
 
@@ -162,7 +163,7 @@ export default abstract class FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-    date: Date,
+    yearAndMonth: YearAndMonth,
   ): Promise<boolean>;
   // abstract remove(): void;
   // abstract changeStatus(): void;

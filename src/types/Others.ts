@@ -21,3 +21,5 @@ export type RemoveAccountParams = [
   string,
   number,
 ];
+
+export type YearAndMonth = { year: number, month: number };

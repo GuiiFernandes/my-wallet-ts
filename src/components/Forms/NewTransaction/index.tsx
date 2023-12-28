@@ -80,8 +80,8 @@ export default function NewTransaction() {
             if (newTransaction) {
               await register.create(uid, transactions, accounts);
             } else {
-              const date = endOfMonth(new Date(year, month - 1));
-              goDispatch = await register.edit(uid, transactions, accounts, date);
+              goDispatch = await register
+                .edit(uid, transactions, accounts, { year, month });
             }
             if (goDispatch) {
               dispatch(changeOperationls({

@@ -4,6 +4,7 @@ import { AccountType, TransactionKeys,
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import { swalUpTrans } from '../../utils/swal';
 import FinancialRecord from './FinancialRecord';
+import { YearAndMonth } from '../../types/Others';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -49,7 +50,7 @@ export default class Transaction extends FinancialRecord {
         const newTransactions = this.formatTrans(repetitions);
         await firebaseFuncs.update(
           meta,
-          [transactions[meta.key], ...newTransactions],
+          [...transactions[meta.key], ...newTransactions],
         );
         if (this.payday) {
           await Promise.all([firebaseFuncs.update(
@@ -87,7 +88,7 @@ export default class Transaction extends FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-    date: Date,
+    yearAndMonth: YearAndMonth,
   ): Promise<boolean> {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
@@ -104,7 +105,7 @@ export default class Transaction extends FinancialRecord {
     }
     if (this.installments === 'F') {
       return this
-        .editFixed({ uid, meta }, transactions, accounts, format(date, DATE_FORMAT));
+        .editFixed({ uid, meta }, transactions, accounts, yearAndMonth);
     }
     return false;
   }
@@ -113,15 +114,16 @@ export default class Transaction extends FinancialRecord {
     { uid, meta }: { uid: string, meta: MetaCreateInfos<TransactionKeys> },
     transactions: TransactionsType,
     accounts: AccountType[],
-    date: string,
+    yearAndMonth: YearAndMonth,
   ): Promise<boolean> {
     const { value } = await swalUpTrans();
     if (value === 'true') {
-      await this.updateThisAndUpcomming(transactions, date, meta, { uid, accounts });
+      await this
+        .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
       return true;
     }
     if (value === 'false') {
-      await this.updateThisOnly(meta, transactions, accounts, { uid, date });
+      await this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
       return true;
     }
     return false;
@@ -129,32 +131,42 @@ export default class Transaction extends FinancialRecord {
 
   private async updateThisAndUpcomming(
     transactions: TransactionsType,
-    date: string,
+    { year, month }: YearAndMonth,
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
+    const day = Number(this.date.split('-')[2]);
     const recordsByFixeds = transactions.records
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const fixedTrans = transactions
-      .fixeds.find(({ transactionId }) => transactionId === this.transactionId);
-    if (!fixedTrans) throw new Error('Fixed transaction not found');
-    const initialDate = recordsByFixeds[0].date
-      ? new Date(this.calculateNextDate(1, recordsByFixeds[0]))
-      : new Date(fixedTrans.date);
-    const repetitions = super.calcIntervalEditRepeat(date, initialDate);
+    const fixedTrans = transactions.fixeds
+      .filter(({ transactionId }) => transactionId === this.transactionId)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    if (!fixedTrans.length) throw new Error('Fixed transaction not found');
 
+    const initialDate = recordsByFixeds[0]?.date
+      ? new Date(this.calculateNextDate(1, recordsByFixeds[0]))
+      : new Date(`${fixedTrans[0].date}T00:00`);
+    const endDate = new Date(year, month - 1, day, 0);
+    const repetitions = super.calcIntervalEditRepeat(endDate, initialDate);
     const newTransactions = this.formatTrans(
       repetitions,
-      { ...fixedTrans, date: format(initialDate, DATE_FORMAT) },
+      { ...fixedTrans[0], date: format(initialDate, DATE_FORMAT) },
     );
-    const newFixed = { ...this.record,
-      date: fixedTrans.date,
-      payday: null,
-      id: fixedTrans.id };
-    const result = super.editFinRecords(transactions[meta.key], newFixed);
-    if (!result) throw new Error('Record not found');
-    const [newData] = result;
+    let newData: TransactionType[] = [];
+    for (let i = 0; i < fixedTrans.length; i += 1) {
+      const newFixed = { ...this.record,
+        date: fixedTrans[i].date,
+        payday: null,
+        id: fixedTrans[i].id };
+
+      const trans = i === 0 ? transactions[meta.key] : newData;
+
+      const result = super.editFinRecords(trans, newFixed, 'id');
+      if (!result) throw new Error('Record not found');
+      const [data] = result;
+      newData = data;
+    }
     const [data] = await Promise.all([
       firebaseFuncs.update(
         { ...meta, key: 'records' },
@@ -166,9 +178,9 @@ export default class Transaction extends FinancialRecord {
       await this.updateThisOnly(
         meta,
         data,
-        accounts,
+        { year, month },
         { uid,
-          date },
+          accounts },
       );
     }
   }
@@ -176,8 +188,8 @@ export default class Transaction extends FinancialRecord {
   private async updateThisOnly(
     meta: MetaCreateInfos<TransactionKeys>,
     transactions: TransactionsType,
-    accounts: AccountType[],
-    { uid, date }: { uid: string, date: string },
+    { year, month }: YearAndMonth,
+    { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const validMeta = { ...meta, key: 'records' };
     const result = super.editFinRecords(transactions.records, undefined, 'id');
@@ -190,7 +202,6 @@ export default class Transaction extends FinancialRecord {
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
     } else {
-      const [year, month] = date.split('-');
       const day = Number(super.record.date.split('-')[2]);
       const newDate = new Date(`${year}-${month}-${day}T00:00`);
       const newTransaction = { ...super.record,
