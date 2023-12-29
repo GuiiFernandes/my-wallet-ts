@@ -75,7 +75,7 @@ export default function useTransaction() {
           transfer.transactionId === transactionId && transfer.date === date
         ));
       if (record) {
-        return { ...transfer, payday: record.payday };
+        return { ...transfer, payday: record.payday, value: record.value };
       }
       return transfer;
     });

@@ -143,16 +143,16 @@ export default abstract class FinancialRecord {
   }
 
   protected createArrayBalance(
-    prevRecord: TransactionType[],
-    newRecord: TransactionType[],
+    prevRecord?: TransactionType[],
+    newRecord?: TransactionType[],
   ) {
     const arrayNewBalance: TransactionType[] = [];
-    prevRecord.forEach((record) => {
+    prevRecord?.forEach((record) => {
       if (record.payday) {
         arrayNewBalance.push({ ...record, value: -record.value });
       }
     });
-    newRecord.forEach((record) => {
+    newRecord?.forEach((record) => {
       if (record.payday) {
         arrayNewBalance.push(record);
       }

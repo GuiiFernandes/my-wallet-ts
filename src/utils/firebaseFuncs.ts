@@ -86,6 +86,7 @@ const updateBalance = async (
     if (!payday) return;
     change = true;
     const accountIndex = accounts.findIndex((acc) => acc.name === account);
+
     if (accountIndex === -1) throw new Error('Conta não encontrada');
     const copyAccount = { ...accounts[accountIndex] };
     copyAccount.balance += (value * mult[type]);

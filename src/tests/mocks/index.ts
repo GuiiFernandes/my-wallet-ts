@@ -1,4 +1,4 @@
-import { TransactionType, TransactionsType } from '../../types/Data';
+import { AccountType, TransactionType, TransactionsType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
 
 const PAYDAY = '2023-12-22';
@@ -121,8 +121,14 @@ const transactions: TransactionsType = {
   fixeds: [],
 };
 
+const accounts: AccountType[] = [
+  { id: 1, name: 'Itaú', balance: 100, real: 90, type: 'conta-corrente' },
+  { id: 2, name: 'Carteira', balance: 100, real: 0, type: 'carteira' },
+];
+
 export default {
   formTransfer,
   transactions,
   transfers,
+  accounts,
 };
