@@ -3,6 +3,7 @@ import { AccountType, TransactionKeys,
 import { FormTransaction } from '../../types/LocalStates';
 import { YearAndMonth } from '../../types/Others';
 import firebaseFuncs from '../../utils/firebaseFuncs';
+import { swalUpTrans } from '../../utils/swal';
 import FinancialRecord from './FinancialRecord';
 
 type FormatedTrans = [TransactionType[], TransactionType[]];
@@ -32,7 +33,7 @@ export default class Transfer extends FinancialRecord {
       this.period = this.installments === 'U' ? '' : this.period;
       const payday = i === 0 ? this.payday : null;
       const account = `${this.account}>${this.accountDestiny}`;
-      const newData = super.record;
+      const newData = { ...super.record, category: '', subCategory: '' };
       newTransfers.push({ ...newData, value, date, payday: null, account });
       if (payday) {
         records.push({
@@ -58,7 +59,7 @@ export default class Transfer extends FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<[TransactionType[], TransactionType[]]> {
+  ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     let [newTransfers, newTransactions]: FormatedTrans = [[], []];
     if (this.installments === 'U') {
@@ -113,6 +114,16 @@ export default class Transfer extends FinancialRecord {
       transCopy.records = filteredRecords;
       const result = await this.create(uid, transCopy, accounts);
       return result;
+    }
+    if (this.installments === 'F') {
+      const { value } = await swalUpTrans();
+      if (value === 'true') {
+        return this
+          .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+      }
+      if (value === 'false') {
+        return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
+      }
     }
     return null;
   }

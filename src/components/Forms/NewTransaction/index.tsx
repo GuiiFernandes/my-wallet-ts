@@ -82,6 +82,7 @@ export default function NewTransaction() {
               goDispatch = await register
                 .edit(uid, transactions, accounts, { year, month });
             }
+            console.log('goDispatch', goDispatch);
             if (goDispatch) {
               dispatch(changeOperationls({
                 newTransaction: false, editTransaction: null,

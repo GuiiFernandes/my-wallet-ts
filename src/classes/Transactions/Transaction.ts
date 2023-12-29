@@ -32,19 +32,17 @@ export default class Transaction extends FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<void> {
+  ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
-      // Se for uma receita única
       this.period = '';
       const newTransaction = super.record;
-      await Promise.all([firebaseFuncs.update(
+      return Promise.all([firebaseFuncs.update(
         meta,
         [...transactions[meta.key], newTransaction],
       ),
       firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
-    } else if (this.installments === 'F') {
-      // Se for uma receita fixa
+    } if (this.installments === 'F') {
       const repetitions = super.calcIntervalMonthRepeat();
       if (repetitions > 1) {
         const newTransactions = this.formatTrans(repetitions);
@@ -59,29 +57,28 @@ export default class Transaction extends FinancialRecord {
           ),
           firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
         }
-      } else {
-        await firebaseFuncs.update(meta, [
-          ...transactions[meta.key],
-          { ...super.record, payday: null },
-        ]);
-        if (this.payday) {
-          const newTransaction = super.record;
-          await Promise.all([firebaseFuncs.update(
-            { ...meta, key: 'records' },
-            [...transactions[meta.key], newTransaction],
-          ),
-          firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
-        }
+        return [newTransactions, []];
       }
-    } else {
-      // Se for uma receita parcelada
-      const newTransactions = this.formatTrans();
-      await Promise.all([await firebaseFuncs.update(
-        meta,
-        [...transactions[meta.key], ...newTransactions],
-      ),
-      firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
+      await firebaseFuncs.update(meta, [
+        ...transactions[meta.key],
+        { ...super.record, payday: null },
+      ]);
+      if (this.payday) {
+        const newTransaction = super.record;
+        await Promise.all([firebaseFuncs.update(
+          { ...meta, key: 'records' },
+          [...transactions[meta.key], newTransaction],
+        ),
+        firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
+      }
+      return [{ ...super.record, payday: null }, super.record];
     }
+    const newTransactions = this.formatTrans();
+    return Promise.all([await firebaseFuncs.update(
+      meta,
+      [...transactions[meta.key], ...newTransactions],
+    ),
+    firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
   }
 
   async edit(
@@ -103,22 +100,44 @@ export default class Transaction extends FinancialRecord {
       return [newData, arrayNewBalance];
     }
     if (this.installments === 'F') {
-      return this
-        .editFixed({ uid, meta }, transactions, accounts, yearAndMonth);
+      const { value } = await swalUpTrans();
+      if (value === 'true') {
+        return this
+          .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+      }
+      if (value === 'false') {
+        return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
+      }
+    } else {
+      return this.updateInstallments(transactions, yearAndMonth, meta, { uid, accounts });
     }
     return null;
   }
 
-  private async editFixed(
-    { uid, meta }: { uid: string, meta: MetaCreateInfos<TransactionKeys> },
+  private async updateInstallments(
     transactions: TransactionsType,
-    accounts: AccountType[],
     yearAndMonth: YearAndMonth,
-  ): Promise<any> {
+    meta: MetaCreateInfos<TransactionKeys>,
+    { uid, accounts }: { uid: string, accounts: AccountType[] },
+  ) {
     const { value } = await swalUpTrans();
     if (value === 'true') {
-      return this
-        .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+      const filteredTrans = transactions.records
+        .filter(({ transactionId, date }) => transactionId === this.transactionId
+          && date >= this.date);
+      const editedTrans = filteredTrans
+        .map(({ type, installment, installments, id, transactionId, date }) => ({
+          ...this.record, type, installment, installments, id, transactionId, date,
+        }));
+      const [data, prevRecord, newRecord] = super
+        .editFinRecords(transactions.records, editedTrans, 'id');
+      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+      await Promise.all([
+        firebaseFuncs.update({ ...meta, key: 'records' }, data),
+        arrayNewBalance.length
+          ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
+      ]);
+      return [data, arrayNewBalance];
     }
     if (value === 'false') {
       return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
@@ -191,16 +210,17 @@ export default class Transaction extends FinancialRecord {
         arrayNewBalance.length
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
-    } else {
-      const day = Number(super.record.date.split('-')[2]);
-      const newDate = new Date(`${year}-${month}-${day}T00:00`);
-      const newTransaction = { ...super.record,
-        id: super.generateId(),
-        date: format(newDate, DATE_FORMAT) };
-      await Promise.all([
-        firebaseFuncs.update(validMeta, [...transactions.records, newTransaction]),
-        firebaseFuncs.updateBalance(uid, accounts, [newTransaction]),
-      ]);
+      return [newData, arrayNewBalance];
     }
+    const day = Number(super.record.date.split('-')[2]);
+    const newDate = new Date(`${year}-${month}-${day}T00:00`);
+    const newTransaction = { ...super.record,
+      id: super.generateId(),
+      date: format(newDate, DATE_FORMAT) };
+    await Promise.all([
+      firebaseFuncs.update(validMeta, [...transactions.records, newTransaction]),
+      firebaseFuncs.updateBalance(uid, accounts, [newTransaction]),
+    ]);
+    return [[newTransaction], []];
   }
 }
