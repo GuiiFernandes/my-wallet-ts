@@ -112,8 +112,7 @@ export default class Transfer extends FinancialRecord {
         .filter(({ transactionId }) => transactionId !== this.transactionId);
       transCopy[meta.key] = filteredTransfers;
       transCopy.records = filteredRecords;
-      const result = await this.create(uid, transCopy, accounts);
-      return result;
+      return this.create(uid, transCopy, accounts);
     }
     if (this.installments === 'F') {
       const { value } = await swalUpTrans();
