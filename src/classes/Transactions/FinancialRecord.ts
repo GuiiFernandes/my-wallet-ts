@@ -127,13 +127,13 @@ export default abstract class FinancialRecord {
     editedRecord?: TransactionType[],
     key: keyof TransactionType = 'transactionId',
   ): [TransactionType[], TransactionType[], TransactionType[]] {
-    const newRecord = editedRecord || [this.record];
+    const newRecords = editedRecord || [this.record];
     const data = [...transactions];
     const prevRecords: TransactionType[] = [];
     const nextRecords: TransactionType[] = [];
     console.log(transactions);
-    console.log(newRecord);
-    newRecord.forEach((record) => {
+    console.log(newRecords);
+    newRecords.forEach((record) => {
       const index = transactions
         .findIndex((trans) => trans[key] === record[key]);
       if (index === -1) throw new Error('Record not found');
@@ -184,7 +184,7 @@ export default abstract class FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<void>;
+  ): Promise<[TransactionType[], TransactionType[]] | void>;
   abstract edit(
     uid: string,
     transactions: TransactionsType,

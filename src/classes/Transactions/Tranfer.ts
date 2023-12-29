@@ -20,12 +20,12 @@ export default class Transfer extends FinancialRecord {
     this.accountDestiny = form.accountDestiny;
   }
 
-  private formatTrans(repetitions?: number): FormatedTrans {
+  private formatTrans(repetitions?: number, editTrans: boolean = false): FormatedTrans {
     const newTransfers: TransactionType[] = [];
     const records: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
     for (let i = 0; i < periodRepetion; i += 1) {
-      this.id = super.generateId();
+      this.id = editTrans ? this.id : super.generateId();
       const value = this.formatedInstalments[this.installments]
         ? this.value : super.calculateValue(i);
       const date = super.calculateNextDate(i);
@@ -58,7 +58,7 @@ export default class Transfer extends FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<void> {
+  ): Promise<[TransactionType[], TransactionType[]]> {
     const meta = super.createMeta<TransactionKeys>(uid);
     let [newTransfers, newTransactions]: FormatedTrans = [[], []];
     if (this.installments === 'U') {
@@ -92,6 +92,7 @@ export default class Transfer extends FinancialRecord {
         await firebaseFuncs.updateBalance(uid, accounts, [expense, revenue]),
       ]);
     }
+    return [newTransfers, newTransactions];
   }
 
   async edit(
@@ -103,20 +104,15 @@ export default class Transfer extends FinancialRecord {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
       // Se for uma transferência única
-      const [formatedTransfers, formatedRecords] = this.formatTrans(1);
-      const [newTransfers] = super
-        .editFinRecords(transactions[meta.key], formatedTransfers, 'id');
-      console.log(formatedTransfers);
-      console.log(formatedRecords);
-      const [newRecords, prevRecords, nextRecords] = super
-        .editFinRecords(transactions.records, formatedRecords, 'id');
-      const arrayNewBalance = this.createArrayBalance(prevRecords, nextRecords);
-      await Promise.all([
-        firebaseFuncs.update(meta, newTransfers),
-        firebaseFuncs.update({ ...meta, key: 'records' }, newRecords),
-        firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance),
-      ]);
-      return [newTransfers, newRecords, arrayNewBalance];
+      const transCopy = { ...transactions };
+      const filteredTransfers = transactions[meta.key]
+        .filter(({ transactionId }) => transactionId !== this.transactionId);
+      const filteredRecords = transactions.records
+        .filter(({ transactionId }) => transactionId !== this.transactionId);
+      transCopy[meta.key] = filteredTransfers;
+      transCopy.records = filteredRecords;
+      const result = await this.create(uid, transCopy, accounts);
+      return result;
     }
     return null;
   }
