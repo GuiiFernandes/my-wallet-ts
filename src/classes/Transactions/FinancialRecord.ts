@@ -182,7 +182,7 @@ export default abstract class FinancialRecord {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-  ): Promise<[TransactionType[], TransactionType[]] | null>;
+  ): Promise<any>;
   abstract edit(
     uid: string,
     transactions: TransactionsType,
