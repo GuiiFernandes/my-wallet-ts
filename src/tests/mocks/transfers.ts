@@ -101,7 +101,14 @@ const transfers: TransactionType[] = [
   },
 ];
 
-const formTransfer: FormTransaction = {
+const formTransferThisOnly: FormTransaction = {
+  ...transfers[2],
+  value: 150,
+  account: 'Itaú',
+  accountDestiny: 'Carteira',
+};
+
+const formTransferUnique: FormTransaction = {
   ...transfers[0],
   payday: PAYDAY,
   value: 100,
@@ -110,7 +117,7 @@ const formTransfer: FormTransaction = {
 };
 
 const transactions: TransactionsType = {
-  transfers: [{ ...formTransfer, value: 90 }],
+  transfers: [{ ...formTransferUnique, value: 90 }, transfers[2]],
   records: [expenseTransfer, {
     ...expenseTransfer,
     id: 'ee898259-40e0-445b-acb5-abcac16853a1',
@@ -127,7 +134,8 @@ const accounts: AccountType[] = [
 ];
 
 export default {
-  formTransfer,
+  formTransferUnique,
+  formTransferThisOnly,
   transactions,
   transfers,
   accounts,

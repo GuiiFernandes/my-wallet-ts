@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
-import { swalUpTrans } from '../../utils/swal';
+import swal from '../../utils/swal';
 import FinancialRecord from './FinancialRecord';
 import { YearAndMonth } from '../../types/Others';
 
@@ -100,7 +100,7 @@ export default class Transaction extends FinancialRecord {
       return [newData, arrayNewBalance];
     }
     if (this.installments === 'F') {
-      const { value } = await swalUpTrans();
+      const { value } = await swal.upTrans();
       if (value === 'true') {
         return this
           .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
@@ -120,7 +120,7 @@ export default class Transaction extends FinancialRecord {
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
-    const { value } = await swalUpTrans();
+    const { value } = await swal.upTrans();
     if (value === 'true') {
       const filteredTrans = transactions.records
         .filter(({ transactionId, date }) => transactionId === this.transactionId

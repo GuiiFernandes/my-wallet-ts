@@ -8,7 +8,7 @@ export type Options = {
   icon: 'warning' | 'success' | 'question';
 };
 
-const swalRemove = <P extends any[], R>(
+const remove = <P extends any[], R>(
   fn: Fn<P, R>,
   { title, text, icon }: Options,
   ...params: P
@@ -30,7 +30,7 @@ const swalRemove = <P extends any[], R>(
     }
   });
 
-const swalUpTrans = () => Swal.fire({
+const upTrans = () => Swal.fire({
   title: 'Atualizar Lançamento',
   text: 'Quais lançamentos deseja alterar?',
   icon: 'question',
@@ -53,7 +53,7 @@ const swalUpTrans = () => Swal.fire({
   },
 });
 
-const toast = Swal.mixin({
+export const toast = Swal.mixin({
   toast: true,
   position: 'center',
   iconColor: 'white',
@@ -65,4 +65,4 @@ const toast = Swal.mixin({
   timerProgressBar: true,
 });
 
-export { swalRemove, toast, swalUpTrans };
+export default { remove, upTrans };

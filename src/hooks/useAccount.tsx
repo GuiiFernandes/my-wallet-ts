@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { changeOperationls } from '../redux/reducers/operationals';
 import { DeleteAccountType, NewAccountType, StateRedux } from '../types/State';
-import { Options, swalRemove, toast } from '../utils/swal';
+import swal, { Options, toast } from '../utils/swal';
 import firebaseFuncs from '../utils/firebaseFuncs';
 import { RemoveAccountParams } from '../types/Others';
 import { FormAccount, RealForm } from '../types/LocalStates';
@@ -58,7 +58,7 @@ export default function useLogin() {
         text: `Deseja deletar a conta ${name}? Essa ação não tem retorno`,
         icon: 'warning',
       };
-      swalRemove<RemoveAccountParams, void>(
+      swal.remove<RemoveAccountParams, void>(
         firebaseFuncs.remove,
         options,
         accounts,

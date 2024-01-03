@@ -3,7 +3,7 @@ import { AccountType, TransactionKeys,
 import { FormTransaction } from '../../types/LocalStates';
 import { YearAndMonth } from '../../types/Others';
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
-import { swalUpTrans } from '../../utils/swal';
+import swal from '../../utils/swal';
 import FinancialRecord from './FinancialRecord';
 
 type FormatedTrans = [TransactionType[], TransactionType[]];
@@ -109,33 +109,75 @@ export default class Transfer extends FinancialRecord {
       return this.updateUniqueTransfer(transactions, meta, { uid, accounts });
     }
     if (this.installments === 'F') {
-      const { value } = await swalUpTrans();
+      const { value } = await swal.upTrans();
       if (value === 'true') {
         return this
           .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
       }
       if (value === 'false') {
-        return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
+        return this.updateThisOnly(meta, transactions, { uid, accounts });
       }
     }
     return null;
   }
 
-  async updateThisOnly(
+  private async updateThisOnly(
     meta: MetaCreateInfos<TransactionKeys>,
     transactions: TransactionsType,
-    yearAndMonth: YearAndMonth,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
+    const t = 'T00:00';
     const transferRecords = transactions.records
-      .filter(({ transactionId, date, account }) => transactionId === this.transactionId
-      && new Date(`${date}T00:00`).getDate() === new Date(`${this.date}T00:00`).getDate()
-      && account === this.account);
-    const arrayNewBalance = super.createArrayBalance(transferRecords);
-    await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance);
+      .filter(({ transactionId, date }) => transactionId === this.transactionId
+      && new Date(`${date}${t}`).getDate() === new Date(`${this.date}${t}`).getDate());
+    let newTransferRecords: TransactionType[] = [];
+    let newData: TransactionType[] = [];
+
+    if (transferRecords.length) {
+      const editedTransferRecords = transferRecords.map(({
+        type, installment, installments, id, transactionId,
+      }, index) => {
+        if (index === 0) {
+          return { ...this.record, type, installment, installments, id, transactionId };
+        }
+        return {
+          ...this.record,
+          type,
+          installment,
+          installments,
+          id,
+          transactionId,
+          account: this.accountDestiny,
+        };
+      });
+      const [data, , nextData] = super
+        .editFinRecords(transactions.records, editedTransferRecords, 'id');
+      newData = data;
+      newTransferRecords = nextData;
+    } else {
+      newTransferRecords = [
+        { ...this.record, type: 'Despesa' },
+        { ...this.record,
+          account: this.accountDestiny,
+          id: super.generateId(),
+          type: 'Receita' },
+      ];
+    }
+    const arrayNewBalance = super
+      .createArrayBalance(transferRecords, newTransferRecords);
+    return Promise.all([
+      firebaseFuncs.update(
+        { ...meta, key: 'records' },
+        newData.length ? newData
+          : [...transactions.records, ...newTransferRecords],
+      ),
+      arrayNewBalance.length
+        ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance)
+        : null,
+    ]);
   }
 
-  async updateUniqueTransfer(
+  private async updateUniqueTransfer(
     transactions: TransactionsType,
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
