@@ -3,7 +3,6 @@ import DatePicker from 'react-datepicker';
 import { pt } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { useState } from 'react';
 import { BsCashCoin } from 'react-icons/bs';
 import { MonthSelected, StateRedux } from '../../types/State';
 import { months } from '../../utils/datas';
@@ -31,7 +30,6 @@ export default function MonthSelector() {
         <BsCashCoin size="2.5rem" />
         <strong className={ styles.balance }>
           Saldo:
-          {' '}
           <span style={ { color: total >= 0 ? 'var(--light-green)' : 'var(--red)' } }>
             { total.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }
           </span>
