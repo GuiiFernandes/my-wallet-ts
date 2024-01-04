@@ -9,13 +9,6 @@
   width: 100%;
 }
 
-.total {
-  align-items: center;
-  display: flex;
-  font-size: 2rem;
-  gap: 10px;
-}
-
 .nav {
   display: flex;
   background-color: var(--light-gray);

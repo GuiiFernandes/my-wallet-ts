@@ -13,10 +13,7 @@ export default function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { displayName, photoURL } = useSelector(({ user }: StateRedux) => user);
-  const { banks } = useSelector(({ data }: StateRedux) => data);
-  const { accounts } = banks;
 
-  const total = accounts.reduce((sum, { balance }) => sum + balance, 0);
   const logout = async () => {
     const auth = getAuth();
     await signOut(auth);
@@ -30,16 +27,6 @@ export default function Header() {
         <div className={ styles.titleContainer }>
           <img className={ styles.logo } src={ logo } alt="logo" />
           <h1 className={ styles.title }>My Wallet</h1>
-        </div>
-        <div className={ styles.total }>
-          <BsCashCoin size="2.5rem" />
-          <p>
-            <strong>Saldo:</strong>
-            {' '}
-            <span style={ { color: total >= 0 ? 'var(--green)' : 'var(--red)' } }>
-              { total.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }
-            </span>
-          </p>
         </div>
         <div className={ styles.user }>
           { photoURL ? (
