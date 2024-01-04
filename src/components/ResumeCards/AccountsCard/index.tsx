@@ -31,7 +31,6 @@ export default function AccountsCard() {
             </h3>
             <NumericFormat
               value={ balance }
-              allowNegative
               displayType="text"
               decimalScale={ 2 }
               fixedDecimalScale
