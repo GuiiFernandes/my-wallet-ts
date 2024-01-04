@@ -9,17 +9,21 @@ const styles = { ...styles1, ...styles2 };
 interface Props {
   onSubmit: (input: string, category?: string) => Promise<void>;
   placeholder: string;
-  category: string | undefined;
+  category?: string;
+  type?: string;
 }
 
-export default function FormCategory({ onSubmit, placeholder, category }: Props) {
+export default function FormCategory({
+  onSubmit, placeholder, category = undefined, type = undefined,
+}: Props) {
   const [input, setInput] = useState('');
   return (
     <form
       className={ styles.form }
       onSubmit={ async (e) => {
         e.preventDefault();
-        await onSubmit(input, category);
+        if (category) await onSubmit(input, category);
+        if (type) await onSubmit(input, type);
         setInput('');
       } }
     >
@@ -31,7 +35,7 @@ export default function FormCategory({ onSubmit, placeholder, category }: Props)
         value={ input }
         className={ styles.input }
       />
-      <button className={ styles.addBtn }>
+      <button className={ styles.addBtn } data-testid="addCatBtn">
         <BiSolidMessageSquareAdd size="30px" />
       </button>
     </form>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BiSolidMessageSquareAdd } from 'react-icons/bi';
 
-import { SubCategory } from '../../../types/Data';
+import { Category, SubCategory } from '../../../types/Data';
 import { FormTransaction } from '../../../types/LocalStates';
 import styles1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
@@ -16,7 +16,7 @@ type CategoriesSelectsProps = {
   form: FormTransaction,
   setForm: React.Dispatch<React.SetStateAction<FormTransaction>>;
   handleChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  categories: string[];
+  categories: Category[];
   subCategories: SubCategory[];
 };
 
@@ -38,7 +38,10 @@ export default function CategoriesSelects({
   const addCategory = async () => {
     await firebaseFuncs.update(
       { uid, docName: 'configurations', key: 'categories' },
-      [...categories, catForm.category].sort((a, b) => a.localeCompare(b)),
+      [
+        ...categories,
+        { name: catForm.category, type: form.type },
+      ].sort((a, b) => a.name.localeCompare(b.name)),
     );
     setForm({ ...form, category: catForm.category });
     setCatForm(INITIAL_STATE);
@@ -98,9 +101,9 @@ export default function CategoriesSelects({
             value={ form.category || '' }
             onChange={ handleChange }
           >
-            { categories.map((category) => (
-              <option className={ styles.option } key={ category } value={ category }>
-                { category }
+            { categories.filter(({ type }) => form.type === type).map(({ name }) => (
+              <option className={ styles.option } key={ name } value={ name }>
+                { name }
               </option>
             )) }
           </select>

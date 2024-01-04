@@ -29,7 +29,9 @@ export type AccountType = {
   type: 'carteira' | 'conta-corrente' | 'conta-investimento',
 };
 
-export type TypesTransaction = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
+export type ExpenseRevenue = 'Despesa' | 'Receita';
+
+export type TypesTransaction = ExpenseRevenue | 'Investimento' | 'Transferência';
 
 export type Period = 'Diariamente' | 'Semanalmente'
 | 'Quinzenalmente' | 'Mensalmente'
@@ -87,8 +89,13 @@ export type SubCategory = {
   category: string,
 };
 
+export type Category = {
+  name: string,
+  type: ExpenseRevenue,
+};
+
 export type ConfigurationsType = {
-  categories: string[],
+  categories: Category[],
   subCategories: SubCategory[],
   currency: string,
 };

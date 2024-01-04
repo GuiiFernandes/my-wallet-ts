@@ -12,7 +12,13 @@ export default function useChangeFormTrans() {
   const { categories,
     subCategories } = useSelector(({ data }: StateRedux) => data.configurations);
   const { month, year } = monthSelected;
+
   const selectedAccountText = accounts[0].name;
+
+  const categoryInitialName = categories.filter(({ type }) => type === 'Despesa')[0].name;
+  const subCategoryInitialName = subCategories.length
+    ? subCategories.filter(({ category }) => category === categoryInitialName)[0].name
+    : '';
 
   const INITIAL_STATE: FormTransaction = {
     id: '',
@@ -26,10 +32,8 @@ export default function useChangeFormTrans() {
     account: selectedAccountText,
     accountDestiny: accounts.filter(({ name }) => name !== selectedAccountText)[0].name,
     type: 'Despesa',
-    category: categories[0],
-    subCategory: subCategories.length
-      ? subCategories.filter(({ category }) => category === categories[0])[0].name
-      : '',
+    category: categoryInitialName,
+    subCategory: subCategoryInitialName,
     installment: 1,
     installments: 'U',
     period: 'Mensalmente',
@@ -52,9 +56,14 @@ export default function useChangeFormTrans() {
   const handleChangeType = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const type = value as TypesTransaction;
+    const filteredCat = categories.filter((cat) => cat.type === type);
+    const filteredSub = filteredCat[0]
+      ? subCategories.filter((sub) => sub.category === filteredCat[0].name) : [];
     setForm({
       ...form,
       type,
+      category: filteredCat[0]?.name || '',
+      subCategory: filteredSub[0]?.name || '',
     });
   };
 
