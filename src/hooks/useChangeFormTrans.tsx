@@ -15,10 +15,10 @@ export default function useChangeFormTrans() {
 
   const selectedAccountText = accounts[0].name;
 
-  const categoryInitialName = categories.filter(({ type }) => type === 'Despesa')[0].name;
-  const subCategoryInitialName = subCategories.length
-    ? subCategories.filter(({ category }) => category === categoryInitialName)[0].name
-    : '';
+  const categoryFiltered = categories.filter(({ type }) => type === 'Despesa');
+  const subCatFiltered = categoryFiltered[0] ? subCategories
+    .filter(({ category, type }) => category === categoryFiltered[0].name
+    && type === categoryFiltered[0].type) : [];
 
   const INITIAL_STATE: FormTransaction = {
     id: '',
@@ -32,8 +32,8 @@ export default function useChangeFormTrans() {
     account: selectedAccountText,
     accountDestiny: accounts.filter(({ name }) => name !== selectedAccountText)[0].name,
     type: 'Despesa',
-    category: categoryInitialName,
-    subCategory: subCategoryInitialName,
+    category: categoryFiltered[0]?.name || '',
+    subCategory: subCatFiltered[0]?.name || '',
     installment: 1,
     installments: 'U',
     period: 'Mensalmente',
@@ -58,7 +58,8 @@ export default function useChangeFormTrans() {
     const type = value as TypesTransaction;
     const filteredCat = categories.filter((cat) => cat.type === type);
     const filteredSub = filteredCat[0]
-      ? subCategories.filter((sub) => sub.category === filteredCat[0].name) : [];
+      ? subCategories.filter((sub) => sub.category === filteredCat[0].name
+      && sub.type === filteredCat[0].type) : [];
     setForm({
       ...form,
       type,

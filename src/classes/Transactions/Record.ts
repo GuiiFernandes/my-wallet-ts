@@ -44,22 +44,6 @@ export default class Record extends Transaction {
       ),
       firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
     } if (this.installments === 'F') {
-      const repetitions = super.calcIntervalMonthRepeat();
-      if (repetitions > 1) {
-        const newTransactions = this.formatTrans(repetitions);
-        await firebaseFuncs.update(
-          meta,
-          [...transactions[meta.key], ...newTransactions],
-        );
-        if (this.payday) {
-          await Promise.all([firebaseFuncs.update(
-            { ...meta, key: 'records' },
-            [...transactions.records, { ...newTransactions[0], payday: this.payday }],
-          ),
-          firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
-        }
-        return [newTransactions, []];
-      }
       await firebaseFuncs.update(meta, [
         ...transactions[meta.key],
         { ...super.transaction, payday: null },

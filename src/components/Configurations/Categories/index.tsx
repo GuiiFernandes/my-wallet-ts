@@ -26,7 +26,7 @@ export default function Categories() {
   }, objInit);
   const [addSub, setAddSub] = useState(initialAddSub);
 
-  const addCategory = async (name: string, type?: string) => {
+  const addCategory = async (name: string, type: string) => {
     if (!type) throw new Error('Type is undefined');
     await firebaseFuncs.update(
       { uid, docName: 'configurations', key: 'categories' },
@@ -34,10 +34,11 @@ export default function Categories() {
     );
   };
 
-  const addSubCategory = async (input: string, category?: string) => {
+  const addSubCategory = async (input: string, type: string, category?: string) => {
     if (!category) throw new Error('Category is undefined');
     const subCat = {
       category,
+      type,
       name: input,
     };
     await firebaseFuncs.update(
@@ -70,7 +71,8 @@ export default function Categories() {
                 </div>
                 <ul className={ styles.subCatContainer }>
                   {subCategories
-                    .filter((subCat) => subCat.category === category.name)
+                    .filter((subCat) => subCat.category === category.name
+                    && subCat.type === type)
                     .map((subCat: SubCategory) => (
                       <li key={ subCat.name } className={ styles.subCatListItem }>
                         {subCat.name}
@@ -81,6 +83,7 @@ export default function Categories() {
                       onSubmit={ addSubCategory }
                       placeholder="Nova Sub-Categoria"
                       category={ category.name }
+                      type={ type }
                     />
                   )}
                 </ul>

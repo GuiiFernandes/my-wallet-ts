@@ -7,14 +7,14 @@ import styles2 from './formCategory.module.css';
 const styles = { ...styles1, ...styles2 };
 
 interface Props {
-  onSubmit: (input: string, category?: string) => Promise<void>;
+  onSubmit: (input: string, type: string, category?: string) => Promise<void>;
   placeholder: string;
   category?: string;
-  type?: string;
+  type: string;
 }
 
 export default function FormCategory({
-  onSubmit, placeholder, category = undefined, type = undefined,
+  onSubmit, placeholder, category = undefined, type,
 }: Props) {
   const [input, setInput] = useState('');
   return (
@@ -22,7 +22,7 @@ export default function FormCategory({
       className={ styles.form }
       onSubmit={ async (e) => {
         e.preventDefault();
-        if (category) await onSubmit(input, category);
+        if (category) await onSubmit(input, type, category);
         if (type) await onSubmit(input, type);
         setInput('');
       } }

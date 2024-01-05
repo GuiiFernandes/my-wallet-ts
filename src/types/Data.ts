@@ -86,6 +86,7 @@ type InvestimentType = 'fixa' | 'variável' | 'FII' | 'previdência' | 'outros';
 
 export type SubCategory = {
   name: string,
+  type: ExpenseRevenue,
   category: string,
 };
 

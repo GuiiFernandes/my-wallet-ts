@@ -51,6 +51,7 @@ export default function CategoriesSelects({
   const addSubCategory = async () => {
     const subCat = {
       category: form.category,
+      type: form.type,
       name: catForm.subCategory,
     };
     await firebaseFuncs.update(
