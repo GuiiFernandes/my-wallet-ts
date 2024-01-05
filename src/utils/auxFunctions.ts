@@ -12,3 +12,20 @@ export const installmentsTransform: InstallmentsTransType = {
   Semestralmente: oneDay * 186.64,
   Anualmente: oneDay * 365.28,
 };
+
+type ObjNextDate = {
+  [key in string]: { [key2 in string]: number }
+};
+
+export const objNextDate = (i: number): ObjNextDate => {
+  return {
+    Diariamente: { days: 1 * i },
+    Semanalmente: { weeks: 1 * i },
+    Quinzenalmente: { weeks: 2 * i },
+    Mensalmente: { months: 1 * i },
+    Bimestralmente: { months: 2 * i },
+    Trimestralmente: { months: 3 * i },
+    Semestralmente: { months: 6 * i },
+    Anualmente: { years: 1 * i },
+  };
+};

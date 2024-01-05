@@ -1,10 +1,12 @@
+import { v4 as uuidv4 } from 'uuid';
 import { useSelector } from 'react-redux';
-import { addMonths, differenceInMonths, endOfMonth, isBefore,
+import { add, addMonths, differenceInMonths, endOfMonth, format, isBefore,
   isSameMonth, startOfMonth } from 'date-fns';
+
 import { StateRedux } from '../types/State';
 import { InstallmentsTransType } from '../types/Others';
 import { TransactionType } from '../types/Data';
-import { installmentsTransform, oneDay } from '../utils/auxFunctions';
+import { installmentsTransform, objNextDate, oneDay } from '../utils/auxFunctions';
 
 export default function useTransaction() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
@@ -68,6 +70,20 @@ export default function useTransaction() {
         .has(`${transactionId}-${date.split('-')[2]}`));
     const recordsFilterTransfers = recorsByDate
       .filter(({ transactionId }) => !setTransfersTransId.has(transactionId));
+    const repeatFixedTransactions = fixedFilterTransactions
+      .reduce((repeatFixeds, transaction) => {
+        const repetitions = calculateRepetitions(transaction);
+        const newFixeds: TransactionType[] = [...repeatFixeds];
+        for (let i = 0; i < repetitions; i += 1) {
+          const date = calculateNextDate(i, transaction);
+          newFixeds.push({
+            ...transaction,
+            date,
+            id: uuidv4(),
+          });
+        }
+        return newFixeds;
+      }, [] as TransactionType[]);
 
     const transferWithPayday = transfersfiltered.map((transfer) => {
       const record = recorsByDate
@@ -80,10 +96,45 @@ export default function useTransaction() {
       return transfer;
     });
 
-    return [...recordsFilterTransfers, ...fixedFilterTransactions, ...transferWithPayday]
+    return [...recordsFilterTransfers, ...repeatFixedTransactions, ...transferWithPayday]
       .sort((a: TransactionType, b: TransactionType) => {
         return Number(b.date.split('-')[2]) - Number(a.date.split('-')[2]);
       });
+  };
+
+  const calculateRepetitions = (
+    transaction: TransactionType,
+  ): number => {
+    const day = Number(transaction.date.split('-')[2]);
+    const recordsByFixeds = transactions.records
+      .filter(({ transactionId }) => transactionId === transaction.transactionId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const initialDate = recordsByFixeds[0]?.date
+      ? new Date(calculateNextDate(1, recordsByFixeds[0]))
+      : new Date(`${transaction.date}T00:00`);
+    const endDate = endOfMonth(new Date(year, month - 1, day, 0));
+    return calcIntervalEditRepeat(endDate, initialDate, transaction.period);
+  };
+
+  const calculateNextDate = (
+    i: number = 1,
+    { period, date }: TransactionType,
+  ): string => {
+    const periodValid = period || 'Mensalmente';
+    const nextDate = add(
+      new Date(`${date}T00:00`),
+      objNextDate(i)[periodValid],
+    );
+    return format(nextDate, 'yyyy-MM-dd');
+  };
+
+  const calcIntervalEditRepeat = (
+    endDate: Date,
+    initialDate: Date,
+    period: keyof InstallmentsTransType = 'Mensalmente',
+  ): number => {
+    const transFrequency = installmentsTransform[period];
+    return Math.ceil((endDate.getTime() - initialDate.getTime()) / transFrequency);
   };
 
   return { getAllTransactions };

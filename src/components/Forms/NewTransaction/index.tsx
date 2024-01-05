@@ -50,16 +50,21 @@ export default function NewTransaction() {
   const allTransactions: TransactionType[] = getAllTransactions();
 
   useEffect(() => {
-    const index = allTransactions.findIndex(({ id }) => id === editTransaction);
+    const [id, transId] = editTransaction ? editTransaction.split('/') : ['', ''];
+    console.log(allTransactions);
+    const index = allTransactions.findIndex((trans) => trans.id === id
+    || trans.transactionId === transId);
+
     if (index !== -1) {
       const { account, ...formTrans } = allTransactions[index];
+
       const [originAcc, destinyAcc] = account.split('>');
       setForm({
         ...formTrans,
-        date: format(
-          new Date(year, month - 1, Number(formTrans.date.split('-')[2])),
-          'yyyy-MM-dd',
-        ),
+        // date: format(
+        //   new Date(year, month - 1, Number(formTrans.date.split('-')[2])),
+        //   'yyyy-MM-dd',
+        // ),
         account: originAcc,
         accountDestiny: destinyAcc || '',
       });

@@ -108,7 +108,9 @@ export default function WalletTable() {
                   type="button"
                   className={ styles.btnEdit }
                   onClick={ () => {
-                    dispatch(changeOperationls({ editTransaction: transaction.id }));
+                    dispatch(changeOperationls({
+                      editTransaction: `${transaction.id}/${transaction.transactionId}`,
+                    }));
                   } }
                 >
                   <AiFillEdit />
