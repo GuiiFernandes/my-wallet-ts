@@ -133,6 +133,11 @@ const transactions: TransactionsType = {
   fixeds: [],
 };
 
+const transAllFixTransfers: TransactionsType = {
+  ...transactions,
+  transfers,
+};
+
 const accounts: AccountType[] = [
   { id: 1, name: 'Itaú', balance: 100, real: 90, type: 'conta-corrente' },
   { id: 2, name: 'Carteira', balance: 100, real: 0, type: 'carteira' },
@@ -143,6 +148,7 @@ export default {
   formTransferThisOnly,
   formTransferThisAndComming,
   transactions,
+  transAllFixTransfers,
   transfers,
   accounts,
 };

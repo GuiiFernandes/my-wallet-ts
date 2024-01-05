@@ -10,6 +10,7 @@
 .react-datepicker {
   font-family: var(--font-default);
   font-size: 1.6rem;
+  font-weight: 400;
   background-color: var(--gray);
   color: var(--green);
 }

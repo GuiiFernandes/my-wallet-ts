@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { add, format } from 'date-fns';
+import { add, differenceInDays, format } from 'date-fns';
 
 import { AccountType, KeyByType, Period, TransactionKeys, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
@@ -99,7 +99,6 @@ export default abstract class Transaction {
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     if (!superficialRecords.length) throw new Error(`${key} transaction not found`);
-
     const initialDate = recordsByFixeds[0]?.date
       ? new Date(this.calculateNextDate(1, recordsByFixeds[0]))
       : new Date(`${superficialRecords[0].date}T00:00`);
@@ -138,7 +137,8 @@ export default abstract class Transaction {
       new Date(`${trans.date}T00:00`),
       this.objNextDate(i)[periodValid],
     );
-    return format(nextDate, 'yyyy-MM-dd');
+    const diff = differenceInDays(new Date(`${trans.date}T00:00`), nextDate);
+    return format(add(nextDate, this.objNextDate(diff).Diariamente), 'yyyy-MM-dd');
   }
 
   protected generateId(id?: string): string {
