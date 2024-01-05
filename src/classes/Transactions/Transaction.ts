@@ -1,226 +1,217 @@
-import { format } from 'date-fns';
-import { AccountType, TransactionKeys,
-  TransactionType, TransactionsType } from '../../types/Data';
-import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
-import swal from '../../utils/swal';
-import FinancialRecord from './FinancialRecord';
+import { v4 as uuidv4 } from 'uuid';
+import { add, format } from 'date-fns';
+
+import { AccountType, KeyByType, Period, TransactionKeys, TransactionType,
+  TransactionsType, TypesTransaction } from '../../types/Data';
+import { MetaCreateInfos } from '../../utils/firebaseFuncs';
+import { installmentsTransform } from '../../utils/auxFunctions';
+import { FormTransaction } from '../../types/LocalStates';
 import { YearAndMonth } from '../../types/Others';
 
-const DATE_FORMAT = 'yyyy-MM-dd';
+export default abstract class Transaction {
+  id: string;
 
-export default class Transaction extends FinancialRecord {
-  private formatTrans(repetitions?: number, transaction?: TransactionType) {
-    const newTransactions: TransactionType[] = [];
-    const periodRepetion = repetitions || Number(this.installments);
-    const trans: TransactionType = transaction ? { ...transaction } : { ...super.record };
+  transactionId: string;
 
-    for (let i = 0; i < periodRepetion; i += 1) {
-      trans.id = super.generateId();
-      const value = trans.installments === 'F'
-        ? trans.value : super.calculateValue(i, transaction);
-      const date = super.calculateNextDate(i, transaction);
-      const payday = i === 0 && trans.installments !== 'F'
-        ? trans.payday : null;
-      trans.period = trans.installments === 'U' ? '' : trans.period;
-      newTransactions.push({ ...trans, payday, value, date });
-      trans.installment += 1;
-    }
-    return newTransactions;
+  account: string;
+
+  date: string;
+
+  description: string;
+
+  payday: string | null;
+
+  value: number;
+
+  category: string;
+
+  subCategory: string;
+
+  installment: number;
+
+  installments: string;
+
+  period: Period;
+
+  type: TypesTransaction;
+
+  objNextDate(i: number): { [key in string]: { [key2 in string]: number } } {
+    return {
+      Diariamente: { days: 1 * i },
+      Semanalmente: { weeks: 1 * i },
+      Quinzenalmente: { weeks: 2 * i },
+      Mensalmente: { months: 1 * i },
+      Bimestralmente: { months: 2 * i },
+      Trimestralmente: { months: 3 * i },
+      Semestralmente: { months: 6 * i },
+      Anualmente: { years: 1 * i },
+    };
   }
 
-  async create(
-    uid: string,
-    transactions: TransactionsType,
-    accounts: AccountType[],
-  ): Promise<any> {
-    const meta = super.createMeta<TransactionKeys>(uid);
-    if (this.installments === 'U') {
-      this.period = '';
-      const newTransaction = super.record;
-      return Promise.all([firebaseFuncs.update(
-        meta,
-        [...transactions[meta.key], newTransaction],
-      ),
-      firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
-    } if (this.installments === 'F') {
-      const repetitions = super.calcIntervalMonthRepeat();
-      if (repetitions > 1) {
-        const newTransactions = this.formatTrans(repetitions);
-        await firebaseFuncs.update(
-          meta,
-          [...transactions[meta.key], ...newTransactions],
-        );
-        if (this.payday) {
-          await Promise.all([firebaseFuncs.update(
-            { ...meta, key: 'records' },
-            [...transactions.records, { ...newTransactions[0], payday: this.payday }],
-          ),
-          firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
-        }
-        return [newTransactions, []];
-      }
-      await firebaseFuncs.update(meta, [
-        ...transactions[meta.key],
-        { ...super.record, payday: null },
-      ]);
-      if (this.payday) {
-        const newTransaction = super.record;
-        await Promise.all([firebaseFuncs.update(
-          { ...meta, key: 'records' },
-          [...transactions[meta.key], newTransaction],
-        ),
-        firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
-      }
-      return [{ ...super.record, payday: null }, super.record];
-    }
-    const newTransactions = this.formatTrans();
-    return Promise.all([await firebaseFuncs.update(
-      meta,
-      [...transactions[meta.key], ...newTransactions],
-    ),
-    firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
+  private keyByInstalments: KeyByType = {
+    U: 'records',
+    F: 'fixeds',
+    t: 'transfers',
+  };
+
+  constructor(form: FormTransaction) {
+    this.account = form.account;
+    this.date = form.date;
+    this.description = form.description;
+    this.value = form.value;
+    this.period = form.period;
+    this.payday = form.payday;
+    this.installment = form.installment;
+    this.category = form.category || '';
+    this.subCategory = form.subCategory || '';
+    this.type = form.type;
+    this.id = form.id || this.generateId();
+    this.transactionId = form.transactionId || this.generateId();
+    this.installments = form.installments;
   }
 
-  async edit(
-    uid: string,
-    transactions: TransactionsType,
-    accounts: AccountType[],
-    yearAndMonth: YearAndMonth,
-  ): Promise<any> {
-    const meta = super.createMeta<TransactionKeys>(uid);
-    if (this.installments === 'U') {
-      const [newData, prevRecord, newRecord] = super
-        .editFinRecords(transactions[meta.key]);
-      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
-        firebaseFuncs.update(meta, newData),
-        arrayNewBalance.length
-          ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
-      ]);
-      return [newData, arrayNewBalance];
-    }
-    if (this.installments === 'F') {
-      const { value } = await swal.upTrans();
-      if (value === 'true') {
-        return this
-          .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
-      }
-      if (value === 'false') {
-        return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
-      }
-    } else {
-      return this.updateInstallments(transactions, yearAndMonth, meta, { uid, accounts });
-    }
-    return null;
+  protected createMeta<T>(uid: string): MetaCreateInfos<T> {
+    const keyForKey = this.type === 'Transferência' ? 't' : this.installments;
+    return {
+      uid,
+      docName: 'transactions',
+      key: (this.keyByInstalments[keyForKey] || 'records') as T,
+    };
   }
 
-  private async updateInstallments(
-    transactions: TransactionsType,
-    yearAndMonth: YearAndMonth,
-    meta: MetaCreateInfos<TransactionKeys>,
-    { uid, accounts }: { uid: string, accounts: AccountType[] },
-  ) {
-    const { value } = await swal.upTrans();
-    if (value === 'true') {
-      const filteredTrans = transactions.records
-        .filter(({ transactionId, date }) => transactionId === this.transactionId
-          && date >= this.date);
-      const editedTrans = filteredTrans
-        .map(({ type, installment, installments, id, transactionId, date }) => ({
-          ...this.record, type, installment, installments, id, transactionId, date,
-        }));
-      const [data, prevRecord, newRecord] = super
-        .editFinRecords(transactions.records, editedTrans, 'id');
-      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
-        firebaseFuncs.update({ ...meta, key: 'records' }, data),
-        arrayNewBalance.length
-          ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
-      ]);
-      return [data, arrayNewBalance];
-    }
-    if (value === 'false') {
-      return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
-    }
-    return null;
+  protected calcIntervalMonthRepeat(): number {
+    const monthInterval = installmentsTransform.Mensalmente;
+    const transFrequency = installmentsTransform[this.period];
+    return Math.floor(monthInterval / transFrequency);
   }
 
-  private async updateThisAndUpcomming(
+  protected calculateRepetitions(
     transactions: TransactionsType,
-    { year, month }: YearAndMonth,
-    meta: MetaCreateInfos<TransactionKeys>,
-    { uid, accounts }: { uid: string, accounts: AccountType[] },
-  ) {
+    year: number,
+    month: number,
+    key: TransactionKeys,
+  ): [number, Date, TransactionType[]] {
     const day = Number(this.date.split('-')[2]);
     const recordsByFixeds = transactions.records
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const fixedTrans = transactions.fixeds
+    const superficialRecords = transactions[key]
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    if (!fixedTrans.length) throw new Error('Fixed transaction not found');
+    if (!superficialRecords.length) throw new Error(`${key} transaction not found`);
 
     const initialDate = recordsByFixeds[0]?.date
       ? new Date(this.calculateNextDate(1, recordsByFixeds[0]))
-      : new Date(`${fixedTrans[0].date}T00:00`);
+      : new Date(`${superficialRecords[0].date}T00:00`);
     const endDate = new Date(year, month - 1, day, 0);
-    const repetitions = super.calcIntervalEditRepeat(endDate, initialDate);
-    const newTransactions = this.formatTrans(
-      repetitions,
-      { ...fixedTrans[0], date: format(initialDate, DATE_FORMAT) },
-    );
-    const newFixeds = fixedTrans.map((fixed) => ({
-      ...this.record,
-      date: fixed.date,
-      payday: null,
-      id: fixed.id,
-    }));
-    const [newData] = super.editFinRecords(transactions[meta.key], newFixeds, 'id');
-    const [data] = await Promise.all([
-      firebaseFuncs.update(
-        { ...meta, key: 'records' },
-        [...transactions.records, ...newTransactions],
-      ),
-      firebaseFuncs.update(meta, newData),
-    ]);
-    if (this.payday) {
-      await this.updateThisOnly(
-        meta,
-        data,
-        { year, month },
-        { uid,
-          accounts },
-      );
-    }
+    const repetitions = this.calcIntervalEditRepeat(endDate, initialDate);
+    return [repetitions, initialDate, superficialRecords];
   }
 
-  private async updateThisOnly(
-    meta: MetaCreateInfos<TransactionKeys>,
-    transactions: TransactionsType,
-    { year, month }: YearAndMonth,
-    { uid, accounts }: { uid: string, accounts: AccountType[] },
-  ) {
-    const validMeta = { ...meta, key: 'records' };
-    const result = super.editFinRecords(transactions.records, undefined, 'id');
-    if (result) {
-      const [newData, prevRecord, newRecord] = result;
-      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
-        firebaseFuncs.update(validMeta, newData),
-        arrayNewBalance.length
-          ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
-      ]);
-      return [newData, arrayNewBalance];
-    }
-    const day = Number(super.record.date.split('-')[2]);
-    const newDate = new Date(`${year}-${month}-${day}T00:00`);
-    const newTransaction = { ...super.record,
-      id: super.generateId(),
-      date: format(newDate, DATE_FORMAT) };
-    await Promise.all([
-      firebaseFuncs.update(validMeta, [...transactions.records, newTransaction]),
-      firebaseFuncs.updateBalance(uid, accounts, [newTransaction]),
-    ]);
-    return [[newTransaction], []];
+  private calcIntervalEditRepeat(
+    endDate: Date,
+    initialDate: Date,
+  ): number {
+    const transFrequency = installmentsTransform[this.period];
+    return Math.floor((endDate.getTime() - initialDate.getTime()) / transFrequency);
   }
+
+  protected calculateValue(
+    i: number = 1,
+    transaction?: TransactionType,
+  ) {
+    const trans = transaction || this.transaction;
+    const numInstallments = Number(trans.installments);
+    const baseValue = Math.floor((trans.value / numInstallments) * 100) / 100;
+    const totalBase = baseValue * numInstallments;
+    const restValue = (trans.value - totalBase) * 100;
+    return i < restValue - 1 ? baseValue + 0.01 : baseValue;
+  }
+
+  protected calculateNextDate(
+    i: number = 1,
+    transaction?: TransactionType,
+  ): string {
+    const trans = transaction || this.transaction;
+    const periodValid = trans.period || 'Mensalmente';
+    const nextDate = add(
+      new Date(`${trans.date}T00:00`),
+      this.objNextDate(i)[periodValid],
+    );
+    return format(nextDate, 'yyyy-MM-dd');
+  }
+
+  protected generateId(id?: string): string {
+    return id || uuidv4();
+  }
+
+  protected editFinRecords(
+    transactions: TransactionType[],
+    editedRecord?: TransactionType[],
+    key: keyof TransactionType = 'transactionId',
+  ): [TransactionType[], TransactionType[], TransactionType[]] {
+    const newRecords = editedRecord || [this.transaction];
+    const data = [...transactions];
+    const prevRecords: TransactionType[] = [];
+    const nextRecords: TransactionType[] = [];
+    newRecords.forEach((record) => {
+      const index = transactions
+        .findIndex((trans) => trans[key] === record[key]);
+      if (index === -1) throw new Error('Record not found');
+      data[index] = record;
+      prevRecords.push(transactions[index]);
+      nextRecords.push(record);
+    });
+    return [data, prevRecords, nextRecords];
+  }
+
+  protected createArrayBalance(
+    prevRecord?: TransactionType[],
+    newRecord?: TransactionType[],
+  ) {
+    const arrayNewBalance: TransactionType[] = [];
+    prevRecord?.forEach((record) => {
+      if (record.payday) {
+        arrayNewBalance.push({ ...record, value: -record.value });
+      }
+    });
+    newRecord?.forEach((record) => {
+      if (record.payday) {
+        arrayNewBalance.push(record);
+      }
+    });
+    return arrayNewBalance;
+  }
+
+  get transaction(): TransactionType {
+    return {
+      id: this.id,
+      account: this.account,
+      date: this.date,
+      description: this.description,
+      payday: this.payday,
+      value: this.value,
+      category: this.category,
+      subCategory: this.subCategory,
+      installment: this.installment,
+      installments: this.installments,
+      period: this.period,
+      type: this.type,
+      transactionId: this.transactionId,
+    };
+  }
+
+  abstract create(
+    uid: string,
+    transactions: TransactionsType,
+    accounts: AccountType[],
+  ): Promise<any>;
+  abstract edit(
+    uid: string,
+    transactions: TransactionsType,
+    accounts: AccountType[],
+    yearAndMonth: YearAndMonth,
+  ): Promise<any>;
+  // abstract remove(): void;
+  // abstract changeStatus(): void;
 }

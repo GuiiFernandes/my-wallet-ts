@@ -108,6 +108,11 @@ const formTransferThisOnly: FormTransaction = {
   accountDestiny: 'Carteira',
 };
 
+const formTransferThisAndComming: FormTransaction = {
+  ...formTransferThisOnly,
+  payday: PAYDAY,
+}
+
 const formTransferUnique: FormTransaction = {
   ...transfers[0],
   payday: PAYDAY,
@@ -136,6 +141,7 @@ const accounts: AccountType[] = [
 export default {
   formTransferUnique,
   formTransferThisOnly,
+  formTransferThisAndComming,
   transactions,
   transfers,
   accounts,

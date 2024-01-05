@@ -1,7 +1,7 @@
-import FinancialRecord from './FinancialRecord';
 import Transaction from './Transaction';
+import Record from './Record';
 import Transfer from './Tranfer';
 
 export { Transaction, Transfer };
 
-export default FinancialRecord;
+export default Transaction;

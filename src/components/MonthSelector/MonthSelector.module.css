@@ -5,11 +5,17 @@
   gap: 20px;
 }
 
-.balance {
+.total {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
 }
 
 .dateContainer {
@@ -19,11 +25,11 @@
   gap: 20px;
 }
 
-.total {
-  align-items: center;
+.balance {
   display: flex;
+  align-items: center;
+  flex-direction: column;
   font-size: 2rem;
-  gap: 10px;
 }
 
 .select {

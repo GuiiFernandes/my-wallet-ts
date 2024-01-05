@@ -26,33 +26,37 @@ export default function MonthSelector() {
       className={ styles.container }
       onSubmit={ (e) => { e.preventDefault(); } }
     >
-      <div className={ styles.total }>
-        <BsCashCoin size="2.5rem" />
-        <strong className={ styles.balance }>
+      <strong className={ styles.balance }>
+        <div className={ styles.total }>
+          <BsCashCoin size="2.5rem" />
           Saldo:
-          <span style={ { color: total >= 0 ? 'var(--light-green)' : 'var(--red)' } }>
-            { total.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }
-          </span>
-        </strong>
-      </div>
+        </div>
+        <span style={ { color: total >= 0 ? 'var(--light-green)' : 'var(--red)' } }>
+          { total.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) }
+        </span>
+      </strong>
       <div className={ styles.dateContainer }>
-        <DatePicker
-          selected={ new Date(year, month - 1) }
-          onChange={ (newDate) => {
-            if (!newDate) return;
-            dispatch(changeOperationls<MonthSelected>({
-              monthSelected: {
-                monthString: months[newDate.getMonth()],
-                month: newDate.getMonth() + 1,
-                year: newDate.getFullYear(),
-              },
-            }));
-          } }
-          dateFormat="MM/yyyy"
-          locale={ pt }
-          showMonthYearPicker
-          className={ styles.select }
-        />
+        <label htmlFor="month" className={ styles.label }>
+          Mês atual:
+          <DatePicker
+            selected={ new Date(year, month - 1) }
+            onChange={ (newDate) => {
+              if (!newDate) return;
+              dispatch(changeOperationls<MonthSelected>({
+                monthSelected: {
+                  monthString: months[newDate.getMonth()],
+                  month: newDate.getMonth() + 1,
+                  year: newDate.getFullYear(),
+                },
+              }));
+            } }
+            dateFormat="MM/yyyy"
+            locale={ pt }
+            showMonthYearPicker
+            id="month"
+            className={ styles.select }
+          />
+        </label>
         <BtnTransaction />
       </div>
     </form>

@@ -1,14 +1,16 @@
+import { format } from 'date-fns';
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
 import { YearAndMonth } from '../../types/Others';
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import swal from '../../utils/swal';
-import FinancialRecord from './FinancialRecord';
+import Transaction from './Transaction';
 
 type FormatedTrans = [TransactionType[], TransactionType[]];
+const T = 'T00:00';
 
-export default class Transfer extends FinancialRecord {
+export default class Transfer extends Transaction {
   accountDestiny: string;
 
   private formatedInstalments: { [key: string]: string } = {
@@ -21,38 +23,40 @@ export default class Transfer extends FinancialRecord {
     this.accountDestiny = form.accountDestiny;
   }
 
-  private formatTrans(repetitions?: number, editTrans: boolean = false): FormatedTrans {
-    const newTransfers: TransactionType[] = [];
+  private formatTrans(
+    repetitions?: number,
+    transaction?: FormTransaction,
+    isFormatTransactions = false,
+  ): FormatedTrans {
+    const transfers: TransactionType[] = [];
     const records: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
+    const trans: FormTransaction = transaction
+      ? { ...transaction }
+      : { ...super.transaction, accountDestiny: this.accountDestiny };
     for (let i = 0; i < periodRepetion; i += 1) {
-      this.id = editTrans ? this.id : super.generateId();
-      const value = this.formatedInstalments[this.installments]
-        ? this.value : super.calculateValue(i);
-      const date = super.calculateNextDate(i);
-      this.period = this.installments === 'U' ? '' : this.period;
-      const payday = i === 0 ? this.payday : null;
-      const account = `${this.account}>${this.accountDestiny}`;
-      const newData = { ...super.record, category: '', subCategory: '' };
-      newTransfers.push({ ...newData, value, date, payday: null, account });
+      trans.id = super.generateId();
+      const value = this.formatedInstalments[trans.installments]
+        ? trans.value : super.calculateValue(i, transaction);
+      const date = super.calculateNextDate(i, transaction);
+      const payday = i === 0 || isFormatTransactions ? trans.payday : null;
+      trans.period = trans.installments === 'U' ? '' : trans.period;
+      const account = `${trans.account}>${trans.accountDestiny}`;
+      const newData = { ...trans, category: '', subCategory: '' };
+      transfers.push({ ...newData, value, date, payday: null, account });
       if (payday) {
-        records.push({
-          ...newData, value, payday, date, type: 'Despesa',
-        });
-        records.push({
-          ...newData,
+        records.push({ ...newData, value, payday, date, type: 'Despesa' });
+        records.push({ ...newData,
           id: super.generateId(),
           payday,
           value,
           date,
-          account: this.accountDestiny,
-          type: 'Receita',
-        });
+          account: trans.accountDestiny,
+          type: 'Receita' });
       }
-      this.installment += 1;
+      trans.installment += 1;
     }
-
-    return [newTransfers, records];
+    return [transfers, records];
   }
 
   async create(
@@ -61,35 +65,35 @@ export default class Transfer extends FinancialRecord {
     accounts: AccountType[],
   ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
-    let [newTransfers, newTransactions]: FormatedTrans = [[], []];
+    let [transfers, records]: FormatedTrans = [[], []];
     let result: any[] = [];
     if (this.installments === 'U') {
       // Se for uma transferência única
-      [newTransfers, newTransactions] = this.formatTrans(1);
+      [transfers, records] = this.formatTrans(1);
     } else if (this.installments === 'F') {
       // Se for uma transferência fixa
       const repetitions = super.calcIntervalMonthRepeat();
       if (repetitions > 1) {
-        [newTransfers, newTransactions] = this.formatTrans(repetitions);
+        [transfers, records] = this.formatTrans(repetitions);
       } else {
-        const [formatedTransfer, formatedTransactions] = this.formatTrans(1);
-        newTransfers = formatedTransfer;
-        newTransactions = formatedTransactions;
+        const [formatedTransfer, formatedRecords] = this.formatTrans(1);
+        transfers = formatedTransfer;
+        records = formatedRecords;
       }
     } else {
       // Se for uma transferência parcelada
-      [newTransfers, newTransactions] = this.formatTrans();
+      [transfers, records] = this.formatTrans();
     }
     const resultTransfer = await firebaseFuncs.update<TransactionKeys>(
       meta,
-      [...transactions[meta.key], ...newTransfers],
+      [...transactions[meta.key], ...transfers],
     );
-    if (newTransactions.length) {
-      const [expense, revenue] = newTransactions;
+    if (records.length) {
+      const [expense, revenue] = records;
       result = await Promise.all([
         await firebaseFuncs.update(
           { ...meta, key: 'records' },
-          [...transactions.records, ...newTransactions],
+          [...transactions.records, ...records],
         ),
         await firebaseFuncs.updateBalance(uid, accounts, [expense, revenue]),
       ]);
@@ -121,59 +125,95 @@ export default class Transfer extends FinancialRecord {
     return null;
   }
 
+  private async updateThisAndUpcomming(
+    transactions: TransactionsType,
+    { year, month }: YearAndMonth,
+    meta: MetaCreateInfos<TransactionKeys>,
+    { uid, accounts }: { uid: string, accounts: AccountType[] },
+  ) {
+    const [repetitions, initialDate, fixedTransfers] = super
+      .calculateRepetitions(transactions, year, month, meta.key);
+    const [account, accountDestiny] = fixedTransfers[0].account.split('>');
+    const [, newRecords] = this.formatTrans(repetitions, { ...fixedTransfers[0],
+      account,
+      accountDestiny,
+      date: format(initialDate, 'yyyy-MM-dd') }, true);
+    const newTransfers: TransactionType[] = fixedTransfers
+      .map((transfer) => ({ ...this.transaction,
+        date: transfer.date,
+        id: transfer.id,
+        payday: null }));
+    const [formatedTransfers] = super
+      .editFinRecords(transactions[meta.key], newTransfers, 'id');
+    const [dataRecords, dataTransfers] = await Promise.all([
+      firebaseFuncs.update(
+        { ...meta, key: 'records' },
+        [...transactions.records, ...newRecords],
+      ),
+      firebaseFuncs.update(meta, formatedTransfers),
+    ]);
+    let result: TransactionType[] = [];
+    if (this.payday) {
+      result = await this.updateThisOnly(
+        meta,
+        dataRecords,
+        { uid,
+          accounts },
+      );
+    }
+    return [result[0], dataTransfers, result[1]];
+  }
+
   private async updateThisOnly(
     meta: MetaCreateInfos<TransactionKeys>,
     transactions: TransactionsType,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
-    const t = 'T00:00';
     const transferRecords = transactions.records
       .filter(({ transactionId, date }) => transactionId === this.transactionId
-      && new Date(`${date}${t}`).getDate() === new Date(`${this.date}${t}`).getDate());
-    let newTransferRecords: TransactionType[] = [];
-    let newData: TransactionType[] = [];
+      && new Date(`${date}${T}`).getDate() === new Date(`${this.date}${T}`).getDate());
+    let [newTransfers, newData]: [TransactionType[], TransactionType[]] = [[], []];
 
     if (transferRecords.length) {
       const editedTransferRecords = transferRecords.map(({
         type, installment, installments, id, transactionId,
       }, index) => {
         if (index === 0) {
-          return { ...this.record, type, installment, installments, id, transactionId };
+          return { ...this.transaction,
+            type,
+            installment,
+            installments,
+            id,
+            transactionId };
         }
-        return {
-          ...this.record,
+        return { ...this.transaction,
           type,
           installment,
           installments,
           id,
           transactionId,
-          account: this.accountDestiny,
-        };
+          account: this.accountDestiny };
       });
       const [data, , nextData] = super
         .editFinRecords(transactions.records, editedTransferRecords, 'id');
       newData = data;
-      newTransferRecords = nextData;
+      newTransfers = nextData;
     } else {
-      newTransferRecords = [
-        { ...this.record, type: 'Despesa' },
-        { ...this.record,
+      newTransfers = [
+        { ...this.transaction, type: 'Despesa' },
+        { ...this.transaction,
           account: this.accountDestiny,
           id: super.generateId(),
           type: 'Receita' },
       ];
     }
     const arrayNewBalance = super
-      .createArrayBalance(transferRecords, newTransferRecords);
+      .createArrayBalance(transferRecords, newTransfers);
     return Promise.all([
-      firebaseFuncs.update(
-        { ...meta, key: 'records' },
-        newData.length ? newData
-          : [...transactions.records, ...newTransferRecords],
-      ),
+      firebaseFuncs.update({ ...meta, key: 'records' }, newData.length
+        ? newData : [...transactions.records, ...newTransfers]),
       arrayNewBalance.length
-        ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance)
-        : null,
+        ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
     ]);
   }
 
@@ -194,11 +234,9 @@ export default class Transfer extends FinancialRecord {
       .filter((transfer) => transfer.transactionId === this.transactionId
           && new Date(`${transfer.date}T00:00`).getDate() === day);
     const arrayNewBalance = super.createArrayBalance(recordsTransfer);
-
     const newAccounts = await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance);
     if (!newAccounts) throw new Error('Erro ao atualizar o saldo');
     const result = await this.create(uid, transCopy, newAccounts.accounts);
-
     return result;
   }
 }
