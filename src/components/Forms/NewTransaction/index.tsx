@@ -15,7 +15,7 @@ import style1 from '../FormLayout/formlayout.module.css';
 import styles2 from './NewTransaction.module.css';
 import useChangeFormTrans from '../../../hooks/useChangeFormTrans';
 import { changeOperationls } from '../../../redux/reducers/operationals';
-import Transaction, { Transaction, Transfer } from '../../../classes/Transactions';
+import Transaction, { Record, Transfer } from '../../../classes/Transactions';
 import { toast } from '../../../utils/swal';
 import CategoriesSelects from './CategoriesSelects';
 import { TransactionType } from '../../../types/Data';
@@ -75,7 +75,7 @@ export default function NewTransaction() {
           try {
             let goDispatch = true;
             const register: Transaction = form.type !== TRANSFER_TYPE
-              ? new Transaction(form) : new Transfer(form);
+              ? new Record(form) : new Transfer(form);
             if (newTransaction) {
               await register.create(uid, transactions, accounts);
             } else {

@@ -100,39 +100,52 @@ describe('Transfer', () => {
     it('Edita corretamente uma transferência fixa que atualiza esta e as próximas', async () => {
       vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
       vi.spyOn(uuid, 'v4')
-      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
-      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6');
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75fdh75t43')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc65r380');
       // vi.spyOn(uuid, 'v4').mockReturnValue('760e0d03-6cf9-4ae0-9800-cf75cc222670');
       const register = new Transfer(mocks.formTransferThisAndComming);
       let result = await register.edit(
         'uid',
-        mocks.transactions,
+        mocks.transAllFixTransfers,
         mocks.accounts,
-        { year: 2023, month: 12 },
+        { year: 2024, month: 1 },
       );
-      const expectExpense = {
-        ...mocks.transfers[2],
-        value: 150,
-        payday: '2023-12-22',
-        type: 'Despesa',
-        account: 'Itaú',
-        id: '760e0d03-6cf9-4ae0-9800-cf75cc222670',
-      };
-      const expectRevenue = {
-        ...expectExpense,
-        type: 'Receita',
-        account: 'Carteira',
-        id: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
-      };
-      const [{ records }, { transfers }, updateBalance] = result;
-      expect(transfers).toHaveLength(2);
+      const expectExpenses = [
+        {...mocks.transfers[1], id: '760e0d03-6cf9-4ae0-9800-cf75cc222670', type: 'Despesa', account: 'Itaú'},
+        {
+          ...mocks.transfers[2],
+          value: 150,
+          payday: '2023-12-22',
+          type: 'Despesa',
+          account: 'Itaú',
+        },
+      ];
+      const expectRevenues = [
+        {...mocks.transfers[1], type: 'Receita', account: 'PicPay', id: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6'},
+        {
+          ...expectExpenses[1],
+          type: 'Receita',
+          account: 'Carteira',
+          id: '760e0d03-6cf9-4ae0-9800-cf75fdh75t43',
+        },
+      ];
+      const [{ records }, { transfers }, [,{ accounts }]] = result;
+      console.log('records', records);
+      
+      
+      expect(transfers).toHaveLength(5);
       expect(transfers[1].value).toBe(150);
       expect(transfers[1].payday).toBeNull();
-      expect(records).toHaveLength(4);
-      expect(records[2]).toEqual(expectExpense)
-      expect(records[3]).toEqual(expectRevenue);
-      expect(updateBalance[0].balance).toBe(-50);
-      expect(updateBalance[1].balance).toBe(250);
+      expect(transfers[1].account).toBe('Itaú>Carteira');
+      expect(records).toHaveLength(6);
+      expect(records[2]).toEqual(expectExpenses[0]);
+      expect(records[3]).toEqual(expectRevenues[0]);
+      expect(records[4]).toEqual(expectExpenses[1]);
+      expect(records[5]).toEqual(expectRevenues[1]);
+      expect(accounts[0].balance).toBe(-50);
+      expect(accounts[1].balance).toBe(250);
     });
   });
 });

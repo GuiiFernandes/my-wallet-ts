@@ -42,9 +42,11 @@ export default class Transfer extends Transaction {
       const payday = i === 0 || isFormatTransactions ? trans.payday : null;
       trans.period = trans.installments === 'U' ? '' : trans.period;
       const account = `${trans.account}>${trans.accountDestiny}`;
-      const newData = { ...trans, category: '', subCategory: '' };
+      const newData: TransactionType
+      & { accountDestiny?: string } = { ...trans, category: '', subCategory: '' };
+      delete newData.accountDestiny;
       transfers.push({ ...newData, value, date, payday: null, account });
-      if (payday) {
+      if (payday || isFormatTransactions) {
         records.push({ ...newData, value, payday, date, type: 'Despesa' });
         records.push({ ...newData,
           id: super.generateId(),
@@ -68,10 +70,8 @@ export default class Transfer extends Transaction {
     let [transfers, records]: FormatedTrans = [[], []];
     let result: any[] = [];
     if (this.installments === 'U') {
-      // Se for uma transferência única
       [transfers, records] = this.formatTrans(1);
     } else if (this.installments === 'F') {
-      // Se for uma transferência fixa
       const repetitions = super.calcIntervalMonthRepeat();
       if (repetitions > 1) {
         [transfers, records] = this.formatTrans(repetitions);
@@ -81,7 +81,6 @@ export default class Transfer extends Transaction {
         records = formatedRecords;
       }
     } else {
-      // Se for uma transferência parcelada
       [transfers, records] = this.formatTrans();
     }
     const resultTransfer = await firebaseFuncs.update<TransactionKeys>(
@@ -109,7 +108,6 @@ export default class Transfer extends Transaction {
   ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
-      // Se for uma transferência única
       return this.updateUniqueTransfer(transactions, meta, { uid, accounts });
     }
     if (this.installments === 'F') {
@@ -142,6 +140,8 @@ export default class Transfer extends Transaction {
       .map((transfer) => ({ ...this.transaction,
         date: transfer.date,
         id: transfer.id,
+        installment: transfer.installment,
+        account: `${this.transaction.account}>${this.accountDestiny}`,
         payday: null }));
     const [formatedTransfers] = super
       .editFinRecords(transactions[meta.key], newTransfers, 'id');
@@ -161,7 +161,7 @@ export default class Transfer extends Transaction {
           accounts },
       );
     }
-    return [result[0], dataTransfers, result[1]];
+    return [result[0], dataTransfers, result];
   }
 
   private async updateThisOnly(
