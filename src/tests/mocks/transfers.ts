@@ -1,4 +1,4 @@
-import { AccountType, TransactionType, TransactionsType } from '../../types/Data';
+import { TransactionType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
 
 const PAYDAY = '2023-12-22';
@@ -111,7 +111,7 @@ const formTransferThisOnly: FormTransaction = {
 const formTransferThisAndComming: FormTransaction = {
   ...formTransferThisOnly,
   payday: PAYDAY,
-}
+};
 
 const formTransferUnique: FormTransaction = {
   ...transfers[0],
@@ -121,34 +121,10 @@ const formTransferUnique: FormTransaction = {
   accountDestiny: 'Carteira',
 };
 
-const transactions: TransactionsType = {
-  transfers: [{ ...formTransferUnique, value: 90 }, transfers[2]],
-  records: [expenseTransfer, {
-    ...expenseTransfer,
-    id: 'ee898259-40e0-445b-acb5-abcac16853a1',
-    value: 90,
-    type: 'Receita',
-    account: 'Carteira',
-  }],
-  fixeds: [],
-};
-
-const transAllFixTransfers: TransactionsType = {
-  ...transactions,
-  transfers,
-};
-
-const accounts: AccountType[] = [
-  { id: 1, name: 'Itaú', balance: 100, real: 90, type: 'conta-corrente' },
-  { id: 2, name: 'Carteira', balance: 100, real: 0, type: 'carteira' },
-];
-
 export default {
   formTransferUnique,
   formTransferThisOnly,
   formTransferThisAndComming,
-  transactions,
-  transAllFixTransfers,
   transfers,
-  accounts,
+  expenseTransfer,
 };

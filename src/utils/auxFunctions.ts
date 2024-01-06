@@ -4,6 +4,7 @@ export const oneDay = 1000 * 60 * 60 * 24;
 
 export const installmentsTransform: InstallmentsTransType = {
   Diariamente: oneDay,
+  '4x no mês': oneDay * (31 / 4),
   Semanalmente: oneDay * 7,
   Quinzenalmente: oneDay * 14,
   Mensalmente: oneDay * 30.44,

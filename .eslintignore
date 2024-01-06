@@ -1,1 +1,1 @@
-src/tests
+src/tests/**/*.test.*

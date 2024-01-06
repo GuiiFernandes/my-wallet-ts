@@ -4,6 +4,7 @@ export type Interval = { initialDate: string, endDate: string };
 
 export type InstallmentsTransType = {
   Diariamente: number;
+  '4x no mês': number;
   Semanalmente: number;
   Quinzenalmente: number;
   Mensalmente: number;

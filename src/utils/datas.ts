@@ -15,6 +15,7 @@ export const months = [
 
 export const frequencyRepeatNames = [
   'Diariamente',
+  '4x no mês',
   'Semanalmente',
   'Quinzenalmente',
   'Mensalmente',

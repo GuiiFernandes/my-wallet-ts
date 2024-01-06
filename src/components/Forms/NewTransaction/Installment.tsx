@@ -33,11 +33,14 @@ export default function Installment({ form, setForm }: PropsNewTrans) {
           value={ form.period }
           onChange={ handleChange }
         >
-          { frequencyRepeatNames.map((repeat: string) => (
-            <option key={ repeat } value={ repeat } className={ styles.option }>
-              { repeat }
-            </option>
-          )) }
+          { frequencyRepeatNames
+            .filter((repeat: string) => repeat !== '4x no mês'
+            || form.installments === 'F')
+            .map((repeat: string) => (
+              <option key={ repeat } value={ repeat } className={ styles.option }>
+                { repeat }
+              </option>
+            )) }
         </select>
       </label>
       { form.installments !== 'F' && (

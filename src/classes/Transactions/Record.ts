@@ -42,28 +42,31 @@ export default class Record extends Transaction {
         meta,
         [...transactions[meta.key], newTransaction],
       ),
-      firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
+      newTransaction.payday
+        ? firebaseFuncs.updateBalance(uid, accounts, [newTransaction]) : null]);
     } if (this.installments === 'F') {
-      await firebaseFuncs.update(meta, [
+      const result: any[] = [];
+      result.push(await firebaseFuncs.update(meta, [
         ...transactions[meta.key],
         { ...super.transaction, payday: null },
-      ]);
+      ]));
       if (this.payday) {
         const newTransaction = super.transaction;
-        await Promise.all([firebaseFuncs.update(
+        result.push(await Promise.all([firebaseFuncs.update(
           { ...meta, key: 'records' },
           [...transactions[meta.key], newTransaction],
         ),
-        firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]);
+        firebaseFuncs.updateBalance(uid, accounts, [newTransaction])]));
       }
-      return [{ ...super.transaction, payday: null }, super.transaction];
+      return result;
     }
     const newTransactions = this.formatTrans();
     return Promise.all([await firebaseFuncs.update(
       meta,
       [...transactions[meta.key], ...newTransactions],
     ),
-    firebaseFuncs.updateBalance(uid, accounts, [newTransactions[0]])]);
+    newTransactions[0].payday
+      ? firebaseFuncs.updateBalance(uid, accounts, newTransactions) : null]);
   }
 
   async edit(
@@ -77,12 +80,11 @@ export default class Record extends Transaction {
       const [newData, prevRecord, newRecord] = super
         .editFinRecords(transactions[meta.key]);
       const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
+      return Promise.all([
         firebaseFuncs.update(meta, newData),
         arrayNewBalance.length
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
-      return [newData, arrayNewBalance];
     }
     if (this.installments === 'F') {
       const { value } = await swal.upTrans();
