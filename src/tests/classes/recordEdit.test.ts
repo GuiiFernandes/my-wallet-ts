@@ -37,7 +37,7 @@ afterEach(() => {
 
 describe('Única', () => {
   it('Edita corretamente sem payday', async () => {
-    const expectRecords: TransactionType[] = [...mocksData.transactionsEditRecords.records];
+    const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
     expectRecords[0].value = 30;
     
     const record = new Record({
@@ -57,10 +57,10 @@ describe('Única', () => {
     expect(balance).toBeNull();
   });
   it('Edita corretamente com payday', async () => {
-        const expectRecords: TransactionType[] = [...mocksData.transactionsEditRecords.records];
+        const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
       expectRecords[0].value = 30;
       expectRecords[0].payday = '2024-01-08';
-    const expectAccounts: AccountType[] = [...mocksData.accounts];
+    const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
       expectAccounts[2].balance = 70;
 
     const record = new Record({
@@ -88,7 +88,7 @@ describe('Parcelada', () => {
       vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'false' } as SweetAlertResult<any>);
     });
     it('Edita corretamente sem payday', async () => {
-      const expectRecords: TransactionType[] = [...mocksData.transactionsEditRecords.records];
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
       expectRecords[2].value = 190;
 
       const record = new Record({
@@ -109,12 +109,12 @@ describe('Parcelada', () => {
       expect(balance).toBeNull();
     });
     it('Edita corretamente com payday', async () => {
-      const expectRecords: TransactionType[] = [...mocksData.transactionsEditRecords.records];
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
       expectRecords[2].value = 190;
       expectRecords[2].payday = '2024-01-08';
       expectRecords[2].account = 'Carteira';
 
-      const expectAccounts: AccountType[] = [...mocksData.accounts];
+      const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
       expectAccounts[1].balance = -90;
 
       const record = new Record({
@@ -137,12 +137,70 @@ describe('Parcelada', () => {
       expect(accounts).toEqual(expectAccounts);
     });
   });
+
   describe('Edita esta e as próximas', () => {
-    it('Edita corretamente sem payday', () => {
-      expect(true).toBe(true);
+    beforeEach(() => {
+      vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
     });
-    it('Edita corretamente com payday', () => {
-      expect(true).toBe(true);
+    it('Edita corretamente sem payday', async () => {
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+
+        expectRecords[2].value = 200;
+        expectRecords[2].account = 'Carteira';
+        expectRecords[3].value = 200;
+        expectRecords[3].account = 'Carteira';
+
+      const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
+      expectAccounts[1].balance = -100;
+
+      const record = new Record({
+        ...mocksData.transactionsEditRecords.records[2],
+        value: 200,
+        accountDestiny: '',
+        account: 'Carteira',
+      });
+      const result = await record.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 1 },
+      );
+    
+      const [{ records }, balance] = result;
+      
+      expect(records).toEqual(expectRecords);
+      expect(balance).toBeNull();
+    });
+    it('Edita corretamente com payday', async () => {
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+
+        expectRecords[2].value = 200;
+        expectRecords[2].payday = '2024-01-08';
+        expectRecords[2].account = 'Carteira';
+        expectRecords[3].value = 200;
+        expectRecords[3].account = 'Carteira';
+
+      const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
+      expectAccounts[1].balance = -100;
+
+      const record = new Record({
+        ...mocksData.transactionsEditRecords.records[2],
+        value: 200,
+        payday: '2024-01-08',
+        accountDestiny: '',
+        account: 'Carteira',
+      });
+      const result = await record.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 1 },
+      );
+    
+      const [{ records }, { accounts }] = result;
+      
+      expect(records).toEqual(expectRecords);
+      expect(accounts).toEqual(expectAccounts);
     });
   });
 });

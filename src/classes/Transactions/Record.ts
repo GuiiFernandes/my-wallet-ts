@@ -114,8 +114,15 @@ export default class Record extends Transaction {
         .filter(({ transactionId, date }) => transactionId === this.transactionId
           && date >= this.date);
       const editedTrans = filteredTrans
-        .map(({ type, installment, installments, id, transactionId, date }) => ({
-          ...this.transaction, type, installment, installments, id, transactionId, date,
+        .map(({ type, installment, installments, id, transactionId, date }, index) => ({
+          ...this.transaction,
+          type,
+          installment,
+          installments,
+          id,
+          transactionId,
+          date,
+          payday: index === 0 ? this.payday : null,
         }));
       const [data, prevRecord, newRecord] = super
         .editFinRecords(transactions, editedTrans, 'id');
