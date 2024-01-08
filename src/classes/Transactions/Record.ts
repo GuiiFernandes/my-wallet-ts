@@ -183,24 +183,27 @@ export default class Record extends Transaction {
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const validMeta = { ...meta, key: 'records' };
-    const result = super.editFinRecords(transactions, undefined, 'id');
-    if (result) {
+    try {
+      const result = super.editFinRecords(transactions, undefined, 'id');
       const [newData, prevRecord, newRecord] = result;
       const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      return Promise.all([
+      return await Promise.all([
         firebaseFuncs.update(validMeta, newData),
         arrayNewBalance.length
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
+    } catch (error) {
+      if (this.installments !== 'F') throw error;
+      const day = Number(super.transaction.date.split('-')[2]);
+      const newDate = new Date(year, month, day, 0);
+      const newTransaction: TransactionType = { ...super.transaction,
+        id: super.generateId(),
+        date: format(newDate, 'yyyy-MM-dd') };
+      return Promise.all([
+        firebaseFuncs.update(validMeta, [...transactions, newTransaction]),
+        this.payday
+          ? firebaseFuncs.updateBalance(uid, accounts, [newTransaction]) : null,
+      ]);
     }
-    const day = Number(super.transaction.date.split('-')[2]);
-    const newDate = new Date(`${year}-${month}-${day}T00:00`);
-    const newTransaction = { ...super.transaction,
-      id: super.generateId(),
-      date: format(newDate, 'yyyy-MM-dd') };
-    return Promise.all([
-      firebaseFuncs.update(validMeta, [...transactions, newTransaction]),
-      firebaseFuncs.updateBalance(uid, accounts, [newTransaction]),
-    ]);
   }
 }

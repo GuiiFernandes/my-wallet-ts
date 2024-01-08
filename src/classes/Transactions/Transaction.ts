@@ -158,7 +158,7 @@ export default abstract class Transaction {
 
     newRecords.forEach((record) => {
       const index = transactions
-        .findIndex((trans) => trans[key] === record[key]);
+        .findIndex((trans) => trans[key] === record[key] && trans.date === record.date);
       if (index === -1) throw new Error('Record not found');
       data[index] = record;
       prevRecords.push(transactions[index]);

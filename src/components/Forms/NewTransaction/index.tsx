@@ -51,7 +51,6 @@ export default function NewTransaction() {
 
   useEffect(() => {
     const [id, transId] = editTransaction ? editTransaction.split('/') : ['', ''];
-    console.log(allTransactions);
     const index = allTransactions.findIndex((trans) => trans.id === id
     || trans.transactionId === transId);
 

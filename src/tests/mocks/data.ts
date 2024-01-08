@@ -3,9 +3,11 @@ import transferMock from './transfers';
 import recordMock from './records';
 
 const { transfers, expenseTransfer, formTransferUnique } = transferMock;
-const { recordUnique, recordInstallments } = recordMock;
+const { recordUnique, recordInstallments, recordFixed } = recordMock;
 
 const TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cc2art45';
+const TRANSID_FIXED = '760e0d03-6cf9-4ae0-9800-cf75cc2ar171';
+const SIX_ONE_TWENTYFOUR = '2024-01-06';
 
 const transactionsTransfers: TransactionsType = {
   transfers: [{ ...formTransferUnique, value: 90 }, ...transfers],
@@ -43,8 +45,16 @@ const transactionsEditRecords: TransactionsType = {
       installment: 3,
       date: '2024-03-06',
       id: 'd5de8cd2-dcff-4570-9c6f-5b1a73220065' },
+    { ...recordFixed,
+      transactionId: TRANSID_FIXED,
+      date: SIX_ONE_TWENTYFOUR,
+      payday: SIX_ONE_TWENTYFOUR,
+      id: 'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x' },
   ],
-  fixeds: [],
+  fixeds: [{ ...recordFixed,
+    transactionId: TRANSID_FIXED,
+    date: SIX_ONE_TWENTYFOUR,
+    id: 'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x' }],
 };
 
 const accounts: AccountType[] = [
