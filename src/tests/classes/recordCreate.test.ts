@@ -1,11 +1,9 @@
 import { vi } from 'vitest';
 import * as uuid from 'uuid';
 
-import { SweetAlertResult } from 'sweetalert2';
-import mocksRecord from '../mocks/record';
+import mocksRecord from '../mocks/records';
 import mocksData from '../mocks/data';
 import { Record } from '../../classes/Transactions';
-import swal from '../../utils/swal';
 import { TransactionType } from '../../types/Data';
 
 beforeEach(() => {

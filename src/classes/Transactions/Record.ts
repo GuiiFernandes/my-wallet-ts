@@ -75,6 +75,7 @@ export default class Record extends Transaction {
     accounts: AccountType[],
     yearAndMonth: YearAndMonth,
   ): Promise<any> {
+    const { records } = transactions;
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
       const [newData, prevRecord, newRecord] = super
@@ -93,23 +94,23 @@ export default class Record extends Transaction {
           .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
       }
       if (value === 'false') {
-        return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
+        return this.updateThisOnly(meta, records, yearAndMonth, { uid, accounts });
       }
     } else {
-      return this.updateInstallments(transactions, yearAndMonth, meta, { uid, accounts });
+      return this.updateInstallments(records, yearAndMonth, meta, { uid, accounts });
     }
     return null;
   }
 
   private async updateInstallments(
-    transactions: TransactionsType,
+    transactions: TransactionType[],
     yearAndMonth: YearAndMonth,
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const { value } = await swal.upTrans();
     if (value === 'true') {
-      const filteredTrans = transactions.records
+      const filteredTrans = transactions
         .filter(({ transactionId, date }) => transactionId === this.transactionId
           && date >= this.date);
       const editedTrans = filteredTrans
@@ -117,14 +118,13 @@ export default class Record extends Transaction {
           ...this.transaction, type, installment, installments, id, transactionId, date,
         }));
       const [data, prevRecord, newRecord] = super
-        .editFinRecords(transactions.records, editedTrans, 'id');
+        .editFinRecords(transactions, editedTrans, 'id');
       const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
+      return Promise.all([
         firebaseFuncs.update({ ...meta, key: 'records' }, data),
         arrayNewBalance.length
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
-      return [data, arrayNewBalance];
     }
     if (value === 'false') {
       return this.updateThisOnly(meta, transactions, yearAndMonth, { uid, accounts });
@@ -171,31 +171,29 @@ export default class Record extends Transaction {
 
   private async updateThisOnly(
     meta: MetaCreateInfos<TransactionKeys>,
-    transactions: TransactionsType,
+    transactions: TransactionType[],
     { year, month }: YearAndMonth,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const validMeta = { ...meta, key: 'records' };
-    const result = super.editFinRecords(transactions.records, undefined, 'id');
+    const result = super.editFinRecords(transactions, undefined, 'id');
     if (result) {
       const [newData, prevRecord, newRecord] = result;
       const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-      await Promise.all([
+      return Promise.all([
         firebaseFuncs.update(validMeta, newData),
         arrayNewBalance.length
           ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
       ]);
-      return [newData, arrayNewBalance];
     }
     const day = Number(super.transaction.date.split('-')[2]);
     const newDate = new Date(`${year}-${month}-${day}T00:00`);
     const newTransaction = { ...super.transaction,
       id: super.generateId(),
       date: format(newDate, 'yyyy-MM-dd') };
-    await Promise.all([
-      firebaseFuncs.update(validMeta, [...transactions.records, newTransaction]),
+    return Promise.all([
+      firebaseFuncs.update(validMeta, [...transactions, newTransaction]),
       firebaseFuncs.updateBalance(uid, accounts, [newTransaction]),
     ]);
-    return [[newTransaction], []];
   }
 }

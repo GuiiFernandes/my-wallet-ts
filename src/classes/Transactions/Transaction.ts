@@ -155,6 +155,7 @@ export default abstract class Transaction {
     const data = [...transactions];
     const prevRecords: TransactionType[] = [];
     const nextRecords: TransactionType[] = [];
+
     newRecords.forEach((record) => {
       const index = transactions
         .findIndex((trans) => trans[key] === record[key]);

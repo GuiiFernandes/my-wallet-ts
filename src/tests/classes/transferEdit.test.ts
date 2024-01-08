@@ -136,9 +136,6 @@ it('Edita corretamente uma transferência fixa que atualiza esta e as próximas'
 
   const [{ records }, { transfers }, [,{ accounts }]] = result;
 
-  console.log(transfers);
-  
-
   expect(transfers).toHaveLength(5);
   expect(transfers[1].value).toBe(150);
   expect(transfers[1].payday).toBeNull();
