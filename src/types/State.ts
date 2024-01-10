@@ -1,4 +1,4 @@
-import { Data } from './Data';
+import { Data, TransactionType } from './Data';
 
 export type User = {
   uid: string;
@@ -46,11 +46,11 @@ export type MonthSelected = {
 
 export type NewTransactionType = {
   newTransaction?: boolean;
-  editTransaction?: string | null;
+  editTransaction?: TransactionType | null;
 };
 
 export type EditTransactionType = {
-  editTransaction: string | null;
+  editTransaction: TransactionType | null;
 };
 
 export type NewCategoryType = {

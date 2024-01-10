@@ -8,6 +8,11 @@ import { InstallmentsTransType } from '../types/Others';
 import { TransactionType } from '../types/Data';
 import { installmentsTransform, objNextDate, oneDay } from '../utils/auxFunctions';
 
+const INSTALLMENTS_NAMES = ['Diariamente',
+  '4x no mês',
+  'Semanalmente',
+  'Quinzenalmente'];
+
 export default function useTransaction() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
   const {
@@ -56,35 +61,35 @@ export default function useTransaction() {
     const recorsByDate: TransactionType[] = getByDate(records, initialMonth, true);
     const fixedsByDate: TransactionType[] = getByDate(fixeds, initialMonth);
     const transfersByDate: TransactionType[] = getByDate(transfers, initialMonth);
-
-    const setRecordsTransIdAndDate = new Set(recorsByDate
-      .map(({ transactionId, date }) => `${transactionId}-${date.split('-')[2]}`));
-    const setTransfersTransId = new Set(transfers
-      .map(({ transactionId }) => transactionId));
-
+    const setRecords = new Set(recorsByDate
+      .map(({ transactionId, date }) => `${transactionId}/${date.split('-')[2]}`));
+    const setTransfers = new Set(transfers.map(({ transactionId }) => transactionId));
     const transfersfiltered: TransactionType[] = transfersByDate
       .filter(({ installments, date }) => installments === 'F'
         || isSameMonth(new Date(date), initialMonth));
-    const fixedFilterTransactions = fixedsByDate
-      .filter(({ transactionId, date }) => !setRecordsTransIdAndDate
-        .has(`${transactionId}-${date.split('-')[2]}`));
     const recordsFilterTransfers = recorsByDate
-      .filter(({ transactionId }) => !setTransfersTransId.has(transactionId));
-    const repeatFixedTransactions = fixedFilterTransactions
+      .filter(({ transactionId }) => !setTransfers.has(transactionId));
+    const repeatFixedTransactions = fixedsByDate
+      .filter(({ period }) => new Set(INSTALLMENTS_NAMES).has(period))
       .reduce((repeatFixeds, transaction) => {
         const repetitions = calculateRepetitions(transaction);
         const newFixeds: TransactionType[] = [...repeatFixeds];
         for (let i = 0; i < repetitions; i += 1) {
           const date = calculateNextDate(i, transaction);
-          newFixeds.push({
-            ...transaction,
+          newFixeds.push({ ...transaction,
             date,
-            id: uuidv4(),
-          });
+            id: uuidv4() });
         }
         return newFixeds;
       }, [] as TransactionType[]);
-
+    const setRepeatFixeds = new Set(repeatFixedTransactions
+      .map(({ transactionId }) => transactionId));
+    const fixedFilterTransactions = fixedsByDate
+      .filter(({ transactionId, date }) => !setRepeatFixeds
+        .has(transactionId) && !setRecords.has(`${transactionId}/${date.split('-')[2]}`));
+    const repeatFixedRecordFilter = repeatFixedTransactions
+      .filter(({ transactionId, date }) => !setRecords
+        .has(`${transactionId}/${date.split('-')[2]}`));
     const transferWithPayday = transfersfiltered.map((transfer) => {
       const record = recorsByDate
         .find(({ transactionId, date }) => (
@@ -95,8 +100,8 @@ export default function useTransaction() {
       }
       return transfer;
     });
-
-    return [...recordsFilterTransfers, ...repeatFixedTransactions, ...transferWithPayday]
+    return [...recordsFilterTransfers, ...repeatFixedRecordFilter,
+      ...transferWithPayday, ...fixedFilterTransactions]
       .sort((a: TransactionType, b: TransactionType) => {
         return Number(b.date.split('-')[2]) - Number(a.date.split('-')[2]);
       });
@@ -106,12 +111,7 @@ export default function useTransaction() {
     transaction: TransactionType,
   ): number => {
     const day = Number(transaction.date.split('-')[2]);
-    const recordsByFixeds = transactions.records
-      .filter(({ transactionId }) => transactionId === transaction.transactionId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const initialDate = recordsByFixeds[0]?.date
-      ? new Date(calculateNextDate(1, recordsByFixeds[0]))
-      : new Date(`${transaction.date}T00:00`);
+    const initialDate = new Date(year, month - 1, day, 0);
     const endDate = endOfMonth(new Date(year, month - 1, day, 0));
     return calcIntervalEditRepeat(endDate, initialDate, transaction.period);
   };

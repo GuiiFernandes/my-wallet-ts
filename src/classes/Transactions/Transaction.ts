@@ -91,21 +91,20 @@ export default abstract class Transaction {
     year: number,
     month: number,
     key: TransactionKeys,
-  ): [number, Date, TransactionType[]] {
+  ): [number, Date, TransactionType] {
     const day = Number(this.date.split('-')[2]);
     const recordsByFixeds = transactions.records
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const superficialRecords = transactions[key]
-      .filter(({ transactionId }) => transactionId === this.transactionId)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    if (!superficialRecords.length) throw new Error(`${key} transaction not found`);
+    const transaction = transactions[key]
+      .find(({ transactionId }) => transactionId === this.transactionId);
+    if (!transaction) throw new Error(`${key} transaction not found`);
     const initialDate = recordsByFixeds[0]?.date
-      ? new Date(this.calculateNextDate(1, recordsByFixeds[0]))
-      : new Date(`${superficialRecords[0].date}T00:00`);
+      ? new Date(`${this.calculateNextDate(1, recordsByFixeds[0])}T00:00`)
+      : new Date(`${transaction.date}T00:00`);
     const endDate = new Date(year, month - 1, day, 0);
     const repetitions = this.calcIntervalEditRepeat(endDate, initialDate);
-    return [repetitions, initialDate, superficialRecords];
+    return [repetitions, initialDate, transaction];
   }
 
   private calcIntervalEditRepeat(
@@ -138,8 +137,7 @@ export default abstract class Transaction {
       new Date(`${trans.date}T00:00`),
       this.objNextDate(i)[periodValid],
     );
-    const diff = differenceInDays(new Date(`${trans.date}T00:00`), nextDate);
-    return format(add(nextDate, this.objNextDate(diff).Diariamente), 'yyyy-MM-dd');
+    return format(nextDate, 'yyyy-MM-dd');
   }
 
   protected generateId(id?: string): string {
@@ -155,14 +153,18 @@ export default abstract class Transaction {
     const data = [...transactions];
     const prevRecords: TransactionType[] = [];
     const nextRecords: TransactionType[] = [];
-
     newRecords.forEach((record) => {
       const index = transactions
         .findIndex((trans) => trans[key] === record[key] && trans.date === record.date);
-      if (index === -1) throw new Error('Record not found');
-      data[index] = record;
-      prevRecords.push(transactions[index]);
-      nextRecords.push(record);
+      if (index === -1) {
+        if (this.installments !== 'F') throw new Error('Record not found');
+        data.push({ ...record, id: this.generateId() });
+        if (record.payday) nextRecords.push(record);
+      } else {
+        data[index] = record;
+        prevRecords.push(transactions[index]);
+        nextRecords.push(record);
+      }
     });
     return [data, prevRecords, nextRecords];
   }
@@ -173,12 +175,12 @@ export default abstract class Transaction {
   ) {
     const arrayNewBalance: TransactionType[] = [];
     prevRecord?.forEach((record) => {
-      if (record.payday) {
+      if (record && record.payday) {
         arrayNewBalance.push({ ...record, value: -record.value });
       }
     });
     newRecord?.forEach((record) => {
-      if (record.payday) {
+      if (record && record.payday) {
         arrayNewBalance.push(record);
       }
     });

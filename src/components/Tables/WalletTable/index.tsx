@@ -49,20 +49,21 @@ export default function WalletTable() {
       </thead>
       <tbody className={ styles.container }>
         {allTransactions.map((transaction) => {
-          const { payday } = transaction;
+          const { payday, id, date, description, account, value, transactionId,
+            type, installment, installments, category, subCategory } = transaction;
           return (
-            <tr className={ styles.card } key={ transaction.id }>
+            <tr className={ styles.card } key={ id }>
               <td
                 className={ styles.td }
                 style={ { fontWeight: 'bold' } }
               >
-                { Number(transaction.date.split('-')[2]) }
+                { Number(date.split('-')[2]) }
               </td>
               <td
                 className={ styles.td }
                 style={ {
                   fontWeight: 'bold',
-                  color: transaction.payday ? 'var(--light-green)' : 'var(--light-red)',
+                  color: payday ? 'var(--light-green)' : 'var(--light-red)',
                 } }
               >
                 { payday
@@ -70,11 +71,11 @@ export default function WalletTable() {
                   : '-'}
               </td>
               <td className={ styles.td }>
-                { transaction.description }
+                { description }
               </td>
               <td className={ styles.td }>
                 <NumericFormat
-                  value={ transaction.value }
+                  value={ value }
                   allowNegative={ false }
                   displayType="text"
                   decimalScale={ 2 }
@@ -83,25 +84,25 @@ export default function WalletTable() {
                   prefix="R$"
                   thousandSeparator="."
                   style={ {
-                    color: colors[transaction.type],
+                    color: colors[type],
                     fontWeight: 'bold',
                   } }
                 />
               </td>
               <td className={ styles.td }>
-                { transaction.installment
-                  && !verifyInstallments.has(transaction.installments)
-                  ? `${transaction.installment}/${transaction.installments}`
-                  : transaction.installments }
+                { installment
+                  && !verifyInstallments.has(installments)
+                  ? `${installment}/${installments}`
+                  : installments }
               </td>
-              <td className={ styles.td }>{ transaction.category }</td>
-              <td className={ styles.td }>{ transaction.subCategory }</td>
-              <td className={ styles.td }>{ transaction.account }</td>
+              <td className={ styles.td }>{ category }</td>
+              <td className={ styles.td }>{ subCategory }</td>
+              <td className={ styles.td }>{ account }</td>
               <td
                 className={ styles.td }
-                style={ { color: colors[transaction.type] } }
+                style={ { color: colors[type] } }
               >
-                { transaction.type === 'Transferência' ? 'Transf' : transaction.type }
+                { type === 'Transferência' ? 'Transf' : type }
               </td>
               <td className={ styles.tdBtn }>
                 <button
@@ -109,7 +110,7 @@ export default function WalletTable() {
                   className={ styles.btnEdit }
                   onClick={ () => {
                     dispatch(changeOperationls({
-                      editTransaction: `${transaction.id}/${transaction.transactionId}`,
+                      editTransaction: transaction,
                     }));
                   } }
                 >

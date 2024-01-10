@@ -101,7 +101,7 @@ describe('Parcelada', () => {
     expect(records).toHaveLength(3);
     expect(records[0]).toEqual(expectRecord);
     expect(records[2]).toEqual({
-      ...expectRecord, id: 'd5de8cd2-dcff-4570-9c6f-5b1a73220065', installment: 3,
+      ...expectRecord, id: 'd5de8cd2-dcff-4570-9c6f-5b1a73220065', installment: 3, date: '2024-03-06',
     });
     expect(balance).toBeNull();
   });
@@ -130,7 +130,7 @@ describe('Parcelada', () => {
     expect(records).toHaveLength(3);
     expect(records[0]).toEqual(expectRecord);
     expect(records[2]).toEqual({
-      ...expectRecord, id: 'd5de8cd2-dcff-4570-9c6f-5b1a73220065', installment: 3, payday: null,
+      ...expectRecord, id: 'd5de8cd2-dcff-4570-9c6f-5b1a73220065', installment: 3, payday: null, date: '2024-03-06',
     });
     expect(accounts[0].balance).toBe(30);
   });

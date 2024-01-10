@@ -2,8 +2,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumericFormat } from 'react-number-format';
 
 import { useEffect } from 'react';
-import { format } from 'date-fns';
-import useTransaction from '../../../hooks/useTransaction';
 import FormLayout from '../FormLayout';
 import PayBtn from './PayBtn';
 import Installment from './Installment';
@@ -18,7 +16,6 @@ import { changeOperationls } from '../../../redux/reducers/operationals';
 import Transaction, { Record, Transfer } from '../../../classes/Transactions';
 import { toast } from '../../../utils/swal';
 import CategoriesSelects from './CategoriesSelects';
-import { TransactionType } from '../../../types/Data';
 
 const styles = { ...style1, ...styles2 };
 
@@ -27,7 +24,6 @@ const indexes = [0, 1, 2];
 
 export default function NewTransaction() {
   const dispatch = useDispatch();
-  const { getAllTransactions } = useTransaction();
   const {
     form,
     setForm,
@@ -47,23 +43,13 @@ export default function NewTransaction() {
 
   const destinyAccounts = accounts.filter((account) => account.name !== form.account);
 
-  const allTransactions: TransactionType[] = getAllTransactions();
-
   useEffect(() => {
-    const [id, transId] = editTransaction ? editTransaction.split('/') : ['', ''];
-    const index = allTransactions.findIndex((trans) => trans.id === id
-    || trans.transactionId === transId);
-
-    if (index !== -1) {
-      const { account, ...formTrans } = allTransactions[index];
+    if (editTransaction) {
+      const { account, ...formTrans } = editTransaction;
 
       const [originAcc, destinyAcc] = account.split('>');
       setForm({
         ...formTrans,
-        // date: format(
-        //   new Date(year, month - 1, Number(formTrans.date.split('-')[2])),
-        //   'yyyy-MM-dd',
-        // ),
         account: originAcc,
         accountDestiny: destinyAcc || '',
       });

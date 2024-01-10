@@ -6,7 +6,6 @@ import mocksData from '../mocks/data';
 import { Record } from '../../classes/Transactions';
 import swal from '../../utils/swal';
 import { AccountType, TransactionType } from '../../types/Data';
-import transfers from '../mocks/transfers';
 
 beforeEach(() => {
   const upDoc = vi.hoisted(() => {
@@ -227,7 +226,7 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
+        { year: 2024, month: 2 },
       );
     
       const [{ records }, balance] = result;
@@ -260,7 +259,7 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
+        { year: 2024, month: 2 },
       );
     
       const [{ records }, { accounts }] = result;
@@ -269,15 +268,51 @@ describe('Fixa', () => {
       expect(accounts).toEqual(expectAccounts);
     });
   });
-  // describe('Edita esta e as próximas', () => {
-  //   beforeEach(() => {
-  //     vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
-  //   });
-  //   it('Edita corretamente sem payday', () => {
-  //     expect(true).toBe(true);
-  //   });
-  //   it('Edita corretamente com payday', () => {
-  //     expect(true).toBe(true);
-  //   });
-  // });
+  describe('Edita esta e as próximas', () => {
+    beforeEach(() => {
+      vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
+    });
+    it.only('Edita corretamente sem payday', async () => {
+      vi.spyOn(uuid, 'v4')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7');
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+      for (let index = 0; index < 2; index += 1) {
+        const id = index === 0
+          ? '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6'
+          : '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7';
+        const date = index === 0 ? '2024-02-06' : '2024-03-06';
+        expectRecords.push({
+          ...expectRecords[4],
+          id,
+          date,
+          payday: null,
+          value: 500,
+        });
+      }
+      const expectFixed: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.fixeds));
+      expectFixed[0].value = 200;
+      const record = new Record({
+        ...mocksData.transactionsEditRecords.fixeds[0],
+        value: 200,
+        date: '2024-04-06',
+        accountDestiny: '',
+      });
+      const result = await record.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 4 },
+      );
+      
+      const [[{ records }, { fixeds }], balance] = result;
+      
+      expect(records).toEqual(expectRecords);
+      expect(fixeds).toEqual(expectFixed);
+      expect(balance).toBeNull();
+    });
+    // it('Edita corretamente com payday', () => {
+    //   expect(true).toBe(true);
+    // });
+  });
 });
