@@ -1,25 +1,25 @@
 import { AccountType, TransactionsType } from '../../types/Data';
-import transferMock from './transfers';
+// import transferMock from './transfers';
 import recordMock from './records';
 
-const { transfers, expenseTransfer, formTransferUnique } = transferMock;
+// const { transfers, expenseTransfer, formTransferUnique } = transferMock;
 const { recordUnique, recordInstallments, recordFixed } = recordMock;
 
 const TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cc2art45';
 const TRANSID_FIXED = '760e0d03-6cf9-4ae0-9800-cf75cc2ar171';
 const SIX_ONE_TWENTYFOUR = '2024-01-06';
 
-const transactionsTransfers: TransactionsType = {
-  transfers: [{ ...formTransferUnique, value: 90 }, ...transfers],
-  records: [expenseTransfer, {
-    ...expenseTransfer,
-    id: 'ee898259-40e0-445b-acb5-abcac16853a1',
-    value: 90,
-    type: 'Receita',
-    account: 'Carteira',
-  }],
-  fixeds: [],
-};
+// const transactionsTransfers: TransactionsType = {
+//   transfers: [{ ...formTransferUnique, value: 90 }, ...transfers],
+//   records: [expenseTransfer, {
+//     ...expenseTransfer,
+//     id: 'ee898259-40e0-445b-acb5-abcac16853a1',
+//     value: 90,
+//     type: 'Receita',
+//     account: 'Carteira',
+//   }],
+//   fixeds: [],
+// };
 
 const transactionsRecords: TransactionsType = {
   transfers: [],
@@ -64,7 +64,7 @@ const accounts: AccountType[] = [
 ];
 
 export default {
-  transactionsTransfers,
+  // transactionsTransfers,
   transactionsRecords,
   accounts,
   transactionsEditRecords,

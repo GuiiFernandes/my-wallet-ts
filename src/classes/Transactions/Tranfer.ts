@@ -35,7 +35,7 @@ export default class Transfer extends Transaction {
       ? { ...transaction }
       : { ...super.transaction, accountDestiny: this.accountDestiny };
     for (let i = 0; i < periodRepetion; i += 1) {
-      trans.id = super.generateId();
+      trans.id = periodRepetion > 1 ? super.generateId() : this.id;
       const value = this.formatedInstalments[trans.installments]
         ? trans.value : super.calculateValue(i, transaction);
       const date = super.calculateNextDate(i, transaction);

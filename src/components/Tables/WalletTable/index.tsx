@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { NumericFormat } from 'react-number-format';
 import { AiFillEdit } from 'react-icons/ai';
@@ -8,6 +8,7 @@ import { TransactionType } from '../../../types/Data';
 import styleGlobal from '../table.module.css';
 import styleTable from './walleTable.module.css';
 import useTransaction from '../../../hooks/useTransaction';
+import { StateRedux } from '../../../types/State';
 
 const styles = { ...styleGlobal, ...styleTable };
 
@@ -29,6 +30,8 @@ const verifyInstallments = new Set(['U', 'F']);
 
 export default function WalletTable() {
   const dispatch = useDispatch();
+  const { monthSelected } = useSelector(({ operationals }: StateRedux) => operationals);
+  const { month, year } = monthSelected;
   const { getAllTransactions } = useTransaction();
 
   const allTransactions: TransactionType[] = getAllTransactions();
@@ -58,13 +61,16 @@ export default function WalletTable() {
         {allTransactions.map((transaction) => {
           const { payday, id, date, description, account, value,
             type, installment, installments, category, subCategory } = transaction;
+          const [, , day] = date.split('-').map((number) => Number(number));
+          const editDate = `${year}-${month < 10 ? '0' : ''}${month}-${day}`;
           return (
             <tr
               className={ styles.card }
               key={ id }
-              style={ date === format(new Date(), 'yyyy-MM-dd') ? {
-                background: gradient,
-              } : {} }
+              style={ editDate === format(new Date(), 'yyyy-MM-dd')
+                ? {
+                  background: gradient,
+                } : {} }
             >
               <td
                 className={ styles.td }
