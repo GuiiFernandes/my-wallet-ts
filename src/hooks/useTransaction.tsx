@@ -12,6 +12,7 @@ const INSTALLMENTS_NAMES = ['Diariamente',
   '4x no mês',
   'Semanalmente',
   'Quinzenalmente'];
+const FORMAT_DATE = 'yyyy-MM-dd';
 
 export default function useTransaction() {
   const { transactions } = useSelector(({ data }: StateRedux) => data);
@@ -56,14 +57,82 @@ export default function useTransaction() {
     return isBefore(transDate, endOfMonth(initialMonth));
   });
 
-  const getAllTransactions = () => {
+  const datasByDate = () => {
     const initialMonth = new Date(year, month - 1, 1, 0);
     const recorsByDate: TransactionType[] = getByDate(records, initialMonth, true);
     const fixedsByDate: TransactionType[] = getByDate(fixeds, initialMonth);
     const transfersByDate: TransactionType[] = getByDate(transfers, initialMonth);
+    return [recorsByDate, fixedsByDate, transfersByDate];
+  };
+
+  const dataSets = (
+    recorsByDate: TransactionType[],
+  ) => {
     const setRecords = new Set(recorsByDate
       .map(({ transactionId, date }) => `${transactionId}/${date.split('-')[2]}`));
     const setTransfers = new Set(transfers.map(({ transactionId }) => transactionId));
+    return [setRecords, setTransfers];
+  };
+
+  const searchWeekDay = (transDate: Date): Date => {
+    const keyOfWeek = transDate.getDay();
+    console.log('transDate', transDate);
+    console.log('keyOfWeek', keyOfWeek);
+    let date = new Date(year, month - 1, 1, 0);
+
+    while (date.getDay() !== keyOfWeek) {
+      console.log('getDay', date.getDay());
+      date = add(date, { days: 1 });
+    }
+    console.log('date', date);
+    return date;
+  };
+
+  const createWeeklyFixeds = (transaction: TransactionType): TransactionType[] => {
+    const transDate = new Date(`${transaction.date}T00:00`);
+    let date = new Date(year, month - 1, 1, 0);
+    const endMonth = endOfMonth(date);
+    const newFixeds: TransactionType[] = [];
+    date = searchWeekDay(transDate);
+    while (date <= endMonth) {
+      newFixeds.push({ ...transaction, date: format(date, FORMAT_DATE), id: uuidv4() });
+      date = add(date, { days: 7 });
+    }
+    return newFixeds;
+  };
+
+  const repeatFixedsFilter = (
+    repeatFixeds: TransactionType[],
+    transaction: TransactionType,
+  ) => {
+    if (transaction.period === 'Semanalmente') {
+      return createWeeklyFixeds(transaction);
+    }
+    const [, transMonth, day] = transaction.date.split('-')
+      .map((number) => Number(number));
+    const initialDate = transMonth === month
+      ? new Date(year, month - 1, day, 0)
+      : searchWeekDay(new Date(`${transaction.date}T00:00`));
+    console.log('transDay', initialDate);
+    const transactionCorrectDate = {
+      ...transaction, date: format(initialDate, FORMAT_DATE),
+    };
+    const repetitions = calculateRepetitions(transactionCorrectDate);
+    const newFixeds: TransactionType[] = [...repeatFixeds];
+    for (let i = 0; i < repetitions; i += 1) {
+      const date = i === 0
+        ? format(initialDate, FORMAT_DATE) : calculateNextDate(i, transactionCorrectDate);
+      newFixeds.push({ ...transaction,
+        date,
+        id: uuidv4() });
+    }
+    return newFixeds;
+  };
+
+  const getAllTransactions = () => {
+    const initialMonth = new Date(year, month - 1, 1, 0);
+    const [recorsByDate, fixedsByDate, transfersByDate] = datasByDate();
+    const [setRecords, setTransfers] = dataSets(recorsByDate);
     const transfersfiltered: TransactionType[] = transfersByDate
       .filter(({ installments, date }) => installments === 'F'
         || isSameMonth(new Date(date), initialMonth));
@@ -71,17 +140,7 @@ export default function useTransaction() {
       .filter(({ transactionId }) => !setTransfers.has(transactionId));
     const repeatFixedTransactions = fixedsByDate
       .filter(({ period }) => new Set(INSTALLMENTS_NAMES).has(period))
-      .reduce((repeatFixeds, transaction) => {
-        const repetitions = calculateRepetitions(transaction);
-        const newFixeds: TransactionType[] = [...repeatFixeds];
-        for (let i = 0; i < repetitions; i += 1) {
-          const date = calculateNextDate(i, transaction);
-          newFixeds.push({ ...transaction,
-            date,
-            id: uuidv4() });
-        }
-        return newFixeds;
-      }, [] as TransactionType[]);
+      .reduce(repeatFixedsFilter, [] as TransactionType[]);
     const setRepeatFixeds = new Set(repeatFixedTransactions
       .map(({ transactionId }) => transactionId));
     const fixedFilterTransactions = fixedsByDate
@@ -107,15 +166,6 @@ export default function useTransaction() {
       });
   };
 
-  const calculateRepetitions = (
-    transaction: TransactionType,
-  ): number => {
-    const day = Number(transaction.date.split('-')[2]);
-    const initialDate = new Date(year, month - 1, day, 0);
-    const endDate = endOfMonth(new Date(year, month - 1, day, 0));
-    return calcIntervalEditRepeat(endDate, initialDate, transaction.period);
-  };
-
   const calculateNextDate = (
     i: number = 1,
     { period, date }: TransactionType,
@@ -125,16 +175,19 @@ export default function useTransaction() {
       new Date(`${date}T00:00`),
       objNextDate(i)[periodValid],
     );
-    return format(nextDate, 'yyyy-MM-dd');
+    return format(nextDate, FORMAT_DATE);
   };
 
-  const calcIntervalEditRepeat = (
-    endDate: Date,
-    initialDate: Date,
-    period: keyof InstallmentsTransType = 'Mensalmente',
+  const calculateRepetitions = (
+    transaction: TransactionType,
   ): number => {
-    const transFrequency = installmentsTransform[period];
-    return Math.ceil((endDate.getTime() - initialDate.getTime()) / transFrequency);
+    const { period, date } = transaction;
+    const day = date.split('-')[2];
+    const initialDate = new Date(year, month - 1, Number(day), 0);
+    const endDate = endOfMonth(new Date(year, month - 1, Number(day), 0));
+    const transFrequency = installmentsTransform[period || 'Mensalmente'];
+    const frequency = (endDate.getTime() - initialDate.getTime()) / transFrequency;
+    return Math.ceil(frequency);
   };
 
   return { getAllTransactions };

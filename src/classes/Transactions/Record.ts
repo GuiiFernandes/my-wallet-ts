@@ -146,7 +146,6 @@ export default class Record extends Transaction {
   ) {
     const [repetitions, initialDate, fixedTrans] = super
       .calculateRepetitions(transactions, year, month, meta.key);
-
     const newTransactions = this.formatTrans(
       repetitions,
       { ...fixedTrans, date: format(initialDate, 'yyyy-MM-dd') },

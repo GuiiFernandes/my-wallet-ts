@@ -22,6 +22,7 @@ export const objNextDate = (i: number): ObjNextDate => {
   return {
     Diariamente: { days: 1 * i },
     Semanalmente: { weeks: 1 * i },
+    '4x no mês': { days: (31 / 4) * i },
     Quinzenalmente: { weeks: 2 * i },
     Mensalmente: { months: 1 * i },
     Bimestralmente: { months: 2 * i },
