@@ -313,10 +313,11 @@ describe('Fixa', () => {
       expect(fixeds).toEqual(expectFixed);
       expect(balance).toBeUndefined();
     });
-    it('Edita corretamente com payday', () => {
+    it('Edita corretamente com payday', async () => {
       vi.spyOn(uuid, 'v4')
         .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
-        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7');
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs8');
       const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
       for (let index = 0; index < 2; index += 1) {
         const id = index === 0
@@ -328,7 +329,7 @@ describe('Fixa', () => {
           ...expectRecords[4],
           id,
           date,
-          payday: date,
+          payday: null,
           installment,
           value: 500,
         });
@@ -345,18 +346,24 @@ describe('Fixa', () => {
         payday: '2024-04-06',
         accountDestiny: '',
       });
-      const result = record.edit(
+      const result = await record.edit(
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
         { year: 2024, month: 4 },
       );
       
-      const [[{ records }, { fixeds }], [{ accounts }, {}]] = result;
+      const [[{ records }, { fixeds }], [{ records: recordThisOnly }]] = result;
       
       expect(records).toEqual(expectRecords);
       expect(fixeds).toEqual(expectFixed);
-      expect(accounts).toEqual(expectAccounts);
+      expect(recordThisOnly).toEqual([...expectRecords, {
+        ...mocksData.transactionsEditRecords.fixeds[0],
+        value: 200,
+        date: '2024-04-06',
+        payday: '2024-04-06',
+        id: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs8',
+      }]);
     });
   });
 });

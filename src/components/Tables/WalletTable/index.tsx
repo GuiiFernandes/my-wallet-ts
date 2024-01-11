@@ -18,6 +18,13 @@ const colors = {
   Investimento: 'var(--blue)',
 };
 
+const gradient1 = 'linear-gradient(90deg,';
+const gradient2 = 'rgba(121, 199, 197,0) 0%,';
+const gradient3 = 'rgba(121, 199, 197,0.2) 7.5%,';
+const gradient4 = 'rgba(121, 199, 197,0.2) 92.5%,';
+const gradient5 = 'rgba(121, 199, 197,0) 100%)';
+const gradient = `${gradient1} ${gradient2} ${gradient3} ${gradient4} ${gradient5}`;
+
 const verifyInstallments = new Set(['U', 'F']);
 
 export default function WalletTable() {
@@ -49,10 +56,16 @@ export default function WalletTable() {
       </thead>
       <tbody className={ styles.container }>
         {allTransactions.map((transaction) => {
-          const { payday, id, date, description, account, value, transactionId,
+          const { payday, id, date, description, account, value,
             type, installment, installments, category, subCategory } = transaction;
           return (
-            <tr className={ styles.card } key={ id }>
+            <tr
+              className={ styles.card }
+              key={ id }
+              style={ date === format(new Date(), 'yyyy-MM-dd') ? {
+                background: gradient,
+              } : {} }
+            >
               <td
                 className={ styles.td }
                 style={ { fontWeight: 'bold' } }

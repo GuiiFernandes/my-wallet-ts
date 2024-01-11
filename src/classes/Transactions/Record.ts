@@ -166,12 +166,13 @@ export default class Record extends Transaction {
     ]);
     const result = [dataArray];
     if (this.payday) {
-      result.push(await this.updateThisOnly(
+      const paydayResult = await this.updateThisOnly(
         meta,
-        dataArray[0],
+        dataArray[0].records,
         { uid,
           accounts },
-      ));
+      );
+      result.push(paydayResult);
     }
     return result;
   }
