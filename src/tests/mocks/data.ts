@@ -1,9 +1,11 @@
 import { AccountType, TransactionsType } from '../../types/Data';
 // import transferMock from './transfers';
 import recordMock from './records';
+import transferMock from './transfers';
 
 // const { transfers, expenseTransfer, formTransferUnique } = transferMock;
 const { recordUnique, recordInstallments, recordFixed } = recordMock;
+const { transferUnique } = transferMock;
 
 const TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cc2art45';
 const TRANSID_FIXED = '760e0d03-6cf9-4ae0-9800-cf75cc2ar171';
@@ -28,7 +30,9 @@ const transactionsRecords: TransactionsType = {
 };
 
 const transactionsEditRecords: TransactionsType = {
-  transfers: [],
+  transfers: [
+    { ...transferUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2av43t' },
+  ],
   records: [
     { ...recordUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc222670' },
     { ...recordInstallments,

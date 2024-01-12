@@ -5,8 +5,6 @@ import mocksTransfer from '../mocks/transfers';
 import mocksData from '../mocks/data';
 import { Transfer } from '../../classes/Transactions';
 import { AccountType, TransactionType } from '../../types/Data';
-import { SweetAlertResult } from 'sweetalert2';
-import swal from '../../utils/swal';
 
 beforeEach(() => {
   const upDoc = vi.hoisted(() => {

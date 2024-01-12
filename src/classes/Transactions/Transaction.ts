@@ -4,7 +4,7 @@ import { add, endOfMonth, format } from 'date-fns';
 import { AccountType, KeyByType, Period, TransactionKeys, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
 import { MetaCreateInfos } from '../../utils/firebaseFuncs';
-import { installmentsTransform } from '../../utils/auxFunctions';
+import { installmentsTransform, objNextDate } from '../../utils/auxFunctions';
 import { FormTransaction } from '../../types/LocalStates';
 import { YearAndMonth } from '../../types/Others';
 
@@ -34,20 +34,6 @@ export default abstract class Transaction {
   period: Period;
 
   type: TypesTransaction;
-
-  objNextDate(i: number): { [key in string]: { [key2 in string]: number } } {
-    return {
-      Diariamente: { days: 1 * i },
-      Semanalmente: { weeks: 1 * i },
-      '4x no mês': { days: (31 / 4) * i },
-      Quinzenalmente: { weeks: 2 * i },
-      Mensalmente: { months: 1 * i },
-      Bimestralmente: { months: 2 * i },
-      Trimestralmente: { months: 3 * i },
-      Semestralmente: { months: 6 * i },
-      Anualmente: { years: 1 * i },
-    };
-  }
 
   private keyByInstalments: KeyByType = {
     U: 'records',
@@ -135,7 +121,7 @@ export default abstract class Transaction {
     const periodValid = trans.period || 'Mensalmente';
     const nextDate = add(
       new Date(`${trans.date}T00:00`),
-      this.objNextDate(i)[periodValid],
+      objNextDate(i)[periodValid],
     );
     return format(nextDate, 'yyyy-MM-dd');
   }
@@ -157,7 +143,9 @@ export default abstract class Transaction {
       const index = transactions
         .findIndex((trans) => trans[key] === record[key] && trans.date === record.date);
       if (index === -1) {
-        if (this.installments !== 'F') throw new Error('Record not found');
+        if (this.installments !== 'F' && this.type !== 'Transferência') {
+          throw new Error('Record not found');
+        }
         data.push({ ...record, id: this.generateId() });
         if (record.payday) nextRecords.push(record);
       } else {

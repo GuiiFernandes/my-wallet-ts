@@ -99,7 +99,26 @@ export default class Transfer extends Transaction {
   ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
-      return this.updateUniqueTransfer(transactions, meta, { uid, accounts });
+      const [transfers, records] = this.formatTrans(1);
+      const [dataTransfer, prevTransfer, newTransfer] = super
+        .editFinRecords(transactions[meta.key], transfers, 'id');
+      const result: any[] = [];
+      if (newTransfer !== prevTransfer) {
+        result.push(await firebaseFuncs.update<TransactionKeys>(
+          meta,
+          dataTransfer,
+        ));
+        if (records.length) {
+          const [dataRecords, prevRecord, newRecord] = super
+            .editFinRecords(transactions.records, records);
+          const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+          result.push(await Promise.all([
+            await firebaseFuncs.update({ ...meta, key: 'records' }, dataRecords),
+            await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance),
+          ]));
+        }
+      }
+      return result;
     }
     if (this.installments === 'F') {
       const { value } = await swal.upTrans();
@@ -206,28 +225,5 @@ export default class Transfer extends Transaction {
       arrayNewBalance.length
         ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
     ]);
-  }
-
-  private async updateUniqueTransfer(
-    transactions: TransactionsType,
-    meta: MetaCreateInfos<TransactionKeys>,
-    { uid, accounts }: { uid: string, accounts: AccountType[] },
-  ) {
-    const transCopy = { ...transactions };
-    const filteredTransfers = transactions[meta.key]
-      .filter(({ transactionId }) => transactionId !== this.transactionId);
-    const filteredRecords = transactions.records
-      .filter(({ transactionId }) => transactionId !== this.transactionId);
-    transCopy[meta.key] = filteredTransfers;
-    transCopy.records = filteredRecords;
-    const day = new Date(`${this.date}T00:00`).getDate();
-    const recordsTransfer = transactions.records
-      .filter((transfer) => transfer.transactionId === this.transactionId
-          && new Date(`${transfer.date}T00:00`).getDate() === day);
-    const arrayNewBalance = super.createArrayBalance(recordsTransfer);
-    const newAccounts = await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance);
-    if (!newAccounts) throw new Error('Erro ao atualizar o saldo');
-    const result = await this.create(uid, transCopy, newAccounts.accounts);
-    return result;
   }
 }

@@ -79,7 +79,6 @@ export default function useTransaction() {
     let date = new Date(year, month - 1, 1, 0);
 
     while (date.getDay() !== keyOfWeek) {
-      console.log('getDay', date.getDay());
       date = add(date, { days: 1 });
     }
     return date;
