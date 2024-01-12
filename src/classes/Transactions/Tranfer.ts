@@ -68,36 +68,27 @@ export default class Transfer extends Transaction {
   ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     let [transfers, records]: FormatedTrans = [[], []];
-    let result: any[] = [];
-    if (this.installments === 'U') {
+    const result: any[] = [];
+    if (this.installments === 'U' || this.installments === 'F') {
       [transfers, records] = this.formatTrans(1);
-    } else if (this.installments === 'F') {
-      const repetitions = super.calcIntervalMonthRepeat();
-      if (repetitions > 1) {
-        [transfers, records] = this.formatTrans(repetitions);
-      } else {
-        const [formatedTransfer, formatedRecords] = this.formatTrans(1);
-        transfers = formatedTransfer;
-        records = formatedRecords;
-      }
     } else {
       [transfers, records] = this.formatTrans();
     }
-    const resultTransfer = await firebaseFuncs.update<TransactionKeys>(
+    result.push(await firebaseFuncs.update<TransactionKeys>(
       meta,
       [...transactions[meta.key], ...transfers],
-    );
+    ));
     if (records.length) {
       const [expense, revenue] = records;
-      result = await Promise.all([
+      result.push(await Promise.all([
         await firebaseFuncs.update(
           { ...meta, key: 'records' },
           [...transactions.records, ...records],
         ),
         await firebaseFuncs.updateBalance(uid, accounts, [expense, revenue]),
-      ]);
+      ]));
     }
-    return [resultTransfer, ...result];
+    return result;
   }
 
   async edit(

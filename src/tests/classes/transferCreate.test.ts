@@ -5,6 +5,8 @@ import mocksTransfer from '../mocks/transfers';
 import mocksData from '../mocks/data';
 import { Transfer } from '../../classes/Transactions';
 import { AccountType, TransactionType } from '../../types/Data';
+import { SweetAlertResult } from 'sweetalert2';
+import swal from '../../utils/swal';
 
 beforeEach(() => {
   const upDoc = vi.hoisted(() => {
@@ -37,7 +39,7 @@ afterEach(() => {
 const PAYDAY = '2024-01-06';
 
 describe('Única', () => {
-  it('Cria corretamente sem payday', async () => {
+  it('Cria corretamente sem payday', async () => {    
     vi.spyOn(uuid, 'v4')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
       .mockReturnValueOnce('8a803c3e-e6a6-42c8-8bfa-6c04fa391c71');
@@ -90,12 +92,10 @@ describe('Única', () => {
       mocksData.transactionsRecords,
       mocksData.accounts,
     );
-
-    const [{ transfers }, { records }, { accounts }] = result;
+    const [{ transfers }, [{ records }, { accounts }]] = result;
     expect(transfers).toEqual(expectTransfers);
     expect(records).toEqual(expectRecords);    
     expect(accounts).toEqual(expectAccounts);
-    
   });
 });
 
@@ -181,14 +181,67 @@ describe('Parcelada', () => {
       mocksData.transactionsRecords,
       mocksData.accounts,
     );
-    const [{ transfers }, { records }, { accounts }] = result;
+    const [{ transfers }, [{ records }, { accounts }]] = result;
     expect(transfers).toEqual(expectTransfers);
     expect(records).toEqual(expectRecords);
     expect(accounts).toEqual(expectAccounts);
   });
 });
 
-// describe('Fixa', () => {
-//   it('Cria corretamente sem payday', async () => {});
-//   it('Cria corretamente com payday', async () => {});
-// });
+describe('Fixa', () => {
+  it('Cria corretamente sem payday', async () => {
+    vi.spyOn(uuid, 'v4')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6');
+    const expectTransfers: TransactionType[] = [{
+      ...mocksTransfer.transferFixed,
+      transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
+    }];      
+
+    const transaction = new Transfer(mocksTransfer.formFixed);
+    const result = await transaction.create(
+      'uid',
+      JSON.parse(JSON.stringify(mocksData.transactionsRecords)),
+      JSON.parse(JSON.stringify(mocksData.accounts)),
+    );
+    const [{ transfers }, ...others] = result;
+    expect(transfers).toEqual(expectTransfers);
+    expect(others).toEqual([]);
+  });
+  it('Cria corretamente com payday', async () => {
+    vi.spyOn(uuid, 'v4')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+      .mockReturnValueOnce('d5de8cd2-dcff-4570-9c6f-5b1a732fe45x');
+    const expectTransfers: TransactionType[] = [{
+      ...mocksTransfer.transferFixed,
+      transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
+    }];
+    const expectRecords: TransactionType[] = [];
+    for (let i = 0; i < 2; i += 1) {
+      expectRecords.push({
+        ...mocksTransfer.transferFixed,
+        transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
+        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75cc222670' : 'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x',
+        value: 50,
+        type: i === 0 ? 'Despesa' : 'Receita',
+        account: i === 0 ? 'Carteira' : 'Itaú',
+        payday: PAYDAY,
+      });
+    }
+    const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
+    expectAccounts[0].balance = 150;
+    expectAccounts[1].balance = 50;
+
+    const transaction = new Transfer({...mocksTransfer.formFixed, payday: PAYDAY});
+    const result = await transaction.create(
+      'uid',
+      mocksData.transactionsRecords,
+      mocksData.accounts,
+    );
+    const [{ transfers }, [{ records }, { accounts }]] = result;
+    expect(transfers).toEqual(expectTransfers);
+    expect(records).toEqual(expectRecords);
+    expect(accounts).toEqual(expectAccounts);
+  });
+});

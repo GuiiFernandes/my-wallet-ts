@@ -76,15 +76,12 @@ export default function useTransaction() {
 
   const searchWeekDay = (transDate: Date): Date => {
     const keyOfWeek = transDate.getDay();
-    console.log('transDate', transDate);
-    console.log('keyOfWeek', keyOfWeek);
     let date = new Date(year, month - 1, 1, 0);
 
     while (date.getDay() !== keyOfWeek) {
       console.log('getDay', date.getDay());
       date = add(date, { days: 1 });
     }
-    console.log('date', date);
     return date;
   };
 
@@ -113,7 +110,6 @@ export default function useTransaction() {
     const initialDate = transMonth === month
       ? new Date(year, month - 1, day, 0)
       : searchWeekDay(new Date(`${transaction.date}T00:00`));
-    console.log('transDay', initialDate);
     const transactionCorrectDate = {
       ...transaction, date: format(initialDate, FORMAT_DATE),
     };
