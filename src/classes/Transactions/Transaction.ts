@@ -35,7 +35,7 @@ export default abstract class Transaction {
 
   type: TypesTransaction;
 
-  private keyByInstalments: KeyByType = {
+  private keyByInstallments: KeyByType = {
     U: 'records',
     F: 'fixeds',
     t: 'transfers',
@@ -62,7 +62,7 @@ export default abstract class Transaction {
     return {
       uid,
       docName: 'transactions',
-      key: (this.keyByInstalments[keyForKey] || 'records') as T,
+      key: (this.keyByInstallments[keyForKey] || 'records') as T,
     };
   }
 
@@ -104,8 +104,12 @@ export default abstract class Transaction {
   protected calculateValue(
     i: number = 1,
     transaction?: TransactionType,
+    isEditIntallments = false,
   ) {
     const trans = transaction || this.transaction;
+    if (this.keyByInstallments[trans.installments] || isEditIntallments) {
+      return trans.value;
+    }
     const numInstallments = Number(trans.installments);
     const baseValue = Math.floor((trans.value / numInstallments) * 100) / 100;
     const totalBase = baseValue * numInstallments;
@@ -144,7 +148,7 @@ export default abstract class Transaction {
         .findIndex((trans) => trans[key] === record[key] && trans.date === record.date);
       if (index === -1) {
         if (this.installments !== 'F' && this.type !== 'Transferência') {
-          throw new Error('Record not found');
+          throw new Error('Transaction not found');
         }
         data.push({ ...record, id: this.generateId() });
         if (record.payday) nextRecords.push(record);

@@ -5,9 +5,10 @@ import transferMock from './transfers';
 
 // const { transfers, expenseTransfer, formTransferUnique } = transferMock;
 const { recordUnique, recordInstallments, recordFixed } = recordMock;
-const { transferUnique } = transferMock;
+const { transferUnique, transferInstallments } = transferMock;
 
 const TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cc2art45';
+const TRANSFER_TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cft54r09';
 const TRANSID_FIXED = '760e0d03-6cf9-4ae0-9800-cf75cc2ar171';
 const SIX_ONE_TWENTYFOUR = '2024-01-06';
 
@@ -32,12 +33,22 @@ const transactionsRecords: TransactionsType = {
 const transactionsEditRecords: TransactionsType = {
   transfers: [
     { ...transferUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2av43t' },
+    { ...transferInstallments,
+      transactionId: TRANSFER_TRANSID_INSTALLMENTS,
+      id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e32d' },
+    { ...transferInstallments,
+      transactionId: TRANSFER_TRANSID_INSTALLMENTS,
+      installment: 2,
+      id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e33e' },
+    { ...transferInstallments,
+      transactionId: TRANSFER_TRANSID_INSTALLMENTS,
+      installment: 3,
+      id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e34f' },
   ],
   records: [
     { ...recordUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc222670' },
     { ...recordInstallments,
       transactionId: TRANSID_INSTALLMENTS,
-      installment: 1,
       id: '760e0d03-6cf9-4ae0-9800-cf75cc222671' },
     { ...recordInstallments,
       transactionId: TRANSID_INSTALLMENTS,

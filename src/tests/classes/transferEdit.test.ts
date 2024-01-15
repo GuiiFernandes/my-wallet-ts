@@ -101,3 +101,102 @@ describe('Única', () => {
     expect(accounts).toEqual(expectAccounts);
   });
 });
+
+describe('Parcelada', () => {
+  describe('Edita somente esta', () => {
+    beforeEach(() => {
+      vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'false' } as SweetAlertResult<any>);
+    });
+    it('Edita corretamente sem payday', async () => {
+      vi.spyOn(uuid, 'v4')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7');
+      const expectTransfers: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.transfers));
+      expectTransfers[2].value = 200;
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+      for (let index = 0; index < 2; index += 1) {
+        expectRecords.push({
+          ...mocksData.transactionsEditRecords.transfers[2],
+          id: index === 0
+          ? '760e0d03-6cf9-4ae0-9800-cf75cc222670'
+          : '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7',
+          type: index === 0 ? 'Despesa' : 'Receita',
+          account: index === 0 ? 'Itaú' : 'PicPay',
+          value: 200,
+        });
+      }
+
+      const transaction = new Transfer({
+        ...mocksData.transactionsEditRecords.transfers[2],
+        value: 200,
+        account: 'Itaú',
+        accountDestiny: 'PicPay',
+      });
+      const result = await transaction.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 1 },
+      );
+      
+      const [{ transfers }, [{records}, balance]] = result;
+      
+      expect(transfers).toEqual(expectTransfers);
+      expect(records).toEqual(expectRecords);
+      expect(balance).toBeNull();
+    });
+    it('Edita corretamente com payday', async () => {
+      vi.spyOn(uuid, 'v4')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+        .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7');
+      const expectTransfers: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.transfers));
+      expectTransfers[2].value = 200;
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+      for (let index = 0; index < 2; index += 1) {
+        expectRecords.push({
+          ...mocksData.transactionsEditRecords.transfers[2],
+          id: index === 0
+          ? '760e0d03-6cf9-4ae0-9800-cf75cc222670'
+          : '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7',
+          type: index === 0 ? 'Despesa' : 'Receita',
+          account: index === 0 ? 'Itaú' : 'PicPay',
+          value: 200,
+          payday: PAYDAY,
+        });
+      }
+      const expectAccounts: AccountType[] = JSON.parse(JSON.stringify(mocksData.accounts));
+      expectAccounts[0].balance = -100;
+      expectAccounts[2].balance = 300;
+  
+      const transaction = new Transfer({
+        ...mocksData.transactionsEditRecords.transfers[2],
+        value: 200,
+        payday: PAYDAY,
+        account: 'Itaú',
+        accountDestiny: 'PicPay',
+      });
+      const result = await transaction.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 1 },
+      );
+      
+      const [{ transfers }, [{records}, { accounts }]] = result;
+      
+      expect(transfers).toEqual(expectTransfers);
+      expect(records).toEqual(expectRecords);
+      expect(accounts).toEqual(expectAccounts);
+    });
+  });
+  describe('Edita esta e as próximas', () => {
+    beforeEach(() => {
+      vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
+    });
+    it('Edita corretamente sem payday', async () => {
+      //continuar
+    });
+  });
+});

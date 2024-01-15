@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { update } from 'firebase/database';
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
@@ -12,11 +13,6 @@ const T = 'T00:00';
 
 export default class Transfer extends Transaction {
   accountDestiny: string;
-
-  private formatedInstalments: { [key: string]: string } = {
-    F: 'F',
-    U: 'U',
-  };
 
   constructor(form: FormTransaction) {
     super(form);
@@ -36,8 +32,7 @@ export default class Transfer extends Transaction {
       : { ...super.transaction, accountDestiny: this.accountDestiny };
     for (let i = 0; i < periodRepetion; i += 1) {
       trans.id = periodRepetion > 1 ? super.generateId() : this.id;
-      const value = this.formatedInstalments[trans.installments]
-        ? trans.value : super.calculateValue(i, transaction);
+      const value = super.calculateValue(i, transaction, isFormatTransactions);
       const date = super.calculateNextDate(i, transaction);
       const payday = i === 0 || isFormatTransactions ? trans.payday : null;
       trans.period = trans.installments === 'U' ? '' : trans.period;
@@ -99,26 +94,7 @@ export default class Transfer extends Transaction {
   ): Promise<any> {
     const meta = super.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
-      const [transfers, records] = this.formatTrans(1);
-      const [dataTransfer, prevTransfer, newTransfer] = super
-        .editFinRecords(transactions[meta.key], transfers, 'id');
-      const result: any[] = [];
-      if (newTransfer !== prevTransfer) {
-        result.push(await firebaseFuncs.update<TransactionKeys>(
-          meta,
-          dataTransfer,
-        ));
-        if (records.length) {
-          const [dataRecords, prevRecord, newRecord] = super
-            .editFinRecords(transactions.records, records);
-          const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
-          result.push(await Promise.all([
-            await firebaseFuncs.update({ ...meta, key: 'records' }, dataRecords),
-            await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance),
-          ]));
-        }
-      }
-      return result;
+      return this.updateUnique(meta, transactions, { uid, accounts });
     }
     if (this.installments === 'F') {
       const { value } = await swal.upTrans();
@@ -130,7 +106,14 @@ export default class Transfer extends Transaction {
         return this.updateThisOnly(meta, transactions, { uid, accounts });
       }
     }
-    return null;
+    const { value } = await swal.upTrans();
+    if (value === 'true') {
+      return this
+        .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+    }
+    if (value === 'false') {
+      return this.updateUnique(meta, transactions, { uid, accounts }, true);
+    }
   }
 
   private async updateThisAndUpcomming(
@@ -225,5 +208,34 @@ export default class Transfer extends Transaction {
       arrayNewBalance.length
         ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
     ]);
+  }
+
+  private async updateUnique(
+    meta: MetaCreateInfos<TransactionKeys>,
+    transactions: TransactionsType,
+    { uid, accounts }: { uid: string, accounts: AccountType[] },
+    isEditIntallments = false,
+  ) {
+    const [transfers, records] = this.formatTrans(1, undefined, isEditIntallments);
+    const [dataTransfer, prevTransfer, newTransfer] = super
+      .editFinRecords(transactions[meta.key], transfers, 'id');
+    const result: any[] = [];
+    if (newTransfer !== prevTransfer) {
+      result.push(await firebaseFuncs.update<TransactionKeys>(
+        meta,
+        dataTransfer,
+      ));
+      if (records.length) {
+        const [dataRecords, prevRecord, newRecord] = super
+          .editFinRecords(transactions.records, records);
+        const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+        result.push(await Promise.all([
+          await firebaseFuncs.update({ ...meta, key: 'records' }, dataRecords),
+          arrayNewBalance.length
+            ? await firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
+        ]));
+      }
+    }
+    return result;
   }
 }
