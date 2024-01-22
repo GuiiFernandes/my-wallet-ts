@@ -57,7 +57,7 @@ export default function WalletTable() {
           <td className={ styles.td }>Tipo</td>
         </tr>
       </thead>
-      <tbody className={ styles.container }>
+      <tbody className={ styles.tbody }>
         {allTransactions.map((transaction) => {
           const { payday, id, date, description, account, value,
             type, installment, installments, category, subCategory } = transaction;

@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import { update } from 'firebase/database';
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
@@ -122,22 +121,21 @@ export default class Transfer extends Transaction {
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
-    const [repetitions, initialDate, fixedTransfers] = super
+    const [repetitions, initialDate, fixedTransfer] = super
       .calculateRepetitions(transactions, year, month, meta.key);
-    const [account, accountDestiny] = fixedTransfers[0].account.split('>');
-    const [, newRecords] = this.formatTrans(repetitions, { ...fixedTransfers[0],
+    const [account, accountDestiny] = fixedTransfer.account.split('>');
+    const [, newRecords] = this.formatTrans(repetitions, { ...fixedTransfer,
       account,
       accountDestiny,
       date: format(initialDate, 'yyyy-MM-dd') }, true);
-    const newTransfers: TransactionType[] = fixedTransfers
-      .map((transfer) => ({ ...this.transaction,
-        date: transfer.date,
-        id: transfer.id,
-        installment: transfer.installment,
-        account: `${this.transaction.account}>${this.accountDestiny}`,
-        payday: null }));
+    const newTransfers: TransactionType = { ...fixedTransfer,
+      date: fixedTransfer.date,
+      id: fixedTransfer.id,
+      installment: fixedTransfer.installment,
+      account: `${this.transaction.account}>${this.accountDestiny}`,
+      payday: null };
     const [formatedTransfers] = super
-      .editFinRecords(transactions[meta.key], newTransfers, 'id');
+      .editFinRecords(transactions[meta.key], [newTransfers], 'id');
     const [dataRecords, dataTransfers] = await Promise.all([
       firebaseFuncs.update(
         { ...meta, key: 'records' },
@@ -154,7 +152,9 @@ export default class Transfer extends Transaction {
           accounts },
       );
     }
-    return [result[0], dataTransfers, result];
+    if (!result.length) result.unshift(dataRecords);
+    result.unshift(dataTransfers);
+    return result;
   }
 
   private async updateThisOnly(

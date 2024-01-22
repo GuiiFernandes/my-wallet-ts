@@ -46,7 +46,6 @@
   top: 70px;
   width: 95%;
   height: 85vh;
-  overflow-y: scroll;
 }
 
 @keyframes openHeader {

@@ -196,7 +196,32 @@ describe('Parcelada', () => {
       vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
     });
     it('Edita corretamente sem payday', async () => {
-      //continuar
+      const expectTransfers: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.transfers));
+      expectTransfers[2].value = 200;
+      expectTransfers[3].value = 200;
+
+      const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+
+      const transaction = new Transfer({
+        ...mocksData.transactionsEditRecords.transfers[2],
+        value: 200,
+        payday: PAYDAY,
+        account: 'Itaú',
+        accountDestiny: 'PicPay',
+      });
+      const result = await transaction.edit(
+        'uid',
+        mocksData.transactionsEditRecords,
+        mocksData.accounts,
+        { year: 2024, month: 1 },
+      );
+
+      const [{ transfers }, {records}, balance] = result;
+      
+      expect(transfers).toEqual(expectTransfers);
+      expect(records).toEqual(expectRecords);
+      expect(balance).toBeNull();
+
     });
   });
 });
