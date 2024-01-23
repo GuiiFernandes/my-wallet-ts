@@ -157,6 +157,10 @@ export default class Transfer extends Transaction {
     return result;
   }
 
+  private async updateInstThisAndUpcomming() {
+
+  }
+
   private async updateThisOnly(
     meta: MetaCreateInfos<TransactionKeys>,
     transactions: TransactionsType,

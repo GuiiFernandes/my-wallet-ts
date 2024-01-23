@@ -12,6 +12,9 @@ import { StateRedux } from '../../../types/State';
 
 const styles = { ...styleGlobal, ...styleTable };
 
+const HEADERS = ['Venc', 'PG Data', 'Descrição', 'Valor',
+  'Parcelas', 'Categoria', 'Subcategoria', 'Conta', 'Tipo'];
+
 const colors = {
   Receita: 'var(--light-green)',
   Despesa: 'var(--light-red)',
@@ -46,15 +49,14 @@ export default function WalletTable() {
     <table className={ styles.container }>
       <thead className={ styles.tHead }>
         <tr className={ styles.card }>
-          <td className={ styles.td }>Venc</td>
-          <td className={ styles.td }>PG Data</td>
-          <td className={ styles.td }>Descrição</td>
-          <td className={ styles.td }>Valor</td>
-          <td className={ styles.td }>Parcelas</td>
-          <td className={ styles.td }>Categoria</td>
-          <td className={ styles.td }>Subcategoria</td>
-          <td className={ styles.td }>Conta</td>
-          <td className={ styles.td }>Tipo</td>
+          {HEADERS.map((header) => (
+            <th
+              className={ styles.th }
+              key={ header }
+            >
+              { header }
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody className={ styles.tbody }>
