@@ -1,25 +1,57 @@
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 import styles from '../card.module.css';
 import { StateRedux } from '../../../types/State';
+import { TransactionType } from '../../../types/Data';
 
 export default function WalletCard() {
+  const yearNow = new Date().getFullYear();
+  const [year, setYear] = useState(yearNow);
   const { records, transfers } = useSelector(({
     data: { transactions },
   }: StateRedux) => transactions);
   const transfersTransId = new Set(transfers.map(({ transactionId }) => transactionId));
-  const revenues = records.filter(({ type, transactionId }) => type === 'Receita'
-  && !transfersTransId.has(transactionId));
-  const expenses = records.filter(({ type, transactionId }) => type === 'Despesa'
-  && !transfersTransId.has(transactionId));
+  const filterConditions = (
+    { type, transactionId, payday, date }: TransactionType,
+    typeCompare: 'Receita' | 'Despesa',
+  ) => type === typeCompare && !transfersTransId.has(transactionId)
+  && payday && new Date(date).getFullYear() === year;
+  const revenues = records
+    .filter((transaction) => filterConditions(transaction, 'Receita'));
+  const expenses = records
+    .filter((transaction) => filterConditions(transaction, 'Despesa'));
   const revenuesSum = revenues.reduce((acc, { value }) => acc + value, 0);
   const expensesSum = expenses.reduce((acc, { value }) => acc + value, 0);
 
   return (
     <section className={ styles.container }>
-      <h2 className={ styles.title }>Carteira</h2>
+      <h2 className={ styles.title }>
+        Carteira
+        <div className={ styles.yearContainer }>
+          <button
+            className={ styles.changeInput }
+            onClick={ () => setYear(year - 1) }
+          >
+            <IoIosArrowBack />
+          </button>
+          <input
+            className={ styles.yearInput }
+            type="text"
+            value={ year }
+            disabled
+          />
+          <button
+            className={ styles.changeInput }
+            onClick={ () => setYear(year + 1) }
+          >
+            <IoIosArrowForward />
+          </button>
+        </div>
+      </h2>
       <div className={ styles.cards }>
         <div
           className={ styles.card }
