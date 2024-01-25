@@ -6,8 +6,6 @@ import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import swal from '../../utils/swal';
 import TransferCreate from './TransferCreate';
 
-const T = 'T00:00';
-
 export default class Transfer extends TransferCreate {
   async edit(
     uid: string,
