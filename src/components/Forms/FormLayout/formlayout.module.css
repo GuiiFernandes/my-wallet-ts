@@ -17,9 +17,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 70vh;
   width: 90%;
   max-width: 550px;
+  padding: 10px;
   background-color: var(--green);
   color: var(--white);
   border-radius: 16px;

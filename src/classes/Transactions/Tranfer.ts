@@ -21,7 +21,7 @@ export default class Transfer extends Transaction {
   private formatTrans(
     repetitions?: number,
     transaction?: FormTransaction,
-    isFormatTransactions = false,
+    isFormatTrans = false,
   ): FormatedTrans {
     const transfers: TransactionType[] = [];
     const records: TransactionType[] = [];
@@ -30,17 +30,17 @@ export default class Transfer extends Transaction {
       ? { ...transaction }
       : { ...super.transaction, accountDestiny: this.accountDestiny };
     for (let i = 0; i < periodRepetion; i += 1) {
-      trans.id = periodRepetion > 1 ? super.generateId() : this.id;
-      const value = super.calculateValue(i, transaction, isFormatTransactions);
+      if (!isFormatTrans) trans.id = periodRepetion > 1 ? super.generateId() : this.id;
+      const value = super.calculateValue(i, transaction, isFormatTrans);
       const date = super.calculateNextDate(i, transaction);
-      const payday = i === 0 || isFormatTransactions ? trans.payday : null;
+      const payday = i === 0 || isFormatTrans ? trans.payday : null;
       trans.period = trans.installments === 'U' ? '' : trans.period;
       const account = `${trans.account}>${trans.accountDestiny}`;
       const newData: TransactionType
       & { accountDestiny?: string } = { ...trans, category: '', subCategory: '' };
       delete newData.accountDestiny;
       transfers.push({ ...newData, value, date, payday: null, account });
-      if (payday || isFormatTransactions) {
+      if (payday || isFormatTrans) {
         records.push({ ...newData, value, payday, date, type: 'Despesa' });
         records.push({ ...newData,
           id: super.generateId(),
@@ -108,7 +108,7 @@ export default class Transfer extends Transaction {
     const { value } = await swal.upTrans();
     if (value === 'true') {
       return this
-        .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+        .updateInstThisAndUpcomming(transactions, meta, { uid, accounts });
     }
     if (value === 'false') {
       return this.updateUnique(meta, transactions, { uid, accounts }, true);
@@ -157,8 +157,43 @@ export default class Transfer extends Transaction {
     return result;
   }
 
-  private async updateInstThisAndUpcomming() {
-
+  private async updateInstThisAndUpcomming(
+    transactions: TransactionsType,
+    // { year, month }: YearAndMonth,
+    meta: MetaCreateInfos<TransactionKeys>,
+    { uid, accounts }: { uid: string, accounts: AccountType[] },
+  ) {
+    const { transfers, records } = transactions;
+    const transfersToEdit = transfers
+      .filter(({ transactionId }) => transactionId === this.transactionId)
+      .sort((a, b) => a.installment - b.installment)
+      .splice(this.installment - 1)
+      .map(({ type, installment, installments, id, transactionId, date }, index) => ({
+        ...this.transaction,
+        type,
+        installment,
+        installments,
+        id,
+        account: this.account,
+        accountDestiny: this.accountDestiny,
+        transactionId,
+        date,
+        payday: index === 0 ? this.payday : null,
+      }));
+    const [formatTransfers, formatRecords] = this
+      .formatTrans(transfersToEdit.length, transfersToEdit[0], true);
+    console.log(formatTransfers);
+    const [dataTransfers] = super
+      .editFinRecords(transfers, formatTransfers, 'id');
+    const [dataRecords, prevRecord, newRecord] = super
+      .editFinRecords(records, formatRecords, 'id');
+    const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+    return Promise.all([
+      firebaseFuncs.update(meta, dataTransfers),
+      firebaseFuncs.update({ ...meta, key: 'records' }, dataRecords),
+      arrayNewBalance.length
+        ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
+    ]);
   }
 
   private async updateThisOnly(
