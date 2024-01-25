@@ -120,8 +120,10 @@ export default abstract class Transaction {
   protected calculateNextDate(
     i: number = 1,
     transaction?: TransactionType,
+    isEditIntallments = false,
   ): string {
     const trans = transaction || this.transaction;
+    if (isEditIntallments) return trans.date;
     const periodValid = trans.period || 'Mensalmente';
     const nextDate = add(
       new Date(`${trans.date}T00:00`),

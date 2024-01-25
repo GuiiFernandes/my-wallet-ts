@@ -5,7 +5,7 @@ import transferMock from './transfers';
 
 // const { transfers, expenseTransfer, formTransferUnique } = transferMock;
 const { recordUnique, recordInstallments, recordFixed } = recordMock;
-const { transferUnique, transferInstallments } = transferMock;
+const { transferUnique, transferInstallments, transferFixed } = transferMock;
 
 const TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cc2art45';
 const TRANSFER_TRANSID_INSTALLMENTS = '760e0d03-6cf9-4ae0-9800-cf75cft54r09';
@@ -38,12 +38,15 @@ const transactionsEditRecords: TransactionsType = {
       id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e32d' },
     { ...transferInstallments,
       transactionId: TRANSFER_TRANSID_INSTALLMENTS,
+      date: '2024-02-06',
       installment: 2,
       id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e33e' },
     { ...transferInstallments,
       transactionId: TRANSFER_TRANSID_INSTALLMENTS,
+      date: '2024-03-06',
       installment: 3,
       id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e34f' },
+    transferFixed,
   ],
   records: [
     { ...recordUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc222670' },

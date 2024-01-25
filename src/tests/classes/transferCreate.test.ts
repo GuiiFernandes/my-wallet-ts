@@ -61,7 +61,8 @@ describe('Única', () => {
     vi.spyOn(uuid, 'v4')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
       .mockReturnValueOnce('8a803c3e-e6a6-42c8-8bfa-6c04fa391c71')
-      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6');
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7');
     const expectTransfers: TransactionType[] = [{
       ...mocksTransfer.transferUnique,
       transactionId: '8a803c3e-e6a6-42c8-8bfa-6c04fa391c71',
@@ -71,7 +72,7 @@ describe('Única', () => {
       expectRecords.push({
         ...mocksTransfer.transferUnique,
         transactionId: '8a803c3e-e6a6-42c8-8bfa-6c04fa391c71',
-        id: i === 0 ? mocksTransfer.transferUnique.id : '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
+        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6' : '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7',
         type: i === 0 ? 'Despesa' : 'Receita',
         account: i === 0 ? 'Carteira' : 'PicPay',
         payday: PAYDAY,
@@ -138,11 +139,13 @@ describe('Parcelada', () => {
       '760e0d03-6cf9-4ae0-9800-cf75fdh75t43',
       'd5de8cd2-dcff-4570-9c6f-5b1a73220065',
       'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x',
+      '760e0d03-6cf9-4ae0-9800-cf75cc64f8e6',
     ];
     vi.spyOn(uuid, 'v4')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75fdh75t43')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75fdh7bbbb')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc65r380')
       .mockReturnValueOnce('d5de8cd2-dcff-4570-9c6f-5b1a73220065')
       .mockReturnValueOnce('d5de8cd2-dcff-4570-9c6f-5b1a732fe45x');
@@ -162,7 +165,7 @@ describe('Parcelada', () => {
       expectRecords.push({
         ...mocksTransfer.transferInstallments,
         transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
-        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75fdh75t43' : '760e0d03-6cf9-4ae0-9800-cf75cc65r380',
+        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75fdh7bbbb' : '760e0d03-6cf9-4ae0-9800-cf75cc65r380',
         value: 100,
         type: i === 0 ? 'Despesa' : 'Receita',
         account: i === 0 ? 'Itaú' : 'PicPay',
@@ -189,7 +192,7 @@ describe('Parcelada', () => {
 describe('Fixa', () => {
   it('Cria corretamente sem payday', async () => {
     vi.spyOn(uuid, 'v4')
-      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222672')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6');
     const expectTransfers: TransactionType[] = [{
       ...mocksTransfer.transferFixed,
@@ -208,8 +211,9 @@ describe('Fixa', () => {
   });
   it('Cria corretamente com payday', async () => {
     vi.spyOn(uuid, 'v4')
-      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222670')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc222672')
       .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6')
+      .mockReturnValueOnce('760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7')
       .mockReturnValueOnce('d5de8cd2-dcff-4570-9c6f-5b1a732fe45x');
     const expectTransfers: TransactionType[] = [{
       ...mocksTransfer.transferFixed,
@@ -220,7 +224,7 @@ describe('Fixa', () => {
       expectRecords.push({
         ...mocksTransfer.transferFixed,
         transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs6',
-        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75cc222670' : 'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x',
+        id: i === 0 ? '760e0d03-6cf9-4ae0-9800-cf75cc2d5hs7' : 'd5de8cd2-dcff-4570-9c6f-5b1a732fe45x',
         value: 50,
         type: i === 0 ? 'Despesa' : 'Receita',
         account: i === 0 ? 'Carteira' : 'Itaú',

@@ -14,13 +14,13 @@ export default class Record extends Transaction {
     const newTransactions: TransactionType[] = [];
     const periodRepetion = repetitions || Number(this.installments);
     const trans: TransactionType = transaction
-      ? { ...transaction } : { ...super.transaction };
+      ? { ...transaction } : { ...this.transaction };
 
     for (let i = 0; i < periodRepetion; i += 1) {
-      trans.id = super.generateId();
+      trans.id = this.generateId();
       const value = trans.installments === 'F'
-        ? trans.value : super.calculateValue(i, trans);
-      const date = super.calculateNextDate(i, trans);
+        ? trans.value : this.calculateValue(i, trans);
+      const date = this.calculateNextDate(i, trans);
       const payday = i === 0 && trans.installments !== 'F' ? trans.payday : null;
       trans.period = trans.installments === 'U' ? '' : trans.period;
       newTransactions.push({ ...trans, payday, value, date });
@@ -34,10 +34,10 @@ export default class Record extends Transaction {
     transactions: TransactionsType,
     accounts: AccountType[],
   ): Promise<any> {
-    const meta = super.createMeta<TransactionKeys>(uid);
+    const meta = this.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
       this.period = '';
-      const newTransaction = super.transaction;
+      const newTransaction = this.transaction;
       return Promise.all([firebaseFuncs.update(
         meta,
         [...transactions[meta.key], newTransaction],
@@ -48,10 +48,10 @@ export default class Record extends Transaction {
       const result: any[] = [];
       result.push(await firebaseFuncs.update(meta, [
         ...transactions[meta.key],
-        { ...super.transaction, payday: null },
+        { ...this.transaction, payday: null },
       ]));
       if (this.payday) {
-        const newTransaction = super.transaction;
+        const newTransaction = this.transaction;
         result.push(await Promise.all([firebaseFuncs.update(
           { ...meta, key: 'records' },
           [...transactions[meta.key], newTransaction],
@@ -76,11 +76,11 @@ export default class Record extends Transaction {
     yearAndMonth: YearAndMonth,
   ): Promise<any> {
     const { records } = transactions;
-    const meta = super.createMeta<TransactionKeys>(uid);
+    const meta = this.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
-      const [newData, prevRecord, newRecord] = super
+      const [newData, prevRecord, newRecord] = this
         .editFinRecords(transactions[meta.key]);
-      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+      const arrayNewBalance = this.createArrayBalance(prevRecord, newRecord);
       return Promise.all([
         firebaseFuncs.update(meta, newData),
         arrayNewBalance.length
@@ -123,9 +123,9 @@ export default class Record extends Transaction {
           date,
           payday: index === 0 ? this.payday : null,
         }));
-      const [data, prevRecord, newRecord] = super
+      const [data, prevRecord, newRecord] = this
         .editFinRecords(transactions, editedTrans, 'id');
-      const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+      const arrayNewBalance = this.createArrayBalance(prevRecord, newRecord);
       return Promise.all([
         firebaseFuncs.update({ ...meta, key: 'records' }, data),
         arrayNewBalance.length
@@ -144,7 +144,7 @@ export default class Record extends Transaction {
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
-    const [repetitions, initialDate, fixedTrans] = super
+    const [repetitions, initialDate, fixedTrans] = this
       .calculateRepetitions(transactions, year, month, meta.key);
     const newTransactions = this.formatTrans(
       repetitions,
@@ -156,7 +156,7 @@ export default class Record extends Transaction {
       payday: null,
       id: fixedTrans.id,
     };
-    const [newData] = super.editFinRecords(transactions[meta.key], [newFixed], 'id');
+    const [newData] = this.editFinRecords(transactions[meta.key], [newFixed], 'id');
     const dataArray = await Promise.all([
       firebaseFuncs.update(
         { ...meta, key: 'records' },
@@ -183,10 +183,10 @@ export default class Record extends Transaction {
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const validMeta = { ...meta, key: 'records' };
-    const result = super.editFinRecords(transactions, undefined, 'id');
+    const result = this.editFinRecords(transactions, undefined, 'id');
     const [newData, prevRecord, newRecord] = result;
 
-    const arrayNewBalance = super.createArrayBalance(prevRecord, newRecord);
+    const arrayNewBalance = this.createArrayBalance(prevRecord, newRecord);
     return Promise.all([
       firebaseFuncs.update(validMeta, newData),
       arrayNewBalance.length

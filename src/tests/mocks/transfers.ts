@@ -2,11 +2,13 @@ import { TransactionType } from '../../types/Data';
 import { FormTransaction } from '../../types/LocalStates';
 
 const DATE = '2024-01-06';
-const ID_INITIAL = '760e0d03-6cf9-4ae0-9800-cf75cc222670';
+const ID_UNIQUE = '760e0d03-6cf9-4ae0-9800-cf75cc222670';
+const ID_INSTALLMENT = '760e0d03-6cf9-4ae0-9800-cf75cc222671';
+const ID_FIXED = '760e0d03-6cf9-4ae0-9800-cf75cc222672';
 const TRANSFER_TYPE = 'Transferência';
 
 const transferUnique: TransactionType = {
-  id: ID_INITIAL,
+  id: ID_UNIQUE,
   date: DATE,
   payday: null,
   description: 'Depositei',
@@ -31,13 +33,13 @@ const formUnique: FormTransaction = {
 };
 
 const transferInstallments: TransactionType = {
-  id: ID_INITIAL,
+  id: ID_INSTALLMENT,
   date: DATE,
   payday: null,
   description: 'IPVA',
   value: 300,
   account: 'Itaú>PicPay',
-  period: '',
+  period: 'Mensalmente',
   type: TRANSFER_TYPE,
   category: '',
   subCategory: '',
@@ -53,13 +55,13 @@ const formInstallments: FormTransaction = {
 };
 
 const transferFixed: TransactionType = {
-  id: ID_INITIAL,
+  id: ID_FIXED,
   date: DATE,
   payday: null,
   description: 'Investimento',
   value: 50,
   account: 'Carteira>Itaú',
-  period: '',
+  period: 'Mensalmente',
   type: TRANSFER_TYPE,
   category: '',
   subCategory: '',
