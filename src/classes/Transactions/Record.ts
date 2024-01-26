@@ -4,7 +4,6 @@ import { AccountType, TransactionKeys,
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import swal from '../../utils/swal';
 import Transaction from './Transaction';
-import { YearAndMonth } from '../../types/Others';
 
 export default class Record extends Transaction {
   private formatTrans(
@@ -73,7 +72,6 @@ export default class Record extends Transaction {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-    yearAndMonth: YearAndMonth,
   ): Promise<any> {
     const { records } = transactions;
     const meta = this.createMeta<TransactionKeys>(uid);
@@ -91,7 +89,7 @@ export default class Record extends Transaction {
       const { value } = await swal.upTrans();
       if (value === 'true') {
         return this
-          .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+          .updateThisAndUpcomming(transactions, meta, { uid, accounts });
       }
       if (value === 'false') {
         return this.updateThisOnly(meta, records, { uid, accounts });
@@ -140,12 +138,11 @@ export default class Record extends Transaction {
 
   private async updateThisAndUpcomming(
     transactions: TransactionsType,
-    { year, month }: YearAndMonth,
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
     const [repetitions, initialDate, fixedTrans] = this
-      .calculateRepetitions(transactions, year, month, meta.key);
+      .calculateRepetitions(transactions, meta.key);
     const newTransactions = this.formatTrans(
       repetitions,
       { ...fixedTrans, date: format(initialDate, 'yyyy-MM-dd') },

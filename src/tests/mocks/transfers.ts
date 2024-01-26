@@ -61,7 +61,7 @@ const transferFixed: TransactionType = {
   description: 'Investimento',
   value: 50,
   account: 'Carteira>Itaú',
-  period: 'Mensalmente',
+  period: 'Semanalmente',
   type: TRANSFER_TYPE,
   category: '',
   subCategory: '',

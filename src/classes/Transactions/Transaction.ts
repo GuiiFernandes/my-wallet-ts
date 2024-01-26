@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { add, endOfMonth, format } from 'date-fns';
+import { add, format } from 'date-fns';
 
 import { AccountType, KeyByType, Period, TransactionKeys, TransactionType,
   TransactionsType, TypesTransaction } from '../../types/Data';
@@ -74,11 +74,9 @@ export default abstract class Transaction {
 
   protected calculateRepetitions(
     transactions: TransactionsType,
-    year: number,
-    month: number,
     key: TransactionKeys,
+    days = 1,
   ): [number, Date, TransactionType] {
-    const day = Number(this.date.split('-')[2]);
     const recordsByFixeds = transactions.records
       .filter(({ transactionId }) => transactionId === this.transactionId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -88,7 +86,7 @@ export default abstract class Transaction {
     const initialDate = recordsByFixeds[0]?.date
       ? new Date(`${this.calculateNextDate(1, recordsByFixeds[0])}T00:00`)
       : new Date(`${transaction.date}T00:00`);
-    const endDate = endOfMonth(new Date(year, month - 1, day, 0));
+    const endDate = add(new Date(`${this.date}T00:00`), { days });
     const repetitions = this.calcIntervalEditRepeat(endDate, initialDate);
     return [repetitions, initialDate, transaction];
   }

@@ -46,7 +46,7 @@ const transactionsEditRecords: TransactionsType = {
       date: '2024-03-06',
       installment: 3,
       id: '760e0d03-6cf9-4ae0-9800-cf75ccr4e34f' },
-    transferFixed,
+    { ...transferFixed, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc21g2f4' },
   ],
   records: [
     { ...recordUnique, transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc222670' },

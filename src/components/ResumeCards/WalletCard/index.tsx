@@ -4,9 +4,12 @@ import { Link } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
-import styles from '../card.module.css';
+import styles1 from '../card.module.css';
+import styles2 from './walletCard.module.css';
 import { StateRedux } from '../../../types/State';
 import { TransactionType } from '../../../types/Data';
+
+const styles = { ...styles1, ...styles2 };
 
 export default function WalletCard() {
   const yearNow = new Date().getFullYear();

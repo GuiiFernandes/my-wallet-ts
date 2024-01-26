@@ -11,52 +11,6 @@
   height: 100%;
 }
 
-.yearContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.yearInput {
-  width: 60px;
-  background: transparent;
-  color: var(--white);
-  outline: none;
-  border: none;
-  font-size: 2.4rem;
-  font-family: var(--font-default);
-  font-weight: 600;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-.title {
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.changeInput {
-  background: transparent;
-  border: none;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--light-green);
-  font-size: 2.4rem;
-  font-weight: 700;
-  cursor: pointer;
-  width: 15px;
-}
-
-.changeInput:hover {
-  color: var(--blue);
-  transition: all 0.2s ease-in-out;
-}
-
 .manage {
   background-color: var(--green);
   padding: 10px 20px;

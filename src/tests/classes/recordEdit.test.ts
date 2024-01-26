@@ -49,7 +49,6 @@ describe('Única', () => {
       'uid',
       mocksData.transactionsEditRecords,
       mocksData.accounts,
-      { year: 2024, month: 1 },
     );
 
     const [{ records }, balance] = result;
@@ -73,7 +72,6 @@ describe('Única', () => {
       'uid',
       mocksData.transactionsEditRecords,
       mocksData.accounts,
-      { year: 2024, month: 1 },
     );
 
     const [{ records }, {accounts}] = result;
@@ -100,7 +98,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
     
       const [{ records }, balance] = result;
@@ -128,7 +125,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
     
       const [{ records }, { accounts }] = result;
@@ -157,7 +153,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
     
       const [{ records }, balance] = result;
@@ -188,7 +183,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
     
       const [{ records }, { accounts }] = result;
@@ -226,7 +220,6 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 2 },
       );
     
       const [{ records }, balance] = result;
@@ -259,7 +252,6 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 2 },
       );
     
       const [{ records }, { accounts }] = result;
@@ -304,7 +296,6 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 4 },
       );
       
       const [[{ records }, { fixeds }], balance] = result;
@@ -350,7 +341,6 @@ describe('Fixa', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 4 },
       );
       
       const [[{ records }, { fixeds }], [{ records: recordThisOnly }]] = result;

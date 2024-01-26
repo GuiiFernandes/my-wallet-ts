@@ -6,6 +6,7 @@ import mocksData from '../mocks/data';
 import { Transfer } from '../../classes/Transactions';
 import swal from '../../utils/swal';
 import { AccountType, ExpenseRevenue, TransactionType } from '../../types/Data';
+import { recordsMockObj } from '../mocks/expectedsRecords';
 
 const PAYDAY = '2024-01-06';
 
@@ -52,7 +53,6 @@ describe('Única', () => {
       'uid',
       mocksData.transactionsEditRecords,
       mocksData.accounts,
-      { year: 2024, month: 1 },
     );
     const [{ transfers }, ...others] = result;
     expect(transfers).toEqual(expectTransfers);
@@ -94,7 +94,6 @@ describe('Única', () => {
       'uid',
       mocksData.transactionsEditRecords,
       mocksData.accounts,
-      { year: 2024, month: 1 },
     );
     const [{ transfers }, [{ records }, { accounts }]] = result;
     expect(transfers).toEqual(expectTransfers);
@@ -139,7 +138,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
       
       const [{ transfers }, [{records}, balance]] = result;
@@ -184,7 +182,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
       
       const [{ transfers }, [{records}, { accounts }]] = result;
@@ -242,7 +239,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
 
       const [{ transfers }, { records }, balance] = result;
@@ -301,7 +297,6 @@ describe('Parcelada', () => {
         'uid',
         mocksData.transactionsEditRecords,
         mocksData.accounts,
-        { year: 2024, month: 1 },
       );
 
       const [{ transfers }, { records }, { accounts }] = result;
@@ -341,6 +336,7 @@ describe('Parcelada', () => {
         const transaction = new Transfer({
           ...mocksData.transactionsEditRecords.transfers[4],
           value: 100,
+          date: '2024-03-06',
           transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc21g2f4',
           account: 'Carteira',
           accountDestiny: 'Itaú',
@@ -349,7 +345,6 @@ describe('Parcelada', () => {
           'uid',
           mocksData.transactionsEditRecords,
           mocksData.accounts,
-          { year: 2024, month: 3 },
         );
         
         const [transfers, {records}, balance] = result;
@@ -386,6 +381,7 @@ describe('Parcelada', () => {
 
         const transaction = new Transfer({
           ...mocksData.transactionsEditRecords.transfers[4],
+          date: '2024-03-06',
           value: 100,
           transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc21g2f4',
           payday: PAYDAY,
@@ -396,7 +392,6 @@ describe('Parcelada', () => {
           'uid',
           mocksData.transactionsEditRecords,
           mocksData.accounts,
-          { year: 2024, month: 3 },
         );
         
         const [transfers, {records}, { accounts }] = result;
@@ -404,6 +399,55 @@ describe('Parcelada', () => {
         expect(transfers).toEqual(expectTransfers);
         expect(records).toEqual(expectRecords);
         expect(accounts).toEqual(expectAccounts);
+      });
+    });
+    describe('Edita esta e as próximas', () => {
+      beforeEach(() => {
+        vi.spyOn(swal, 'upTrans').mockResolvedValue({ value: 'true' } as SweetAlertResult<any>);
+      })
+      it.only('Edita corretamente sem payday', async () => {
+        vi.spyOn(uuid, 'v4')
+          .mockReturnValueOnce(recordsMockObj[0].id)
+          .mockReturnValueOnce(recordsMockObj[1].id)
+          .mockReturnValueOnce(recordsMockObj[2].id)
+          .mockReturnValueOnce(recordsMockObj[3].id)
+          .mockReturnValueOnce(recordsMockObj[4].id)
+          .mockReturnValueOnce(recordsMockObj[5].id)
+          .mockReturnValueOnce(recordsMockObj[6].id)
+          .mockReturnValueOnce(recordsMockObj[7].id)
+          .mockReturnValueOnce(recordsMockObj[8].id)
+          .mockReturnValueOnce(recordsMockObj[9].id);
+        const expectTransfers: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.transfers));
+        expectTransfers[4].value = 100;
+        const expectRecords: TransactionType[] = JSON.parse(JSON.stringify(mocksData.transactionsEditRecords.records));
+        for (let index = 0; index < 10; index += 1) {
+          expectRecords.push({
+            ...mocksData.transactionsEditRecords.transfers[4],
+            transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc21g2f4',
+            ...recordsMockObj[index],
+            value: 100,
+          });
+        }
+
+        const transaction = new Transfer({
+          ...mocksData.transactionsEditRecords.transfers[4],
+          date: '2024-02-10',
+          value: 100,
+          transactionId: '760e0d03-6cf9-4ae0-9800-cf75cc21g2f4',
+          account: 'Carteira',
+          accountDestiny: 'Itaú',
+        });
+        const result = await transaction.edit(
+          'uid',
+          mocksData.transactionsEditRecords,
+          mocksData.accounts,
+        );
+        
+        const [{ transfers }, {records}, balance] = result;
+        
+        expect(transfers).toEqual(expectTransfers);
+        expect(records).toEqual(expectRecords);
+        expect(balance).toBeNull();
       });
     });
   });

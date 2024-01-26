@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 import { AccountType, TransactionKeys,
   TransactionType, TransactionsType } from '../../types/Data';
-import { YearAndMonth } from '../../types/Others';
 import firebaseFuncs, { MetaCreateInfos } from '../../utils/firebaseFuncs';
 import swal from '../../utils/swal';
 import TransferCreate from './TransferCreate';
@@ -11,7 +10,6 @@ export default class Transfer extends TransferCreate {
     uid: string,
     transactions: TransactionsType,
     accounts: AccountType[],
-    yearAndMonth: YearAndMonth,
   ): Promise<any> {
     const meta = this.createMeta<TransactionKeys>(uid);
     if (this.installments === 'U') {
@@ -21,10 +19,10 @@ export default class Transfer extends TransferCreate {
       const { value } = await swal.upTrans();
       if (value === 'true') {
         return this
-          .updateThisAndUpcomming(transactions, yearAndMonth, meta, { uid, accounts });
+          .updateThisAndUpcomming(transactions, meta, { uid, accounts });
       }
       if (value === 'false') {
-        return this.updateThisOnly(meta, transactions, { uid, accounts }, yearAndMonth);
+        return this.updateThisOnly(meta, transactions, { uid, accounts });
       }
     }
     const { value } = await swal.upTrans();
@@ -39,46 +37,49 @@ export default class Transfer extends TransferCreate {
 
   private async updateThisAndUpcomming(
     transactions: TransactionsType,
-    yearAndMonth: YearAndMonth,
     meta: MetaCreateInfos<TransactionKeys>,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
   ) {
-    const { year, month } = yearAndMonth;
-    const [repetitions, initialDate, fixedTransfer] = this
-      .calculateRepetitions(transactions, year, month, meta.key);
-    const [account, accountDestiny] = fixedTransfer.account.split('>');
-    const [, newRecords] = this.formatTrans(repetitions, [{ ...fixedTransfer,
-      account,
-      accountDestiny,
-      date: format(initialDate, 'yyyy-MM-dd') }], true);
-    const newTransfers: TransactionType = { ...fixedTransfer,
-      date: fixedTransfer.date,
-      id: fixedTransfer.id,
-      installment: fixedTransfer.installment,
-      account: `${this.transaction.account}>${this.accountDestiny}`,
-      payday: null };
-    const [formatedTransfers] = this
-      .editFinRecords(transactions[meta.key], [newTransfers], 'id');
-    const [dataRecords, dataTransfers] = await Promise.all([
+    const includeThisRecord = this.payday ? 1 : 0;
+    const [repetitions, initialDate] = this
+      .calculateRepetitions(transactions, meta.key, includeThisRecord);
+    const { account, accountDestiny } = this;
+    const fixedTransfer = { ...this.transaction,
+      date: format(initialDate, 'yyyy-MM-dd') };
+    const newRecords: TransactionType[] = [];
+    for (let i = 0; i < repetitions; i += 1) {
+      newRecords.push({ ...fixedTransfer,
+        date: super.calculateNextDate(i, fixedTransfer, false),
+        type: 'Despesa',
+        payday: i === repetitions - 1 ? this.payday : fixedTransfer.payday,
+        account });
+      newRecords.push({ ...fixedTransfer,
+        date: super.calculateNextDate(i, fixedTransfer, false),
+        account: accountDestiny,
+        payday: i === repetitions - 1 ? this.payday : fixedTransfer.payday,
+        type: 'Receita' });
+    }
+    const [formatedTransfers] = this.editFinRecords(
+      transactions[meta.key],
+      [{ ...fixedTransfer, account: `${account}>${accountDestiny}` }],
+      'id',
+    );
+    const [formatedRecords, prevRecord, newRecord] = this.editFinRecords(
+      transactions.records,
+      newRecords,
+      'id',
+    );
+
+    const arrayNewBalance = this.createArrayBalance(prevRecord, newRecord);
+    return Promise.all([
+      firebaseFuncs.update(meta, formatedTransfers),
       firebaseFuncs.update(
         { ...meta, key: 'records' },
-        [...transactions.records, ...newRecords],
+        formatedRecords,
       ),
-      firebaseFuncs.update(meta, formatedTransfers),
+      arrayNewBalance.length
+        ? firebaseFuncs.updateBalance(uid, accounts, arrayNewBalance) : null,
     ]);
-    let result: TransactionType[] = [];
-    if (this.payday) {
-      result = await this.updateThisOnly(
-        meta,
-        dataRecords,
-        { uid,
-          accounts },
-        yearAndMonth,
-      );
-    }
-    if (!result.length) result.unshift(dataRecords);
-    result.unshift(dataTransfers);
-    return result;
   }
 
   private async updateInstThisAndUpComming(
@@ -121,18 +122,11 @@ export default class Transfer extends TransferCreate {
     meta: MetaCreateInfos<TransactionKeys>,
     transactions: TransactionsType,
     { uid, accounts }: { uid: string, accounts: AccountType[] },
-    yearAndMonth: YearAndMonth,
   ) {
-    const { year, month } = yearAndMonth;
-    const date = format(
-      new Date(year, month - 1, Number(this.date.split('-')[2]), 0),
-      'yyyy-MM-dd',
-    );
-
     const { records } = transactions;
     const [account, accountDestiny] = [this.account, this.accountDestiny];
     const [,transferRecords] = this
-      .formatTrans(1, [{ ...this.transaction, account, accountDestiny, date }], true);
+      .formatTrans(1, [{ ...this.transaction, account, accountDestiny }], true);
     const [dataRecords, prevRecords, newRecords] = this
       .editFinRecords(records, transferRecords, 'id');
     const arrayNewBalance = this
